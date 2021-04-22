@@ -1,0 +1,63 @@
+Package: PSIsapfluxnetQC1
+Type: Package
+Title: Quality check for SAPFLUXNET PSI project
+Version: 0.1.0
+Author: person("Victor", "Flo", email = "v.flo@creaf.uab.cat", role = c("aut", "cre"))
+Description: Utilities and functions to perform quality check in SAPFLUXNET PSI database
+License: 
+Encoding: UTF-8
+LazyData: true
+Imports:
+    sp,
+    rgeos,
+    ggiraph,
+    ggplot2,
+    broom,
+    magrittr,
+    readxl,
+    dplyr,
+    tidyr,
+    stringr,
+    lazyeval,
+    lubridate,
+    data.table,
+    tools,
+    logging,
+    rmarkdown,
+    DT,
+    yaml,
+    cowplot,
+    mapproj,
+    purrr,
+    GSODR,
+    GSODRdata,
+    soiltexture,
+    solaR,
+    zoo
+Suggests:
+    knitr,
+    testthat,
+    rmarkdown
+VignetteBuilder: knitr
+Collate: 
+    'SfnData_class.R'
+    'SfnData_generics.R'
+    'SfnData_methods.R'
+    'df_functions.R'
+    'dl_data_loading_functions.R'
+    'log_functions.R'
+    'out_outliers_app.R'
+    'qc_coordinates_functions.R'
+    'qc_data_general_checks.R'
+    'qc_gaps_functions.R'
+    'qc_gaps_functions_eff.R'
+    'qc_main.R'
+    'qc_md_general_checks.R'
+    'qc_outliers_and_ranges.R'
+    'qc_plant_functions.R'
+    'qc_sitemd_checks.R'
+    'qc_species_functions.R'
+    'qc_unit_transformations.R'
+    'rep_functions.R'
+    'sm_utils.R'
+    'vis_functions.R'
