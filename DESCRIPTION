@@ -2,11 +2,12 @@ Package: PSIsapfluxnetQC1
 Type: Package
 Title: Quality check for SAPFLUXNET PSI project
 Version: 0.1.0
-Author: person("Victor", "Flo", email = "v.flo@creaf.uab.cat", role = c("aut", "cre"))
+Authors@R: c(person("Victor", "Flo", email = "v.flo@creaf.uab.cat", role = c("aut", "cre")),
+          person("Victor", "Granda", email = "v.granda@creaf.uab.cat", role = c("aut")))
 Description: Utilities and functions to perform quality check in SAPFLUXNET PSI database
 License: 
 Encoding: UTF-8
-LazyData: true
+LazyDaa: true
 Imports:
     sp,
     rgeos,
@@ -30,7 +31,6 @@ Imports:
     mapproj,
     purrr,
     GSODR,
-    GSODRdata,
     soiltexture,
     solaR,
     zoo
@@ -61,3 +61,4 @@ Collate:
     'rep_functions.R'
     'sm_utils.R'
     'vis_functions.R'
+RoxygenNote: 7.1.1
