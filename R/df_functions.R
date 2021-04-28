@@ -7,10 +7,10 @@
 ################################################################################
 #' Initial project folder structure
 #'
-#' Create the folder tree skeleton for SAPFLUXNET project
+#' Create the folder tree skeleton for PSI database project
 #'
 #' This functions only need to be called once, as it creates the needed folder
-#' structure to recreate SAPFLUXNET project in any environment.
+#' structure to recreate PSI database project in any environment.
 #'
 #' @family Data Flow
 #'
@@ -30,7 +30,7 @@ df_folder_structure <- function(parent_dir = '.', parent_logger = 'test') {
   withCallingHandlers({
 
     # STEP 0
-    # Argument checkings
+    # Argument checking
     # Is parent directory a character vector?
     if (!is.character(parent_dir)) {
       stop('Provided parent directory is not a character vector')
@@ -143,7 +143,7 @@ df_received_to_accepted <- function(remove = FALSE, parent_logger = 'test') {
         # dir.create(path)
         dir.create(path_accepted, recursive = TRUE)
         dir.create(file.path(path, 'Lvl_1'))
-        dir.create(file.path(path, 'Lvl_2'))
+        # dir.create(file.path(path, 'Lvl_2'))
 
         # STEP 5
         # Copy data to accepted folder
