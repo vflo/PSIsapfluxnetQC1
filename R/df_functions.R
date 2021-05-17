@@ -85,7 +85,7 @@ df_folder_structure <- function(parent_dir = '.', parent_logger = 'test') {
 
 # START
 # Function declaration
-df_received_to_accepted <- function(remove = FALSE, parent_logger = 'test') {
+df_received_to_accepted_psi <- function(remove = FALSE, parent_logger = 'test') {
 
   # Using calling handlers to logging
   withCallingHandlers({
@@ -219,7 +219,7 @@ df_received_to_accepted <- function(remove = FALSE, parent_logger = 'test') {
 
 # START
 # Function declaration
-df_start_status <- function(si_code, parent_logger = 'test') {
+df_start_status_psi <- function(si_code, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
@@ -250,9 +250,8 @@ df_start_status <- function(si_code, parent_logger = 'test') {
       # 2.1 create the content
       content <- list(
         QC = list(DONE = FALSE, DATE = NULL),
-        LVL1 = list(STORED = FALSE, DATE = NULL, TO_LVL2 = 'FREEZE'),
-        LVL2 = list(STORED = FALSE, DATE = NULL, STEP = NULL,
-                    TO_REM = 'FREEZE', TO_UNITS = 'FREEZE', AVAIL = NULL)
+        LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE',
+                    TO_UNITS = 'FREEZE', AVAIL = NULL)
       )
 
       # 2.2 create the yaml object
@@ -356,10 +355,10 @@ df_get_status <- function(si_code, parent_logger = 'test') {
 #'
 #' Change and update status file info using yaml package
 #'
-#' \code{QC}, \code{LVL1} and \code{LVL2} must be lists. In the case of
+#' \code{QC} and \code{LVL1} must be lists. In the case of
 #' \code{QC}, a list with two elements, \code{DONE} and \code{DATE}. In the case
-#' of \code{LVL1} and \code{LVL2} a list with two elements, \code{STORED} and
-#' \code{DATE}. \code{DONE} and \code{STORED} are logicals, whereas \code{DATE}
+#' of \code{LVL1} a list with two elements, \code{STORED} and
+#' \code{DATE}. \code{DONE} and \code{STORED} are logical, whereas \code{DATE}
 #' is always a character or NULL.
 #'
 #' @family Data Flow
@@ -370,20 +369,17 @@ df_get_status <- function(si_code, parent_logger = 'test') {
 #'
 #' @param LVL1 List with the LVL1 info to be updated
 #'
-#' @param LVL2 List with the LVL2 info to be updated
-#'
 #' @return Invisible TRUE if changes to status file were correctly made,
-#'   invisble FALSE if changes were not made. Also, the status file for the site
+#'   invisible FALSE if changes were not made. Also, the status file for the site
 #'   will be replaced with the new one.
 #'
 #' @export
 
 # START
 # Function declaration
-df_set_status <- function(si_code,
+df_set_status_psi <- function(si_code,
                           QC = NULL,
                           LVL1 = NULL,
-                          LVL2 = NULL,
                           parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -422,12 +418,6 @@ df_set_status <- function(si_code,
       if (!is.null(LVL1)) {
         purrr::walk(names(LVL1), function(x) {
           original_yaml[["LVL1"]][[x]] <<- LVL1[[x]]
-        })
-      }
-
-      if (!is.null(LVL2)) {
-        purrr::walk(names(LVL2), function(x) {
-          original_yaml[["LVL2"]][[x]] <<- LVL2[[x]]
         })
       }
 
@@ -577,19 +567,9 @@ df_get_data_folders <- function(parent_logger = 'test') {
 #'
 #' @param si_code Character with the site code
 #'
-#' @param sapf_data Data frame with the fixed sapflow data
+#' @param psi_data Data frame with the fixed psi data
 #'
-#' @param env_data Data frame with the fixed environmental data
-#'
-#' @param site_md Data frame with the fixed site metadata
-#'
-#' @param stand_md Data frame with the fixed stand metadata
-#'
-#' @param plant_md Data frame with the fixed plant metadata
-#'
-#' @param species_md Data frame with the fixed species metadata
-#'
-#' @param env_md Data frame with the fixed environmental metadata
+#' @param question_data Data frame with the fixed questionnaire data
 #'
 #' @return Nothing
 #'
@@ -597,10 +577,8 @@ df_get_data_folders <- function(parent_logger = 'test') {
 
 # START
 # Function declaration
-df_accepted_to_lvl1 <- function(si_code, sapf_data = NULL, env_data = NULL,
-                                site_md = NULL, stand_md = NULL,
-                                plant_md = NULL, species_md = NULL,
-                                env_md = NULL, parent_logger = 'test') {
+df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NULL,
+                                parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
@@ -609,16 +587,11 @@ df_accepted_to_lvl1 <- function(si_code, sapf_data = NULL, env_data = NULL,
     # Argument checks
     # if any of the data is NULL (does not exists), stop and report, except
     # for the different sapflow unit conversions, as they can be missing
-    if(any(is.null(sapf_data), is.null(env_data), is.null(site_md),
-           is.null(stand_md), is.null(plant_md), is.null(species_md),
-           is.null(env_md))) {
+    if(any(is.null(psi_data), is.null(question_data))) {
       stop('One or more datasets were not provided')
     }
     # are datasets dataframes?
-    if(any(!is.data.frame(sapf_data), !is.data.frame(env_data),
-           !is.data.frame(site_md), !is.data.frame(stand_md),
-           !is.data.frame(plant_md), !is.data.frame(species_md),
-           !is.data.frame(env_md))) {
+    if(any(!is.data.frame(psi_data), !is.data.frame(question_data))) {
       stop('One or more datasets provided are not data frames')
     }
     # is si_code a character string?
@@ -628,19 +601,9 @@ df_accepted_to_lvl1 <- function(si_code, sapf_data = NULL, env_data = NULL,
     # if files exist before the function execution, stop and inform
     if (all(
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'sapf_data.csv', sep = '_'))),
+                            paste(si_code, 'psi_data.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'env_data.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'site_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'stand_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'plant_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'species_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'env_md.csv', sep = '_')))
+                            paste(si_code, 'question_data.csv', sep = '_')))
     )) {
       stop('csv files already exist in Lvl_1 folder. Please revise manually')
     }
@@ -649,51 +612,22 @@ df_accepted_to_lvl1 <- function(si_code, sapf_data = NULL, env_data = NULL,
     # Writing csv files
     write.csv(sapf_data,
               file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'sapf_data.csv', sep = '_')),
+                        paste(si_code, 'psi_data.csv', sep = '_')),
               row.names = FALSE)
     write.csv(env_data,
               file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'env_data.csv', sep = '_')),
+                        paste(si_code, 'question_data.csv', sep = '_')),
               row.names = FALSE)
-    write.csv(site_md,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'site_md.csv', sep = '_')),
-              row.names = FALSE)
-    write.csv(stand_md,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'stand_md.csv', sep = '_')),
-              row.names = FALSE)
-    write.csv(plant_md,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'plant_md.csv', sep = '_')),
-              row.names = FALSE)
-    write.csv(species_md,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'species_md.csv', sep = '_')),
-              row.names = FALSE)
-    write.csv(env_md,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'env_md.csv', sep = '_')),
-              row.names = FALSE)
+
 
     # STEP 2
     # Updating status file
     # only if the files have been created
     if (all(
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'sapf_data.csv', sep = '_'))),
+                            paste(si_code, 'psi_data.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'env_data.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'site_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'stand_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'plant_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'species_md.csv', sep = '_'))),
-      file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'env_md.csv', sep = '_')))
+                            paste(si_code, 'question_data.csv', sep = '_')))
     )) {
       df_set_status(si_code,
                     LVL1 = list(STORED = TRUE, DATE = as.character(Sys.Date())))
@@ -758,41 +692,31 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
       # Copy templates for file transfer and quality check to Template folder
       file.copy(
         system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                    package = 'sapfluxnetQC1'),
+                    package = 'PsisapfluxnetQC1'),
         file.path('Templates'), overwrite = TRUE
       )
       file.copy(
         system.file('Rmd_templates', 'QC_report.Rmd',
-                    package = 'sapfluxnetQC1'),
-        file.path('Templates'), overwrite = TRUE
-      )
-      file.copy(
-        system.file('Rmd_templates', 'LVL2_out_report.Rmd',
-                    package = 'sapfluxnetQC1'),
-        file.path('Templates'), overwrite = TRUE
-      )
-      file.copy(
-        system.file('Rmd_templates', 'LVL2_units_report.Rmd',
-                    package = 'sapfluxnetQC1'),
+                    package = 'PsisapfluxnetQC1'),
         file.path('Templates'), overwrite = TRUE
       )
 
       # Copy template for shiny web app to parent directory
-      file.copy(
-        system.file('Rmd_templates', 'sfn_monitor.Rmd',
-                    package = 'sapfluxnetQC1'),
-        file.path('.'), overwrite = TRUE
-      )
+      # file.copy(
+      #   system.file('Rmd_templates', 'psi_monitor.Rmd',
+      #               package = 'PsisapfluxnetQC1'),
+      #   file.path('.'), overwrite = TRUE
+      # )
 
       # Copy scripts to parent directory
       file.copy(
         system.file('run_scripts', 'main_script.R',
-                    package = 'sapfluxnetQC1'),
+                    package = 'PsisapfluxnetQC1'),
         file.path('.'), overwrite = TRUE
       )
       file.copy(
         system.file('run_scripts', 'debug_script.R',
-                    package = 'sapfluxnetQC1'),
+                    package = 'PsisapfluxnetQC1'),
         file.path('.'), overwrite = TRUE
       )
 
@@ -804,7 +728,7 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
 
     # Get the time of last modification for all the files previous to overwritting
     pre_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                             file.path('Templates','QC_report.Rmd'),'sfn_monitor.Rmd',
+                             file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
                              'main_script.R','debug_script.R'))
 
     # Give an error if modification time of the files can not be obtained
@@ -818,48 +742,38 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
     # Copy templates for file transfer and quality check to Template folder
     file.copy(
       system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                  package = 'sapfluxnetQC1'),
+                  package = 'PsisapfluxnetQC1'),
       file.path('Templates'), overwrite = TRUE
     )
     file.copy(
       system.file('Rmd_templates', 'QC_report.Rmd',
-                  package = 'sapfluxnetQC1'),
-      file.path('Templates'), overwrite = TRUE
-    )
-    file.copy(
-      system.file('Rmd_templates', 'LVL2_out_report.Rmd',
-                  package = 'sapfluxnetQC1'),
-      file.path('Templates'), overwrite = TRUE
-    )
-    file.copy(
-      system.file('Rmd_templates', 'LVL2_units_report.Rmd',
-                  package = 'sapfluxnetQC1'),
+                  package = 'PsisapfluxnetQC1'),
       file.path('Templates'), overwrite = TRUE
     )
 
     # Copy template for shiny web app to parent directory
     file.copy(
       system.file('Rmd_templates', 'sfn_monitor.Rmd',
-                  package = 'sapfluxnetQC1'),
+                  package = 'PsisapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
 
     # Copy scripts to parent directory
     file.copy(
       system.file('run_scripts', 'main_script.R',
-                  package = 'sapfluxnetQC1'),
+                  package = 'PsisapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
     file.copy(
       system.file('run_scripts', 'debug_script.R',
-                  package = 'sapfluxnetQC1'),
+                  package = 'PsisapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
 
     # STEP 5
     # Check that all times of last modification have changed
     post_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                              file.path('Templates','QC_report.Rmd'),'sfn_monitor.Rmd',
+                              file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
                               'main_script.R','debug_script.R'))
 
     if(all(post_time != pre_time)){

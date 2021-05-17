@@ -1,0 +1,31 @@
+---
+title: "Received to Accepted Report"
+author: "SAPFLUXNET Project"
+date: "`r Sys.time()`"
+params:
+  wd: ../
+---
+
+```{r setup, include = FALSE}
+# libraries
+library(sapfluxnetQC1)
+# root folder
+knitr::opts_knit$set(root.dir = params$wd)
+```
+
+```{r setup_log, include = FALSE}
+# log setup
+log_file <- "Logs/sapfluxnet.log"
+log_sapfluxnet_setup(log_file, logger = 'DataFlow.rep_sfn_render', level = 'DEBUG')
+```
+
+## Received folder content
+
+```{r received_content, echo = FALSE}
+dir('received_data')
+```
+
+## Transfer files
+
+```{r transfer_files}
+df_received_to_accepted(remove = FALSE, parent_logger = 'DataFlow.rep_sfn_render')
