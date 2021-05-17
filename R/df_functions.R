@@ -674,7 +674,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NU
 
 # START
 # Function declaration
-df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
+df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
@@ -692,31 +692,31 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
       # Copy templates for file transfer and quality check to Template folder
       file.copy(
         system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                    package = 'PsisapfluxnetQC1'),
+                    package = 'PSIsapfluxnetQC1'),
         file.path('Templates'), overwrite = TRUE
       )
       file.copy(
         system.file('Rmd_templates', 'QC_report.Rmd',
-                    package = 'PsisapfluxnetQC1'),
+                    package = 'PSIsapfluxnetQC1'),
         file.path('Templates'), overwrite = TRUE
       )
 
       # Copy template for shiny web app to parent directory
       # file.copy(
       #   system.file('Rmd_templates', 'psi_monitor.Rmd',
-      #               package = 'PsisapfluxnetQC1'),
+      #               package = 'PSIsapfluxnetQC1'),
       #   file.path('.'), overwrite = TRUE
       # )
 
       # Copy scripts to parent directory
       file.copy(
         system.file('run_scripts', 'main_script.R',
-                    package = 'PsisapfluxnetQC1'),
+                    package = 'PSIsapfluxnetQC1'),
         file.path('.'), overwrite = TRUE
       )
       file.copy(
         system.file('run_scripts', 'debug_script.R',
-                    package = 'PsisapfluxnetQC1'),
+                    package = 'PSIsapfluxnetQC1'),
         file.path('.'), overwrite = TRUE
       )
 
@@ -742,31 +742,31 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
     # Copy templates for file transfer and quality check to Template folder
     file.copy(
       system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                  package = 'PsisapfluxnetQC1'),
+                  package = 'PSIsapfluxnetQC1'),
       file.path('Templates'), overwrite = TRUE
     )
     file.copy(
       system.file('Rmd_templates', 'QC_report.Rmd',
-                  package = 'PsisapfluxnetQC1'),
+                  package = 'PSIsapfluxnetQC1'),
       file.path('Templates'), overwrite = TRUE
     )
 
     # Copy template for shiny web app to parent directory
     file.copy(
       system.file('Rmd_templates', 'sfn_monitor.Rmd',
-                  package = 'PsisapfluxnetQC1'),
+                  package = 'PSIsapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
 
     # Copy scripts to parent directory
     file.copy(
       system.file('run_scripts', 'main_script.R',
-                  package = 'PsisapfluxnetQC1'),
+                  package = 'PSIsapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
     file.copy(
       system.file('run_scripts', 'debug_script.R',
-                  package = 'PsisapfluxnetQC1'),
+                  package = 'PSIsapfluxnetQC1'),
       file.path('.'), overwrite = TRUE
     )
 
@@ -811,16 +811,15 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
 #' A fast way of reset any site data folder when needed, usually after manual
 #' changes of the files.
 #' \code{level} parameter allows for selecting to which level the status must
-#' be resetted. "LVL1" indicates that only LVL1 data and status will be
-#' resetted. "LVL2" resets only LVL2 (warn, rem, units) data and status and
-#' "all" resets all data and status to the initial state for the site.
+#' be reset. "LVL1" indicates that only LVL1 data and status will be
+#' reset. "all" resets all data and status to the initial state for the site.
 #'
 #' @family Data Flow
 #'
 #' @param si_code Character vector indicating the site code to reset
 #'
-#' @param level Character string indicating which level must be resetted. Valid
-#'   values are "LVL1", "LVL2" and "all"
+#' @param level Character string indicating which level must be reset. Valid
+#'   values are "LVL1" and "all"
 #'
 #' @return Nothing
 #'
@@ -828,7 +827,7 @@ df_copy_templates <- function(first = FALSE, parent_logger = 'test') {
 
 # START
 # Function declaration
-df_reset_data_status <- function(si_code, level = 'all', parent_logger = 'test') {
+df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'test') {
 
   # using calling handlers to manage errors
   withCallingHandlers({
@@ -844,14 +843,12 @@ df_reset_data_status <- function(si_code, level = 'all', parent_logger = 'test')
 
     # 1.1 status lists
     QC = list(DONE = FALSE, DATE = NULL)
-    LVL1 = list(STORED = FALSE, DATE = NULL, TO_LVL2 = 'FREEZE')
-    LVL2 = list(STORED = FALSE, DATE = NULL, STEP = NULL,
-                TO_REM = 'FREEZE', TO_UNITS = 'FREEZE',
-                AVAIL = NULL)
+    LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE',
+                TO_UNITS = 'FREEZE', AVAIL = NULL)
 
     # 1.2 set status depending on the level argument
     if (level == 'all') {
-      df_set_status(si_code, QC = QC, LVL1 = LVL1, LVL2 = LVL2,
+      df_set_status_psi(si_code, QC = QC, LVL1 = LVL1,
                     parent_logger = parent_logger)
 
       # STEP 2
@@ -860,34 +857,15 @@ df_reset_data_status <- function(si_code, level = 'all', parent_logger = 'test')
       # 2.1 file names, old and new
       old_files <- c(
         list.files(file.path('Data', si_code, 'Accepted'), full.names = TRUE),
-        list.files(file.path('Data', si_code, 'Lvl_1'), full.names = TRUE),
-        list.files(file.path('Data', si_code, 'Lvl_2'),
+        list.files(file.path('Data', si_code, 'Lvl_1'),
                    full.names = TRUE, recursive = TRUE)
       )
     }
 
-    if (level == 'LVL2') {
-      df_set_status(
-        si_code,
-        # don't forget to indicate that site is not ready yet to go to LVL2
-        # as we just reset level 2 for a reason
-        LVL1 = list(TO_LVL2 = 'FREEZE'),
-        LVL2 = LVL2,
-        parent_logger = parent_logger
-      )
 
-      # STEP 2
-      # Renaming data
-
-      # 2.1 file names, old and new
-      old_files <- c(
-        list.files(file.path('Data', si_code, 'Lvl_2'),
-                   full.names = TRUE, recursive = TRUE)
-      )
-    }
 
     if (level == 'LVL1') {
-      df_set_status(si_code, LVL1 = LVL1, parent_logger = parent_logger)
+      df_set_status_psi(si_code, LVL1 = LVL1, parent_logger = parent_logger)
 
       # STEP 2
       # Renaming data
@@ -930,45 +908,40 @@ df_reset_data_status <- function(si_code, level = 'all', parent_logger = 'test')
 }
 
 ################################################################################
-#' Create a SfnData object from results of Quality Checks
+#' Create a PsiData object from results of Quality Checks
 #'
 #' This function gather all the data and metadata generated in the QC process
-#' and build an SfnData class object
+#' and build an PsiData class object
 #'
-#' \code{sfn_data_constructor} function generates a SfnData object containing
-#' all relevant data and metadata for a site. Sapflow and environmental data
-#' are converted to the same timestamp span and added rows are flagged as
+#' \code{psi_data_constructor} function generates a PsiData object containing
+#' all relevant data and metadata for a site. Add flags to psi_data as
 #' \code{NA_ADDED}. Original NAs are also flagged as \code{NA_PRESENT}. For
-#' info about the available slots see \code{\link{SfnData}},
-#' \code{\link{sfn_get_methods}} and \code{\link{sfn_replacement}}
+#' info about the available slots see \code{\link{PsiData}},
+#' \code{\link{psi_get_methods}} and \code{\link{psi_replacement}}
 #'
 #' @family Data Flow
 #'
-#' @param sapf_data Data frame with sapflow data after QC process
+#' @param psi_data Data frame with metadata and psi data after QC process
 #'
-#' @param env_data Data frame with environmental data after QC process
+#' @param question_data Data frame with questionnaire data after QC process
 #'
-#' @param site_md Data frame with the site metadata after QC process
+#' @param site_md Data frame with site metadata after QC process
 #'
-#' @param stand_md Data frame with the stand metadata after QC process
+#' @param plant_md Data frame with plant metadata after QC process
 #'
-#' @param species_md Data frame with the species metadata after QC process
+#' @param methods_md Data frame with methods metadata after QC process
 #'
-#' @param plant_md Data frame with the plant metadata after QC process
+#' @param solar_timestamp Vector with solar timestamp
 #'
-#' @param env_md Data frame with the environmental after QC process
-#'
-#' @return A SfnData object with all the data and metadata of the site
+#' @return A PsiData object with all the data and metadata of the site
 #'
 #' @export
 
 # START
 # Function declaration
-sfn_data_constructor <- function(sapf_data = NULL, env_data = NULL,
-                                 site_md = NULL, stand_md = NULL,
-                                 species_md = NULL, plant_md = NULL,
-                                 env_md = NULL, solar_timestamp = NULL,
-                                 parent_logger = 'test') {
+psi_data_constructor <- function(psi_data = NULL, question_data = NULL,
+                                 site_md = NULL, plant_md = NULL, methods_md = NULL,
+                                 solar_timestamp = NULL, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
@@ -976,10 +949,7 @@ sfn_data_constructor <- function(sapf_data = NULL, env_data = NULL,
     # STEP 0
     # Argument checks
     if (any(
-      !is.data.frame(sapf_data), !is.data.frame(env_data),
-      !is.data.frame(site_md), !is.data.frame(stand_md),
-      !is.data.frame(species_md), !is.data.frame(plant_md),
-      !is.data.frame(env_md)
+      !is.data.frame(psi_data), !is.data.frame(question_data)
     )) {
       stop('Data and/or metadata objects provided are not data.frames')
     }
@@ -988,64 +958,43 @@ sfn_data_constructor <- function(sapf_data = NULL, env_data = NULL,
     # match nrow between sapf and env data, and if new rows are
     # needed, flag them!!
 
-    # 1.1 New timestamp with the full join of sapf and env
-    sapf_timestamp <- sapf_data %>% dplyr::select(TIMESTAMP)
-    env_timestamp <- env_data %>% dplyr::select(TIMESTAMP)
-    timestamp_join <- dplyr::full_join(sapf_timestamp, env_timestamp, "TIMESTAMP")
-
-    # 1.2 Data with the new timestamp and NAs where the rows are added
-    .sapf_data <- dplyr::full_join(timestamp_join, sapf_data, "TIMESTAMP") %>%
-      dplyr::arrange(TIMESTAMP)
-    .env_data <- dplyr::full_join(timestamp_join, env_data, "TIMESTAMP") %>%
+    # 1.1 Get timestamp from psi_data
+    psi_timestamp <- psi_data %>% dplyr::select(TIMESTAMP)%>%
       dplyr::arrange(TIMESTAMP)
 
-    # 1.3 flags indicating the pre-existent NAs and the new added NAs
-    .sapf_flags <- sapf_data[,-1] %>%
+
+    # 1.2 flags indicating the pre-existent NAs and the new added NAs
+    .psi_flags <- psi_data[,-1] %>%
       is.na() %>%
       tibble::as_tibble() %>%
       dplyr::mutate_all(dplyr::funs(replace(., which(. == TRUE), "NA_PRESENT"))) %>%
       dplyr::mutate_all(dplyr::funs(replace(., which(. == FALSE), ""))) %>%
-      dplyr::mutate(TIMESTAMP = sapf_data$TIMESTAMP) %>%
-      dplyr::full_join(timestamp_join, "TIMESTAMP") %>%
+      dplyr::mutate(TIMESTAMP = psi_data$TIMESTAMP) %>%
+      dplyr::full_join(psi_timestamp, "TIMESTAMP") %>%
       dplyr::arrange(TIMESTAMP) %>%
       dplyr::select(-TIMESTAMP) %>%
       dplyr::mutate_all(dplyr::funs(replace(., which(is.na(.)), "NA_ADDED")))
 
-    .env_flags <- env_data[,-1] %>%
-      is.na() %>%
-      tibble::as_tibble() %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(. == TRUE), "NA_PRESENT"))) %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(. == FALSE), ""))) %>%
-      dplyr::mutate(TIMESTAMP = env_data$TIMESTAMP) %>%
-      dplyr::full_join(timestamp_join, "TIMESTAMP") %>%
-      dplyr::arrange(TIMESTAMP) %>%
-      dplyr::select(-TIMESTAMP) %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(is.na(.)), "NA_ADDED")))
-
-    timestamp_join <- timestamp_join %>% dplyr::arrange(TIMESTAMP)
 
     # 1.4 empty solar timestamp
     if (is.null(solar_timestamp)) {
-      .solar_timestamp <- as.POSIXct(rep(NA, length(timestamp_join[[1]])))
+      .solar_timestamp <- as.POSIXct(rep(NA, length(psi_timestamp[[1]])))
     } else {
       .solar_timestamp <- solar_timestamp
     }
 
     # STEP 2
-    # Build the SfnData object and return it
-    res <- SfnData(
-      sapf_data = .sapf_data[, -1],
-      env_data = .env_data[, -1],
-      sapf_flags = .sapf_flags,
-      env_flags = .env_flags,
-      timestamp = timestamp_join[[1]],
+    # Build the PsiData object and return it
+    res <- PsiData(
+      psi_data = psi_data[, -1],
+      psi_flags = .psi_flags,
+      timestamp = psi_timestamp[[1]],
       solar_timestamp = .solar_timestamp,
-      si_code = rep(site_md$si_code, length(timestamp_join[[1]])),
+      si_code = rep(site_md$si_code, length(psi_timestamp[[1]])),
+      question_data = question_data,
       site_md = site_md,
-      stand_md = stand_md,
-      species_md = species_md,
       plant_md = plant_md,
-      env_md = env_md
+      methods_md = methods_md
     )
 
     # 2.1 Return it!!
