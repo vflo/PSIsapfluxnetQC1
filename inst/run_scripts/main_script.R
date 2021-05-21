@@ -35,35 +35,35 @@ rep_psi_render('received_to_accepted.Rmd',
                parent_logger = 'DataFlow')
 
 # QC
-log_sapfluxnet_setup('Logs/sapfluxnet.log', logger = 'QC', level = "DEBUG")
+log_psi_setup('Logs/psi.log', logger = 'QC', level = "DEBUG")
 
 data_folders <- df_get_data_folders(parent_logger = 'QC')
 
 ## Loop for every site
 lapply(data_folders, function(folder) {
   code <- stringr::str_sub(folder, 6, -1)
-  # log_sapfluxnet_setup('Logs/sapfluxnet.log',
+  # log_psi_setup('Logs/psi.log',
   #                      logger = paste('QC', code, sep = '.'),
   #                      level = "DEBUG")
   qc_start_process(file.path(folder, 'Accepted'), rdata = FALSE,
                    parent_logger = paste('QC', code, sep = '.'))
 })
 
-################################################################################
-# LEVEL 2
-
-log_sapfluxnet_setup('Logs/sapfluxnet.log', logger = 'LEVEL2', level = "DEBUG")
-
-# df_flag_to_lvl2_app()
-
-df_lvl1_to_lvl2(parent_logger = 'LEVEL2')
-
-########
-
-# out_app()
-
-df_warn_to_rem()
-
-# out_confirmation_app()
-
-df_rem_to_units()
+# ################################################################################
+# # LEVEL 2
+#
+# log_psi_setup('Logs/psi.log', logger = 'LEVEL2', level = "DEBUG")
+#
+# # df_flag_to_lvl2_app()
+#
+# df_lvl1_to_lvl2(parent_logger = 'LEVEL2')
+#
+# ########
+#
+# # out_app()
+#
+# df_warn_to_rem()
+#
+# # out_confirmation_app()
+#
+# df_rem_to_units()
