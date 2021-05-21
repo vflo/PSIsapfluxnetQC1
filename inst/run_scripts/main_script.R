@@ -45,7 +45,7 @@ lapply(data_folders, function(folder) {
   # log_psi_setup('Logs/psi.log',
   #                      logger = paste('QC', code, sep = '.'),
   #                      level = "DEBUG")
-  qc_start_process(file.path(folder, 'Accepted'), rdata = FALSE,
+  qc_start_process_psi(file.path(folder, 'Accepted'), rdata = FALSE,
                    parent_logger = paste('QC', code, sep = '.'))
 })
 

@@ -1,8 +1,8 @@
 ################################################################################
-#' Get the site code and the names of the data files (metadata, sapflow and env)
+#' Get the site code and the names of the data files
 #'
 #' Look at the data folder provided and get the code and the names of the files
-#' with the metadata, sapflow data and environmental data, in order to use them
+#' with the metadata, and psi data, in order to use them
 #' as parameters in the automated reports
 #'
 #' @family Data Loading Functions
@@ -11,14 +11,13 @@
 #'   retrieve
 #'
 #' @return A list. The first element is the site code, the second one the
-#'   metadata file route, the third the sapflow data file route and finally, the
-#'   fourth the environmental data file route.
+#'   metadata file route, the third the psi data file route.
 #'
 #' @export
 
 # START
 # Function declaration
-dl_get_si_code <- function(folder = '.', parent_logger = 'test') {
+dl_get_si_code_psi <- function(folder = '.', parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
@@ -31,11 +30,11 @@ dl_get_si_code <- function(folder = '.', parent_logger = 'test') {
     }
 
     # STEP 1
-    # be fast, get the files, now!
+    # catch the files
     files <- list.files(folder,
-                        pattern = "(_env_data|_sapflow_data)\\.csv$|_metadata\\.xls(x)?$")
+                        pattern = ".xls(x)?$")
     complete_files <- list.files(folder,
-                                 pattern = "(_env_data|_sapflow_data)\\.csv$|_metadata\\.xls(x)?$",
+                                 pattern = ".xls(x)?$",
                                  full.names = TRUE)
 
     # 1.1 Check if there is files, to avoid waste time
@@ -44,56 +43,38 @@ dl_get_si_code <- function(folder = '.', parent_logger = 'test') {
     }
 
     # STEP 2
-    # don't forget to extract the si_code, is needed!
+    # Extract the si_code, is needed in the returned object
     code <- unique(stringr::str_replace(
-      files, "(_env_data|_sapflow_data)\\.csv$|_metadata\\.xls(x)?$", ""
+      files, ".xls(x)?$", ""
     ))
 
-    # 2.1 check if there is more than one code, which is a problem!
+    # 2.1 check if there is more than one site code, which is a problem
     if (length(code) > 1) {
-      stop('There is more than one code in the folder, please revise manually the folder')
+      stop('There is more than one site code in the folder, please revise manually the folder')
     }
 
     # STEP 3
-    # How many files? are they the correct ones?
+    # How many files?
 
-    # 3.1 if more than three files ending in env_data.csv, sapflow_data.csv or
-    #     metadata.xlsx, stop it now!!!
-    if (length(files) > 3) {
-      stop('There is more than three data files, please revise manually the folder')
+    # 3.1 if more than one files which ends up by .xlsx, then stop
+    if (length(files) > 1) {
+      stop('There is more than one data files, please revise manually the folder')
     } else {
-
-      # 3.2 Three files, that is the trifecta (xlsx, csv, csv)
-      if (length(files) == 3) {
-
-        # 3.2.1 get the names, quick!
-        metadata <- complete_files[grep('_metadata\\.xls(x)?$', complete_files)]
-        sapf <- complete_files[grep('_sapflow_data\\.csv$', complete_files)]
-        env <- complete_files[grep('env_data\\.csv$', complete_files)]
-      } else {
-
-        # 3.3 One file to rule them all
-        if (length(files) == 1) {
-
-          # 3.3.1 only one name but three things
-          metadata <- complete_files[grep('_metadata\\.xls(x)?$', complete_files)]
-          sapf <- metadata
-          env <- metadata
-        }
+      # 3.3 set files names
+          metadata <- complete_files[grep('.xls(x)?$', complete_files)]
+          psi <- metadata
       }
-    }
 
     # STEP 4
     # now, lets make the results object, a list
     res <- list(
       si_code = code,
       md_file = metadata,
-      sapf_file = sapf,
-      env_file = env
+      psi_file = psi
     )
 
     # STEP 5
-    # Return it!!!
+    # Return it
     return(res)
 
     # END FUNCTION
@@ -102,13 +83,13 @@ dl_get_si_code <- function(folder = '.', parent_logger = 'test') {
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'dl_get_si_code', sep = '.'))},
+                                                        'dl_get_si_code_psi', sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'dl_get_si_code', sep = '.'))},
+                                                       'dl_get_si_code_psi', sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'dl_get_si_code', sep = '.'))})
+                                                        'dl_get_si_code_psi', sep = '.'))})
 
 
 }
@@ -666,7 +647,7 @@ qc_data_results_table <- function(sapf_data_fixed, env_data_fixed, timestamp_err
 
 # START
 # Function declaration
-qc_start_process <- function(folder = '.', rdata = TRUE,
+qc_start_process_psi <- function(folder = '.', rdata = TRUE,
                              parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -680,7 +661,7 @@ qc_start_process <- function(folder = '.', rdata = TRUE,
 
     # STEP 1
     # Get the files names, code and status of the site
-    code_and_files <- dl_get_si_code(folder, parent_logger = parent_logger)
+    code_and_files <- dl_get_si_code_psi(folder, parent_logger = parent_logger)
     status <- df_get_status(code_and_files[['si_code']],
                             parent_logger = parent_logger)
 
@@ -708,7 +689,7 @@ qc_start_process <- function(folder = '.', rdata = TRUE,
                                   parent_logger = parent_logger)
 
         # 2.2.3 report
-        rep_sfn_render('QC_report.Rmd',
+        rep_psi_render('QC_report.Rmd',
                        output_file = file.path(
                          paste(format(Sys.time(), '%Y%m%d%H%M'),
                                code_and_files[['si_code']],
@@ -718,8 +699,7 @@ qc_start_process <- function(folder = '.', rdata = TRUE,
                                               code_and_files[['si_code']]),
                        parent_logger = parent_logger,
                        md_file = code_and_files[['md_file']],
-                       sapf_data_file = code_and_files[['sapf_file']],
-                       env_data_file = code_and_files[['env_file']],
+                       psi_data_file = code_and_files[['psi_file']],
                        code = code_and_files[['si_code']],
                        rdata = rdata)
 
@@ -736,10 +716,10 @@ qc_start_process <- function(folder = '.', rdata = TRUE,
 
       # 2.3 If status does not exist, create it and perform the QC
       # 2.3.1 start status
-      df_start_status(code_and_files[['si_code']], parent_logger = parent_logger)
+      df_start_status_psi(code_and_files[['si_code']], parent_logger = parent_logger)
 
       # 2.3.2 log setup
-      log_sapfluxnet_setup('Logs/sapfluxnet.log',
+      log_psi_setup('Logs/sapfluxnet.log',
                            logger = code_and_files[['si_code']],
                            level = "DEBUG")
 

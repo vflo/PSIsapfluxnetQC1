@@ -205,7 +205,7 @@ df_received_to_accepted_psi <- function(remove = FALSE, parent_logger = 'test') 
 #'
 #' Initialise an empty status file in yaml format, using the yaml package
 #'
-#' Before creating an empty file, \code{df_start_status} checks if an status
+#' Before creating an empty file, \code{df_start_status_psi} checks if an status
 #' file already exists, in order to avoid accidental rewriting of the file.
 #'
 #' @family Data Flow

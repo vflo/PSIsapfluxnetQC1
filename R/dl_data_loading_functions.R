@@ -293,17 +293,15 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 #'   containing the metadata.
 #'
 #' @param sheet_name Character vector indicating the name of the sheet to be
-#'   loaded. It must be one of \code{site_md}, \code{stand_md}, \code{species_md},
-#'   \code{plant_md} or \code{environmental_md}.
+#'   loaded. It must be one of \code{Data} or \code{Questionnaire}.
 #'
 #' @param si_code_loc Name of the object containing the site metadata, in order
 #'   to obtain si_code variable to include it in other metadata objects. Default
 #'   to \code{NULL}, as the first metadata to load must be the site metadata.
 #'
 #' @return The function returns a data_frame with the corresponding metadata
-#'   (site, stand, species, plant or environmental) in "wide" format, with
-#'   metadata variables as columns, ready to be feeded to quality check
-#'   functions.
+#'   in "wide" format, with metadata variables as columns, ready to be feeded
+#'   to quality check functions.
 #'
 #' @importFrom magrittr %>%
 #'
@@ -330,9 +328,8 @@ dl_metadata <- function(file_name, sheet_name,
       stop('File does not exist, please check if file name has been correctly provided')
     }
 
-    # check if sheet name is one of the five kinds of metadata allowed
-    accepted_sheets <- c('site_md', 'stand_md', 'species_md',
-                         'plant_md', 'environmental_md')
+    # check if sheet name is one of the two kinds of metadata allowed
+    accepted_sheets <- c('Data', 'Questionnaire')
 
     if (!is.character(sheet_name) || !(sheet_name %in% accepted_sheets)) {
       stop('Provided sheet name is not a character or is not a metadata sheet. ',

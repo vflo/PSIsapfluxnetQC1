@@ -1,6 +1,6 @@
 ---
   title: "Quality Check for `r params$code`"
-author: "SAPFLUXNET Project"
+author: "psi Project"
 date: "`r Sys.time()`"
 params:
   wd: ../
@@ -15,14 +15,14 @@ output:
 toc: yes
 ---
 
-  ```{r, include=FALSE}
+```{r, include=FALSE}
 # root folder
 knitr::opts_knit$set(root.dir = params$wd)
 knitr::opts_chunk$set(error = TRUE, echo = FALSE)
 # log setup
 logger_name <- paste('QC', params$code, 'qc_start_process',
-                     'rep_sfn_render', sep = '.')
-log_sapfluxnet_setup('Logs/sapfluxnet.log',
+                     'rep_psi_render', sep = '.')
+log_psi_setup('Logs/psi.log',
                      logger = logger_name,
                      level = 'DEBUG')
 ```
@@ -37,16 +37,16 @@ log_sapfluxnet_setup('Logs/sapfluxnet.log',
 
   ## Quick summary
 
-  ```{r qc, message=FALSE, warning=FALSE}
+```{r qc, message=FALSE, warning=FALSE}
 # Libraries
-library(sapfluxnetQC1)
+library(psiQC)
 library(dplyr)
 library(DT)
 # Data load
 ## site_md
-site_md <- dl_metadata(params$md_file, 'site_md', parent_logger = logger_name)
+site_md <- dl_metadata(params$md_file, 'Data', parent_logger = logger_name)[c(1:11),]
 ## stand_md
-stand_md <- dl_metadata(params$md_file, 'stand_md', si_code_loc = site_md,
+stand_md <- dl_metadata(params$md_file, 'Questionnaire', si_code_loc = site_md,
                         parent_logger = logger_name)
 ## species_md
 species_md <- dl_metadata(params$md_file, 'species_md', si_code_loc = site_md,
