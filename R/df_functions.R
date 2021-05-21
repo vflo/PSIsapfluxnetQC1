@@ -693,12 +693,12 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
       file.copy(
         system.file('Rmd_templates', 'received_to_accepted.Rmd',
                     package = 'psiQC'),
-        file.path('Templates'), overwrite = TRUE
+        file.path('Templates'), overwrite = FALSE
       )
       file.copy(
         system.file('Rmd_templates', 'QC_report.Rmd',
                     package = 'psiQC'),
-        file.path('Templates'), overwrite = TRUE
+        file.path('Templates'), overwrite = FALSE
       )
 
       # Copy template for shiny web app to parent directory
@@ -712,12 +712,12 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
       file.copy(
         system.file('run_scripts', 'main_script.R',
                     package = 'psiQC'),
-        file.path('.'), overwrite = TRUE
+        file.path('.'), overwrite = FALSE
       )
       file.copy(
         system.file('run_scripts', 'debug_script.R',
                     package = 'psiQC'),
-        file.path('.'), overwrite = TRUE
+        file.path('.'), overwrite = FALSE
       )
 
       return(invisible(TRUE))
@@ -728,7 +728,7 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 
     # Get the time of last modification for all the files previous to overwritting
     pre_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                             file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
+                             file.path('Templates','QC_report.Rmd',#'sfn_monitor.Rmd',
                              'main_script.R','debug_script.R'))
 
     # Give an error if modification time of the files can not be obtained
@@ -752,11 +752,11 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
     )
 
     # Copy template for shiny web app to parent directory
-    file.copy(
-      system.file('Rmd_templates', 'sfn_monitor.Rmd',
-                  package = 'psiQC'),
-      file.path('.'), overwrite = TRUE
-    )
+    # file.copy(
+    #   system.file('Rmd_templates', 'sfn_monitor.Rmd',
+    #               package = 'psiQC'),
+    #   file.path('.'), overwrite = TRUE
+    # )
 
     # Copy scripts to parent directory
     file.copy(
@@ -789,15 +789,15 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_copy_templates',
+                                                        'df_copy_templates_psi',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_copy_templates',
+                                                       'df_copy_templates_psi',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_copy_templates',
+                                                        'df_copy_templates_psi',
                                                         sep = '.'))})
 }
 

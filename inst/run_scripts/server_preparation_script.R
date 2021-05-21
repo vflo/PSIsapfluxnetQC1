@@ -10,7 +10,7 @@ library(psiQC)
 # df_folder_structure(parent_logger = 'DataFlow')
 
 # Copy templates to Template folder
-# df_copy_templates()
+# df_copy_templates_psi()
 
 ################################################################################
 # END server preparation
