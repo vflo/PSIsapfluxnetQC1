@@ -26,7 +26,7 @@ log_psi_setup('Logs/psi.log',
                      level = 'DEBUG')
 
 # reports for data in the system
-rep_sfn_render('received_to_accepted.Rmd',
+rep_psi_render('received_to_accepted.Rmd',
                output_file = file.path(
                  'Reports', paste(format(Sys.time(), '%Y%m%d%H%M'),
                                   'received_to_accepted.html', sep = '_')
