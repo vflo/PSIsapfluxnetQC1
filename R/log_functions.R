@@ -5,7 +5,7 @@
 ################################################################################
 #' Logs formatter
 #'
-#' Custom log formatter for SAPFLUXNET Project
+#' Custom log formatter for psi Project
 #'
 #' @family Logging Functions
 #'
@@ -17,12 +17,12 @@
 
 # START
 # Function declaration
-log_sapfluxnet_format <- function(record) {
+log_psi_format <- function(record) {
 
   # STEP 1
   # Formatting with sprintf
   sprintf(
-    '"time=%s" "level=%s" "description=sapfluxnetLog:%s" "message=%s"',
+    '"time=%s" "level=%s" "description=psiLog:%s" "message=%s"',
     record$timestamp, record$levelname, record$logger, record$msg
   )
 
@@ -32,7 +32,7 @@ log_sapfluxnet_format <- function(record) {
 ################################################################################
 #' Logging handler action
 #'
-#' Custom logging handler action for SAPFLUXNET Project
+#' Custom logging handler action for psi Project
 #'
 #' @family Logging Functions
 #'
@@ -44,12 +44,12 @@ log_sapfluxnet_format <- function(record) {
 
 # START
 # Function declaration
-log_sapfluxnet_action <- function(msg, handler, ...) {
+log_psi_action <- function(msg, handler, ...) {
 
   # STEP 1
   # Check if file exists, as this is an action for writing log to file
   if (!exists('file', envir = handler)) {
-    stop('Handler with sapfluxnet "action" must have a "file" element\n')
+    stop('Handler with psi "action" must have a "file" element\n')
   }
 
   if (length(list(...)) && "dry" %in% names(list(...)))
@@ -80,13 +80,13 @@ log_sapfluxnet_action <- function(msg, handler, ...) {
 
 # START
 # Function declaration
-log_sapfluxnet_setup <- function(file_name, logger, level = "DEBUG") {
+log_psi_setup <- function(file_name, logger, level = "DEBUG") {
 
   # STEP 1
   # Setting up the handler
   logging::addHandler(
-    log_sapfluxnet_action, file = file_name,
-    logger = logger, formatter = log_sapfluxnet_format,
+    log_psi_action, file = file_name,
+    logger = logger, formatter = log_psi_format,
     level = level
   )
 

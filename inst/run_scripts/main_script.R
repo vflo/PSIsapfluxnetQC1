@@ -6,7 +6,7 @@ library(psiQC)
 # server management run when necessary
 ################################################################################
 
-# log_sapfluxnet_setup('Logs/sapfluxnet.log',
+# log_psi_setup('Logs/psi.log',
 #                      logger = 'Server_Management',
 #                      level = "WARNING")
 #
@@ -21,7 +21,7 @@ library(psiQC)
 
 
 # setup logs
-log_sapfluxnet_setup('Logs/sapfluxnet.log',
+log_psi_setup('Logs/psi.log',
                      logger = 'DataFlow',
                      level = 'DEBUG')
 
