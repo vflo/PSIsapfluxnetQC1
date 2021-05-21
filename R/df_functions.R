@@ -728,7 +728,7 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 
     # Get the time of last modification for all the files previous to overwritting
     pre_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                             file.path('Templates','QC_report.Rmd',#'sfn_monitor.Rmd',
+                             file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
                              'main_script.R','debug_script.R'))
 
     # Give an error if modification time of the files can not be obtained
