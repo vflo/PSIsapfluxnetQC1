@@ -65,7 +65,7 @@ log_psi_action <- function(msg, handler, ...) {
 ################################################################################
 #' Setup handler
 #'
-#' Setting up the SAPFLUXNET Project log handler
+#' Setting up the psi Project log handler
 #'
 #' @family Logging Functions
 #'
