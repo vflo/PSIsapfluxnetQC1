@@ -24,7 +24,7 @@
 
 # START
 # Function declaration
-rep_sfn_render <- function(template, output_file = NULL,
+rep_psi_render <- function(template, output_file = NULL,
                            output_dir = NULL, parent_logger = 'test',
                            ...) {
 
@@ -43,10 +43,10 @@ rep_sfn_render <- function(template, output_file = NULL,
 
   # handlers
   warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'rep_sfn_render', sep = '.'))},
+                                         logger = paste(parent_logger, 'rep_psi_render', sep = '.'))},
   error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'rep_sfn_render', sep = '.'))},
+                                        logger = paste(parent_logger, 'rep_psi_render', sep = '.'))},
   message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'rep_sfn_render', sep = '.'))})
+                                         logger = paste(parent_logger, 'rep_psi_render', sep = '.'))})
 
 }
