@@ -28,4 +28,4 @@ dir('received_data')
 ## Transfer files
 
 ```{r transfer_files}
-df_received_to_accepted(remove = FALSE, parent_logger = 'DataFlow.rep_sfn_render')
+df_received_to_accepted_psi(remove = FALSE, parent_logger = 'DataFlow.rep_sfn_render')
