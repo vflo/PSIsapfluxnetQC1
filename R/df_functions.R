@@ -692,31 +692,31 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
       # Copy templates for file transfer and quality check to Template folder
       file.copy(
         system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                    package = 'PSIsapfluxnetQC1'),
+                    package = 'psiQC'),
         file.path('Templates'), overwrite = TRUE
       )
       file.copy(
         system.file('Rmd_templates', 'QC_report.Rmd',
-                    package = 'PSIsapfluxnetQC1'),
+                    package = 'psiQC'),
         file.path('Templates'), overwrite = TRUE
       )
 
       # Copy template for shiny web app to parent directory
       # file.copy(
       #   system.file('Rmd_templates', 'psi_monitor.Rmd',
-      #               package = 'PSIsapfluxnetQC1'),
+      #               package = 'psiQC'),
       #   file.path('.'), overwrite = TRUE
       # )
 
       # Copy scripts to parent directory
       file.copy(
         system.file('run_scripts', 'main_script.R',
-                    package = 'PSIsapfluxnetQC1'),
+                    package = 'psiQC'),
         file.path('.'), overwrite = TRUE
       )
       file.copy(
         system.file('run_scripts', 'debug_script.R',
-                    package = 'PSIsapfluxnetQC1'),
+                    package = 'psiQC'),
         file.path('.'), overwrite = TRUE
       )
 
@@ -742,31 +742,31 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
     # Copy templates for file transfer and quality check to Template folder
     file.copy(
       system.file('Rmd_templates', 'received_to_accepted.Rmd',
-                  package = 'PSIsapfluxnetQC1'),
+                  package = 'psiQC'),
       file.path('Templates'), overwrite = TRUE
     )
     file.copy(
       system.file('Rmd_templates', 'QC_report.Rmd',
-                  package = 'PSIsapfluxnetQC1'),
+                  package = 'psiQC'),
       file.path('Templates'), overwrite = TRUE
     )
 
     # Copy template for shiny web app to parent directory
     file.copy(
       system.file('Rmd_templates', 'sfn_monitor.Rmd',
-                  package = 'PSIsapfluxnetQC1'),
+                  package = 'psiQC'),
       file.path('.'), overwrite = TRUE
     )
 
     # Copy scripts to parent directory
     file.copy(
       system.file('run_scripts', 'main_script.R',
-                  package = 'PSIsapfluxnetQC1'),
+                  package = 'psiQC'),
       file.path('.'), overwrite = TRUE
     )
     file.copy(
       system.file('run_scripts', 'debug_script.R',
-                  package = 'PSIsapfluxnetQC1'),
+                  package = 'psiQC'),
       file.path('.'), overwrite = TRUE
     )
 

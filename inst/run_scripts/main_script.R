@@ -1,6 +1,6 @@
 # Main script
 
-library(sapfluxnetQC1)
+library(psiQC)
 
 ################################################################################
 # server preparation, run only once!!!!!!!
