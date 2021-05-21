@@ -188,15 +188,15 @@ df_received_to_accepted_psi <- function(remove = FALSE, parent_logger = 'test') 
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_received_to_accepted',
+                                                        'df_received_to_accepted_psi',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_received_to_accepted',
+                                                       'df_received_to_accepted_psi',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_received_to_accepted',
+                                                        'df_received_to_accepted_psi',
                                                         sep = '.'))})
 }
 
@@ -271,15 +271,15 @@ df_start_status_psi <- function(si_code, parent_logger = 'test') {
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_status_start',
+                                                        'df_status_start_psi',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_status_start',
+                                                       'df_status_start_psi',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_status_start',
+                                                        'df_status_start_psi',
                                                         sep = '.'))})
 
 }
@@ -438,13 +438,13 @@ df_set_status_psi <- function(si_code,
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_set_status', sep = '.'))},
+                                                        'df_set_status_psi', sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_set_status', sep = '.'))},
+                                                       'df_set_status_psi', sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_set_status', sep = '.'))})
+                                                        'df_set_status_psi', sep = '.'))})
 }
 
 ################################################################################
@@ -728,7 +728,7 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 
     # Get the time of last modification for all the files previous to overwritting
     pre_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                             file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
+                             file.path('Templates','QC_report.Rmd'),#'psi_monitor.Rmd',
                              'main_script.R','debug_script.R'))
 
     # Give an error if modification time of the files can not be obtained
@@ -753,7 +753,7 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 
     # Copy template for shiny web app to parent directory
     # file.copy(
-    #   system.file('Rmd_templates', 'sfn_monitor.Rmd',
+    #   system.file('Rmd_templates', 'psi_monitor.Rmd',
     #               package = 'psiQC'),
     #   file.path('.'), overwrite = TRUE
     # )
@@ -773,7 +773,7 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
     # STEP 5
     # Check that all times of last modification have changed
     post_time <- file.mtime(c(file.path('Templates','received_to_accepted.Rmd'),
-                              file.path('Templates','QC_report.Rmd'),#'sfn_monitor.Rmd',
+                              file.path('Templates','QC_report.Rmd'),#'psi_monitor.Rmd',
                               'main_script.R','debug_script.R'))
 
     if(all(post_time != pre_time)){
@@ -895,15 +895,15 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_reset_data_status',
+                                                        'df_reset_data_status_psi',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_reset_data_status',
+                                                       'df_reset_data_status_psi',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_reset_data_status',
+                                                        'df_reset_data_status_psi',
                                                         sep = '.'))})
 }
 
@@ -1004,15 +1004,15 @@ psi_data_constructor <- function(psi_data = NULL, question_data = NULL,
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'sfn_data_constructor',
+                                                        'psi_data_constructor',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'sfn_data_constructor',
+                                                       'psi_data_constructor',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'sfn_data_constructor',
+                                                        'psi_data_constructor',
                                                         sep = '.'))})
 }
 
@@ -1199,12 +1199,12 @@ df_lvl2_folder_structure <- function(si_code, parent_logger = 'test') {
 }
 
 ################################################################################
-#' Load SfnData
+#' Load psiData
 #'
-#' Accesory function to load an specified SfnData object
+#' Accesory function to load an specified psiData object
 #'
-#' Given a site code and a level description, \code{df_read_SfnData} will return
-#' the selected SfnData object from the selected location
+#' Given a site code and a level description, \code{df_read_psiData} will return
+#' the selected psiData object from the selected location
 #'
 #' @family Data Flow
 #'
@@ -1215,13 +1215,13 @@ df_lvl2_folder_structure <- function(si_code, parent_logger = 'test') {
 #' @param units Only used if \code{level = "unit_trans"}. Indicates which sapflow
 #'   units (plant, sapwood or leaf) must be read.
 #'
-#' @return A SfnData object.
+#' @return A psiData object.
 #'
 #' @export
 
 # START
 # Function declaration
-df_read_SfnData <- function(
+df_read_psiData <- function(
   si_code,
   level = c("Lvl_1", "Lvl_2", "out_warn", "out_rem", "unit_trans"),
   units = NULL,
@@ -1258,11 +1258,11 @@ df_read_SfnData <- function(
                            paste0(si_code, '.RData'))
 
     if (!file.exists(file_name)) {
-      stop('SfnData for ', si_code, ' and ', level_folder, ' does not exist.')
+      stop('psiData for ', si_code, ' and ', level_folder, ' does not exist.')
     } else {
       load(file = file_name)
 
-      # 1.1 Return the SfnData object
+      # 1.1 Return the psiData object
       return(eval(as.name(si_code)))
     }
 
@@ -1272,29 +1272,29 @@ df_read_SfnData <- function(
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_load_SfnData',
+                                                        'df_load_psiData',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_load_SfnData',
+                                                       'df_load_psiData',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_load_SfnData',
+                                                        'df_load_psiData',
                                                         sep = '.'))})
 }
 
 ################################################################################
-#' Write SfnData
+#' Write psiData
 #'
-#' Accesory function to write an SfnData object to a fixed location
+#' Accesory function to write an psiData object to a fixed location
 #'
-#' Given a site code and a level description, \code{df_write_SfnData} will save
-#' the selected SfnData object in the selected location
+#' Given a site code and a level description, \code{df_write_psiData} will save
+#' the selected psiData object in the selected location
 #'
 #' @family Data Flow
 #'
-#' @param SfnData SfnData object
+#' @param psiData psiData object
 #'
 #' @param level Level to write to as a character string
 #'
@@ -1307,8 +1307,8 @@ df_read_SfnData <- function(
 
 # START
 # Function declaration
-df_write_SfnData <- function(
-  SfnData,
+df_write_psiData <- function(
+  psiData,
   level = c("Lvl_1", "Lvl_2", "out_warn", "out_rem", "unit_trans"),
   units = NULL,
   parent_logger = 'test'
@@ -1326,9 +1326,9 @@ df_write_SfnData <- function(
                            out_warn = file.path('Lvl_2', 'lvl_2_out_warn'),
                            out_rem = file.path('Lvl_2', 'lvl_2_out_rem'),
                            unit_trans = file.path('Lvl_2', 'lvl_2_unit_trans'))
-    # SfnData
-    if (class(SfnData) != 'SfnData') {
-      stop('object provided is not an SfnData object')
+    # psiData
+    if (class(psiData) != 'psiData') {
+      stop('object provided is not an psiData object')
     }
 
     # STEP 1
@@ -1343,8 +1343,8 @@ df_write_SfnData <- function(
     }
 
     # 1.2 file name
-    # code <- deparse(substitute(SfnData))
-    code <- unique(get_si_code(SfnData))
+    # code <- deparse(substitute(psiData))
+    code <- unique(get_si_code(psiData))
     file_name <- file.path('Data', code, level_folder, paste0(code, '.RData'))
 
     # 1.3 Check if file exists
@@ -1355,7 +1355,7 @@ df_write_SfnData <- function(
     # STEP 2
     # Write the object
     # 2.1 assign the code name to the object name
-    assign(code, SfnData)
+    assign(code, psiData)
 
     # 2.2 write
     save(list = code, file = file_name)
@@ -1397,15 +1397,15 @@ df_write_SfnData <- function(
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_write_SfnData',
+                                                        'df_write_psiData',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_write_SfnData',
+                                                       'df_write_psiData',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_write_SfnData',
+                                                        'df_write_psiData',
                                                         sep = '.'))})
 }
 
@@ -1627,7 +1627,7 @@ df_flag_to_lvl2_app <- function(parent_logger = 'test') {
 #'
 #' This function is in charge of check for sites ready to pass to Level 2, create
 #' the needed folder structure, flag for outliers warnings and saving the final
-#' SfnData objects in the corresponding folder.
+#' psiData objects in the corresponding folder.
 #'
 #' @family Data Flow
 #'
@@ -1652,14 +1652,14 @@ df_lvl1_to_lvl2 <- function(parent_logger = 'test') {
     names(ready) %>%
       # 2.1 For each site, create the level 2 folder struture
       purrr::walk(~ df_lvl2_folder_structure(.x, parent_logger = parent_logger)) %>%
-      # 2.2 read the sfnData objects
-      purrr::map(~ df_read_SfnData(.x, level = 'Lvl_1', parent_logger = parent_logger)) %>%
+      # 2.2 read the psiData objects
+      purrr::map(~ df_read_psiData(.x, level = 'Lvl_1', parent_logger = parent_logger)) %>%
       # 2.3 check for outliers
       purrr::map(~ qc_out_remove(.x, parent_logger = parent_logger)) %>%
       # 2.4 check for out of ranges values and flag them
       purrr::map(~ qc_out_of_range(.x, parent_logger = parent_logger)) %>%
       # 2.5 write the results
-      purrr::walk(~ df_write_SfnData(.x, level = 'out_warn', parent_logger = parent_logger))
+      purrr::walk(~ df_write_psiData(.x, level = 'out_warn', parent_logger = parent_logger))
     # 2.6 update the status
     purrr::walk(names(ready), ~ df_set_status(.x, LVL2 = list(STEP = "WARN")))
   },
@@ -1686,7 +1686,7 @@ df_lvl1_to_lvl2 <- function(parent_logger = 'test') {
 #'
 #' This function is in charge of check for sites ready to pass to out_rem,
 #' remove the outliers indicated in the accesory files and saving the final
-#' SfnData objects in the corresponding folder (out_rem).
+#' psiData objects in the corresponding folder (out_rem).
 #'
 #' @family Data Flow
 #'
@@ -1709,9 +1709,9 @@ df_warn_to_rem <- function(parent_logger = 'test') {
     # Substitute outliers, remove out of range values
     sites_list %>%
       purrr::map(qc_outliers_process, parent_logger = parent_logger) %>%
-      # 1.1 write the SfnData objects to the corresponding folders
+      # 1.1 write the psiData objects to the corresponding folders
       purrr::walk(
-        df_write_SfnData, level = 'out_rem',
+        df_write_psiData, level = 'out_rem',
         parent_logger = parent_logger
       )
     # 1.2 update the status of the site
@@ -1721,7 +1721,7 @@ df_warn_to_rem <- function(parent_logger = 'test') {
       ) %>%
       # 1.3 report
       purrr::walk(
-        ~ rep_sfn_render(
+        ~ rep_psi_render(
           'LVL2_out_report.Rmd',
           output_file = paste(format(Sys.time(), '%Y%m%d%H%M'),
                               .x,
@@ -1756,7 +1756,7 @@ df_warn_to_rem <- function(parent_logger = 'test') {
 #'
 #' This function is in charge of check for sites ready to pass to out_units,
 #' perform the available transformations for that site and write the resulting
-#' SfnData in the destination folder (out_units)
+#' psiData in the destination folder (out_units)
 #'
 #' @family Data Flow
 #'
@@ -1778,9 +1778,9 @@ df_rem_to_units <- function(parent_logger = 'test') {
     # STEP 1
     # Start the transformations
     sites_list %>%
-      # read the SfnDatas
+      # read the psiDatas
       purrr::map(
-        ~ df_read_SfnData(.x, 'out_rem', parent_logger = parent_logger)
+        ~ df_read_psiData(.x, 'out_rem', parent_logger = parent_logger)
       ) %>%
       # 1.1 units_process
       purrr::walk(
@@ -1795,7 +1795,7 @@ df_rem_to_units <- function(parent_logger = 'test') {
       ) %>%
       # 1.3 report
       purrr::walk(
-        ~ rep_sfn_render(
+        ~ rep_psi_render(
           'LVL2_units_report.Rmd',
           output_file = paste(format(Sys.time(), '%Y%m%d%H%M'),
                               .x,

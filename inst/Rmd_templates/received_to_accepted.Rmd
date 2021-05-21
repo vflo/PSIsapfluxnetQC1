@@ -1,6 +1,6 @@
 ---
 title: "Received to Accepted Report"
-author: "SAPFLUXNET Project"
+author: "Psi Project"
 date: "`r Sys.time()`"
 params:
   wd: ../
@@ -8,15 +8,15 @@ params:
 
 ```{r setup, include = FALSE}
 # libraries
-library(sapfluxnetQC1)
+library(psiQC)
 # root folder
 knitr::opts_knit$set(root.dir = params$wd)
 ```
 
 ```{r setup_log, include = FALSE}
 # log setup
-log_file <- "Logs/sapfluxnet.log"
-log_sapfluxnet_setup(log_file, logger = 'DataFlow.rep_sfn_render', level = 'DEBUG')
+log_file <- "Logs/psi.log"
+log_psi_setup(log_file, logger = 'DataFlow.rep_sfn_render', level = 'DEBUG')
 ```
 
 ## Received folder content
