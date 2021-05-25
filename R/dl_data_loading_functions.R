@@ -60,6 +60,7 @@ remove_dupcols <- function(data, parent_logger = 'test') {
                                          logger = paste(parent_logger, 'remove_dupcols', sep = '.'))})
 }
 
+
 ################################################################################
 #' Create a characters vector for NA values
 #'
@@ -295,6 +296,10 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 #' @param sheet_name Character vector indicating the name of the sheet to be
 #'   loaded. It must be one of \code{Data} or \code{Questionnaire}.
 #'
+#' @param data_type Character vector indicating the name of the data section.
+#'  It must be one of \code{site_md}, \code{plant_md} or \code{psi_data}. If
+#'  \code{sheet_name} is \code{Questionnaire} then \code{site_md} is not used.
+#'
 #' @param si_code_loc Name of the object containing the site metadata, in order
 #'   to obtain si_code variable to include it in other metadata objects. Default
 #'   to \code{NULL}, as the first metadata to load must be the site metadata.
@@ -310,7 +315,7 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 # START
 # Function declaration
 
-dl_metadata <- function(file_name, sheet_name,
+dl_metadata <- function(file_name, sheet_name, data_type = NA,
                         si_code_loc = NULL, parent_logger = 'test'){
 
   # Using calling handlers to logging
@@ -336,6 +341,11 @@ dl_metadata <- function(file_name, sheet_name,
            'Please see function help')
     }
 
+    if (sheet_name == "Questionnaire" & !is.na(data_type)) {
+      stop('Since sheet name is not a character or is not a metadata sheet. ',
+           'Please see function help')
+    }
+
     # check for si_code_loc and if NULL set si_code to NA
     if (is.null(si_code_loc)) {
       si_code_txt <- NA
@@ -348,8 +358,8 @@ dl_metadata <- function(file_name, sheet_name,
     # STEP 1
     # Load metadata and tidy it
 
-    # 1.1 If sheet is site_md we have to skip first line
-    if (sheet_name == 'site_md') {
+    # 1.1 If sheet is Data we have to skip first line
+    if (any(sheet_name == 'Data')) {
       # read the sheet
       res <- readxl::read_excel(file_name, sheet_name, skip = 1) %>%
         # check for duplicate columns
@@ -365,8 +375,8 @@ dl_metadata <- function(file_name, sheet_name,
       return(res)
     }
 
-    # 1.2 If sheet is stand or environmental, load as it is
-    if (any(sheet_name == 'stand_md', sheet_name == 'environmental_md')) {
+    # 1.2 If sheet is Data, load as it is
+    if (any(sheet_name == 'plant_md', sheet_name == 'environmental_md')) {
       # read the sheet
       res <- readxl::read_excel(file_name, sheet_name) %>%
         # check for duplicate columns
@@ -384,8 +394,8 @@ dl_metadata <- function(file_name, sheet_name,
       return(res)
     }
 
-    # 1.3 If sheet is plant_md we need to take extra steps to tidy the data
-    if (sheet_name == 'plant_md') {
+    # 1.3 If sheet is Questionnaire we need to take extra steps to tidy the data
+    if (sheet_name == 'Questionnaire') {
       # read the sheet
       res <- readxl::read_excel(file_name, sheet_name) %>%
         # check for duplicate columns
@@ -410,32 +420,6 @@ dl_metadata <- function(file_name, sheet_name,
       return(res)
     }
 
-    # 1.4 If sheet is species_md, we need to take the same extra steps as before,
-    #     but with different final filter
-    if (sheet_name == 'species_md') {
-      # read the sheet
-      res <- readxl::read_excel(file_name, sheet_name) %>%
-        # check for duplicate columns
-        remove_dupcols() %>%
-        # select only the name and the value of the variables
-        dplyr::select(-Description, -Units) %>%
-        # in case of the read_excel function gets more rows filled with NA's, remove them
-        dplyr::filter(!is.na(Variable)) %>%
-        # gather the species columns in one to be able to spread it afterwards
-        tidyr::gather('Indexes', 'Values', -Variable) %>%
-        # spread the variables to their own columns, getting back their class
-        tidyr::spread(Variable, Values, convert = TRUE) %>%
-        # clean the resulting data
-        dplyr::select(-Indexes) %>%
-        dplyr::filter(!is.na(sp_basal_area_perc) | !is.na(sp_leaf_habit) |
-                        !is.na(sp_name) | !is.na(sp_ntrees)) %>%
-        # adding the si_code
-        dplyr::mutate(si_code = si_code_txt)
-
-      # 1.4.2 return the species metadata
-      return(res)
-    }
-
     # END FUNCTION
   },
 
@@ -449,207 +433,98 @@ dl_metadata <- function(file_name, sheet_name,
 
 }
 
+
 ################################################################################
-#' Loading data from xls/xlsx ann csv files
+#' Get the site code and the names of the data files
 #'
-#' Detecting file type and load data from files.
-#'
-#' This function make use of dplyr, tidyr and readxl packages in order to
-#' retrieve and format the data. Also, in the case of csv files it uses
-#' data.table package.
+#' Look at the data folder provided and get the code and the names of the files
+#' with the metadata, and psi data, in order to use them
+#' as parameters in the automated reports
 #'
 #' @family Data Loading Functions
 #'
-#' @param file_name Character vector indicating the name of the file
-#'   containing the data.
+#' @param folder Route to folder in which are the code and the file names to
+#'   retrieve
 #'
-#' @param sheet_name Character vector indicating the name of the sheet to be
-#'   loaded. It must be one of \code{sapflow_hd} or \code{environmental_hd}. It
-#'   is only used if origin file is an xlsx file
-#'
-#' @param long Logical indicating if returned data must be in \code{long} format
-#'
-#' @param n Numeric indicating the number of rows used to guess the decimal
-#'   character used in csv files. Only used when data file is a csv.
-#'
-#' @param na Character string with the symbol codified as missing value.
-#'   Default to blank.
-#'
-#' @return \code{dl_data} returns sapflow or environmental data in wide format,
-#'   ready to pipe it in the quality checks for raw data. If \code{long = TRUE}
-#'   data is returned in long format, ready for plotting.
-#'
-#' @importFrom magrittr %>%
+#' @return A list. The first element is the site code, the second one the
+#'   metadata file route, the third the psi data file route.
 #'
 #' @export
 
 # START
 # Function declaration
+dl_get_si_code_psi <- function(folder = '.', parent_logger = 'test') {
 
-dl_data <- function(file_name, sheet_name, long = FALSE, n = 1000, na = '',
-                    parent_logger = 'test') {
-
-  # Using calling handlers to logging
+  # Using calling handlers to manage errors
   withCallingHandlers({
 
     # STEP 0
-    # Argument checking
-    # check if file name is a character and it exist
-    if (!is.character(file_name)) {
-      stop('File name is not provided as character')
-    }
-
-    if (!file_test("-f", file_name)) {
-      stop('File does not exist, please check if file name has been correctly provided')
-    }
-
-    # check if sheet name is one of the five kinds of metadata allowed
-    accepted_sheets <- c('sapflow_hd', 'environmental_hd')
-
-    if (!is.character(sheet_name) || !(sheet_name %in% accepted_sheets)) {
-      stop('Provided sheet name is not a character or is not a metadata sheet.',
-           ' Please see function help')
+    # Argument checks
+    # is folder a valid and existent folder?
+    if (!file_test("-d", folder)) {
+      stop('Folder does not exist, please check if folder name has been correctly provided')
     }
 
     # STEP 1
-    # Is xlsx?
-    if (stringr::str_detect(file_name, "^.+\\.xls(x)?$")) {
+    # catch the files
+    files <- list.files(folder,
+                        pattern = ".xls(x)?$")
+    complete_files <- list.files(folder,
+                                 pattern = ".xls(x)?$",
+                                 full.names = TRUE)
 
-      # STEP 2
-      # Loading and shaping the data
-      # 2.1 sapflow data
-      if (sheet_name == 'sapflow_hd') {
-        res <- suppressWarnings(readxl::read_excel(file_name, sheet_name,
-                                                   na = na, skip = 4,
-                                                   guess_max = n)) %>%
-          # 2.1.2 Check and remove duplicate columns
-          remove_dupcols() %>%
-          # 2.1.3 Remove any extra column that could be created in the read_excel step.
-          #       This is achieved with a regular expression that select for TIME
-          #       and plant code-like text:
-          dplyr::select(dplyr::matches('(TIME|^[A-Z]{3}_[A-Z]{3}_.+$)'))
+    # 1.1 Check if there is files, to avoid waste time
+    if (length(files) < 1) {
+      stop('There is no files matching data names pattern')
+    }
 
-        # 2.1.4 Check and fix if any character is in the data
-        res <- dl_data_col_classes(res, parent_logger = parent_logger)
+    # STEP 2
+    # Extract the si_code, is needed in the returned object
+    code <- unique(stringr::str_replace(
+      files, ".xls(x)?$", ""
+    ))
 
-        # 2.1.5 If long format is needed, gather time!!
-        if (long) {
-          res <- res %>%
-            tidyr::gather(Plant, Sapflow_value, -TIMESTAMP)
-
-          # 2.1.6 return long format
-          return(res)
-
-        } else {
-          # or return wide format
-          return(res)
-        }
-
-      } else {
-        # 2.2 environmental data
-        res <- suppressWarnings(readxl::read_excel(file_name, sheet_name,
-                                                   na = na, skip = 3,
-                                                   guess_max = n)) %>%
-          # 2.2.2 check and remove duplicate columns
-          remove_dupcols() %>%
-          # 2.2.3 Remove any extra column that could be created in the read_excel step.
-          #       This is achieved with a regular expression indicating that we select
-          #       the environmental variables and the TIMESTAMP
-          dplyr::select(dplyr::matches(
-            "(TIME|ta|rh|vpd|sw_in|ppfd_in|netrad|ws|precip|swc_deep|swc_shallow)"
-          ))
-
-        # 2.2.4 Check and fix if any character is in the data
-        res <- dl_data_col_classes(res, parent_logger = parent_logger)
-
-        # 2.2.5 If long format is needed, gather time!!
-        if (long) {
-          res <- res %>%
-            tidyr::gather(Variable, Value, -TIMESTAMP)
-
-          # 2.2.6 return long format
-          return(res)
-
-        } else {
-          # or return wide format
-          return(res)
-        }
-      }
+    # 2.1 check if there is more than one site code, which is a problem
+    if (length(code) > 1) {
+      stop('There is more than one site code in the folder, please revise manually the folder')
     }
 
     # STEP 3
-    # Is csv file?
-    if (stringr::str_detect(file_name, "^.+\\.csv$")) {
+    # How many files?
 
-      # STEP 4
-      # Loading and shaping the data
-      # 4.1 sapflow data
-      if (sheet_name == 'sapflow_hd') {
-        res <- data.table::fread(
-          file_name, skip = 'TIMESTAMP', data.table = FALSE,
-          na.strings = dl_na_char_generator(),
-          dec = dl_dec_char_detect(file_name, n)
-        ) %>%
-          remove_dupcols() %>%
-          dplyr::select(dplyr::matches('(TIME|^[A-Z]{3}_[A-Z]{3}_.+$)'))
-
-        # 4.1.0 Check and fix if any character is in the data
-        res <- dl_data_col_classes(res, parent_logger = parent_logger)
-
-        # 4.1.1 If long format is needed, gather time!!
-        if (long) {
-          res <- res %>%
-            tidyr::gather(Plant, Sapflow_value, -TIMESTAMP)
-
-          # 4.1.2 return long format
-          return(res)
-
-        } else {
-          # or return wide format
-          return(res)
-        }
-      } else {
-
-        # 4.2 environmental data
-        res <- data.table::fread(
-          file_name, skip = 'TIMESTAMP', data.table = FALSE,
-          na.strings = dl_na_char_generator(),
-          dec = dl_dec_char_detect(file_name, n)
-        ) %>%
-          remove_dupcols() %>%
-          dplyr::select(dplyr::matches(
-            "(TIME|ta|rh|vpd|sw_in|ppfd_in|netrad|ws|precip|swc_deep|swc_shallow)"
-          ))
-
-        # 4.2.0 Check and fix if any character is in the data
-        res <- dl_data_col_classes(res, parent_logger = parent_logger)
-
-        # 4.2.1 If long format is needed, gather time!!
-        if (long) {
-          res <- res %>%
-            tidyr::gather(Variable, Value, -TIMESTAMP)
-
-          # 4.1.2 return long format
-          return(res)
-
-        } else {
-          # or return wide format
-          return(res)
-        }
-      }
+    # 3.1 if more than one files which ends up by .xlsx, then stop
+    if (length(files) > 1) {
+      stop('There is more than one data files, please revise manually the folder')
+    } else {
+      # 3.3 set files names
+      metadata <- complete_files[grep('.xls(x)?$', complete_files)]
+      psi <- metadata
     }
+
+    # STEP 4
+    # now, lets make the results object, a list
+    res <- list(
+      si_code = code,
+      md_file = metadata,
+      psi_file = psi
+    )
+
+    # STEP 5
+    # Return it
+    return(res)
+
     # END FUNCTION
   },
 
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'dl_data', sep = '.'))},
+                                                        'dl_get_si_code_psi', sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'dl_data', sep = '.'))},
+                                                       'dl_get_si_code_psi', sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'dl_data', sep = '.'))})
+                                                        'dl_get_si_code_psi', sep = '.'))})
 
 }

@@ -45,24 +45,18 @@ library(DT)
 # Data load
 ## site_md
 site_md <- dl_metadata(params$md_file, 'Data', parent_logger = logger_name)[c(1:11),]
-## stand_md
-stand_md <- dl_metadata(params$md_file, 'Questionnaire', si_code_loc = site_md,
-                        parent_logger = logger_name)
-## species_md
-species_md <- dl_metadata(params$md_file, 'species_md', si_code_loc = site_md,
-                          parent_logger = logger_name)
+
 ## plant_md
-plant_md <- dl_metadata(params$md_file, 'plant_md', si_code_loc = site_md,
+plant_md <- dl_metadata(params$md_file, 'Data', si_code_loc = site_md,
+                          parent_logger = logger_name)[c(12:19),]
+
+## psi_data
+psi_data <- dl_metadata(params$psi_file, 'Data', si_code_loc = site_md,
+                     parent_logger = logger_name)[c(20:29),]
+
+## stand_md
+questionnaire_md <- dl_metadata(params$md_file, 'Questionnaire', si_code_loc = site_md,
                         parent_logger = logger_name)
-## env_md
-env_md <- dl_metadata(params$md_file, 'environmental_md', si_code_loc = site_md,
-                      parent_logger = logger_name)
-## sapf_data
-sapf_data <- dl_data(params$sapf_data_file, 'sapflow_hd', n = 2000, na = '',
-                     parent_logger = logger_name)
-## env_data
-env_data <- dl_data(params$env_data_file, 'environmental_hd', n = 2000, na = '',
-                    parent_logger = logger_name)
 ################################################################################
 # md qc
 ## metadata columns

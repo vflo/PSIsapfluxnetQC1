@@ -1,102 +1,4 @@
 ################################################################################
-#' Get the site code and the names of the data files
-#'
-#' Look at the data folder provided and get the code and the names of the files
-#' with the metadata, and psi data, in order to use them
-#' as parameters in the automated reports
-#'
-#' @family Data Loading Functions
-#'
-#' @param folder Route to folder in which are the code and the file names to
-#'   retrieve
-#'
-#' @return A list. The first element is the site code, the second one the
-#'   metadata file route, the third the psi data file route.
-#'
-#' @export
-
-# START
-# Function declaration
-dl_get_si_code_psi <- function(folder = '.', parent_logger = 'test') {
-
-  # Using calling handlers to manage errors
-  withCallingHandlers({
-
-    # STEP 0
-    # Argument checks
-    # is folder a valid and existent folder?
-    if (!file_test("-d", folder)) {
-      stop('Folder does not exist, please check if folder name has been correctly provided')
-    }
-
-    # STEP 1
-    # catch the files
-    files <- list.files(folder,
-                        pattern = ".xls(x)?$")
-    complete_files <- list.files(folder,
-                                 pattern = ".xls(x)?$",
-                                 full.names = TRUE)
-
-    # 1.1 Check if there is files, to avoid waste time
-    if (length(files) < 1) {
-      stop('There is no files matching data names pattern')
-    }
-
-    # STEP 2
-    # Extract the si_code, is needed in the returned object
-    code <- unique(stringr::str_replace(
-      files, ".xls(x)?$", ""
-    ))
-
-    # 2.1 check if there is more than one site code, which is a problem
-    if (length(code) > 1) {
-      stop('There is more than one site code in the folder, please revise manually the folder')
-    }
-
-    # STEP 3
-    # How many files?
-
-    # 3.1 if more than one files which ends up by .xlsx, then stop
-    if (length(files) > 1) {
-      stop('There is more than one data files, please revise manually the folder')
-    } else {
-      # 3.3 set files names
-          metadata <- complete_files[grep('.xls(x)?$', complete_files)]
-          psi <- metadata
-      }
-
-    # STEP 4
-    # now, lets make the results object, a list
-    res <- list(
-      si_code = code,
-      md_file = metadata,
-      psi_file = psi
-    )
-
-    # STEP 5
-    # Return it
-    return(res)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger,
-                                                        'dl_get_si_code_psi', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger,
-                                                       'dl_get_si_code_psi', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger,
-                                                        'dl_get_si_code_psi', sep = '.'))})
-
-
-}
-
-
-
-################################################################################
 #' Main function to resume Metadata QC in one data frame
 #'
 #' Metadata QC codified results in one data frame
@@ -678,17 +580,11 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
       } else {
 
         # 2.2 if status exists but QC is not DONE, lets do it
-        # # 2.2.1 log setup
-        # log_sapfluxnet_setup('Logs/sapfluxnet.log',
-        #                      logger = code_and_files[['si_code']],
-        #                      level = "DEBUG")
-        ## Log setup not necessary, it is done outside, in the main script
-
-        # 2.2.2 report folder
+        # 2.2.1 report folder
         df_report_folder_creation(code_and_files[['si_code']],
                                   parent_logger = parent_logger)
 
-        # 2.2.3 report
+        # 2.2.2 report
         rep_psi_render('QC_report.Rmd',
                        output_file = file.path(
                          paste(format(Sys.time(), '%Y%m%d%H%M'),
@@ -703,12 +599,12 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
                        code = code_and_files[['si_code']],
                        rdata = rdata)
 
-        # 2.2.4 set status
+        # 2.2.3 set status
         df_set_status(code_and_files[['si_code']],
                       QC = list(DONE = TRUE, DATE = as.character(Sys.Date())),
                       parent_logger = parent_logger)
 
-        # 2.2.7 return invisible TRUE
+        # 2.2.4 return invisible TRUE
         return(invisible(TRUE))
       }
 
@@ -719,7 +615,7 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
       df_start_status_psi(code_and_files[['si_code']], parent_logger = parent_logger)
 
       # 2.3.2 log setup
-      log_psi_setup('Logs/sapfluxnet.log',
+      log_psi_setup('Logs/psi.log',
                            logger = code_and_files[['si_code']],
                            level = "DEBUG")
 
