@@ -296,10 +296,6 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 #' @param sheet_name Character vector indicating the name of the sheet to be
 #'   loaded. It must be one of \code{Data} or \code{Questionnaire}.
 #'
-#' @param data_type Character vector indicating the name of the data section.
-#'  It must be one of \code{site_md}, \code{plant_md} or \code{psi_data}. If
-#'  \code{sheet_name} is \code{Questionnaire} then \code{data_type} is not used.
-#'
 #' @param si_code_loc Name of the object containing the site metadata, in order
 #'   to obtain si_code variable to include it in other metadata objects. Default
 #'   to \code{NULL}, as the first metadata to load must be the site metadata.
@@ -315,8 +311,8 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 # START
 # Function declaration
 
-dl_metadata <- function(file_name, sheet_name, data_type = NA,
-                        si_code_loc = NULL, parent_logger = 'test'){
+dl_metadata <- function(file_name, sheet_name, si_code_loc = NULL,
+                        parent_logger = 'test'){
 
   # Using calling handlers to logging
   withCallingHandlers({
@@ -337,12 +333,7 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
     accepted_sheets <- c('Data', 'Questionnaire')
 
     if (!is.character(sheet_name) || !(sheet_name %in% accepted_sheets)) {
-      stop('Provided sheet name is not a character or is not a metadata sheet. ',
-           'Please see function help')
-    }
-
-    if (sheet_name == "Questionnaire" & !is.na(data_type)) {
-      stop('Since sheet name is not a character or is not a metadata sheet. ',
+      stop('Provided sheet name is not a character or is not an accepted sheet. ',
            'Please see function help')
     }
 
@@ -356,67 +347,29 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
     }
 
     # STEP 1
-    # Load metadata and tidy it
+    # Load xlsx sheet and tidy it
 
-    # 1.1 If sheet is Data we have to skip first line
+    # 1.1 If sheet is Data load as it is.
     if (any(sheet_name == 'Data')) {
       # read the sheet
-      res <- readxl::read_excel(file_name, sheet_name, skip = 1) %>%
+      res <- readxl::read_excel(file_name, sheet_name, skip = 0) %>%
         # check for duplicate columns
-        remove_dupcols() %>%
-        # select only the name and the value of the variables
-        dplyr::select(Variable, Value) %>%
-        # in case of the read_excel function gets more rows filled with NA's, remove them
-        dplyr::filter(!is.na(Variable)) %>%
-        # spread the variables to their own columns, getting back their class
-        tidyr::spread(Variable, Value, convert = TRUE)
+        remove_dupcols()
 
-      # 1.1.2 return the site metadata
+      # 1.1.2 return the Data sheet
       return(res)
     }
 
-    # 1.2 If sheet is Data, load as it is
-    if (any(sheet_name == 'plant_md', sheet_name == 'environmental_md')) {
-      # read the sheet
-      res <- readxl::read_excel(file_name, sheet_name) %>%
-        # check for duplicate columns
-        remove_dupcols() %>%
-        # select only the name and the value of the variables
-        dplyr::select(Variable, Value) %>%
-        # in case of the read_excel function gets more rows filled with NA's, remove them
-        dplyr::filter(!is.na(Variable)) %>%
-        # spread the variables to their own columns, getting back their class
-        tidyr::spread(Variable, Value, convert = TRUE) %>%
-        # adding the si_code
-        dplyr::mutate(si_code = si_code_txt)
-
-      # 1.2.2 return the stand or environmental metadata
-      return(res)
-    }
-
-    # 1.3 If sheet is Questionnaire we need to take extra steps to tidy the data
+    # 1.2 If sheet is Questionnaire we need to take extra steps to tidy the data
     if (sheet_name == 'Questionnaire') {
       # read the sheet
-      res <- readxl::read_excel(file_name, sheet_name) %>%
+      res <- readxl::read_excel(file_name, sheet_name, skip = 0) %>%
         # check for duplicate columns
         remove_dupcols() %>%
-        # select only the name and the value of the variables
-        dplyr::select(-Description, -Units) %>%
-        # in case of the read_excel function gets more rows filled with NA's, remove them
-        dplyr::filter(!is.na(Variable)) %>%
-        # gather the species columns in one to be able to spread it afterwards
-        tidyr::gather('Indexes', 'Values', -Variable) %>%
-        # spread the variables to their own columns, getting back their class
-        tidyr::spread(Variable, Values, convert = TRUE) %>%
-        # clean the resulting data
-        dplyr::select(-Indexes) %>%
-        dplyr::filter(!is.na(pl_age) | !is.na(pl_azimut_int) |
-                        !is.na(pl_bark_thick) | !is.na(pl_code) |
-                        !is.na(pl_dbh)) %>%
-        # adding the si_code
-        dplyr::mutate(si_code = si_code_txt)
+        # select only 4 rows
+        dplyr::slice(c(1:4))
 
-      # 1.3.2 return the plant metadata
+      # 1.2.2 return the plant metadata
       return(res)
     }
 
