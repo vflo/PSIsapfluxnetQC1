@@ -361,7 +361,7 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
       message('si_code_loc set to NULL. If loading other metadata than site_md,',
               ' please indicate the object containing the site metadata.')
     } else {
-      si_code_txt <- si_code_loc$si_code[1]
+      si_code_txt <- si_code_loc$id_sfn[1]
     }
 
     # STEP 1
