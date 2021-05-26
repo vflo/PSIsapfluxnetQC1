@@ -13,8 +13,8 @@
 #' @family Quality Checks Functions
 #'
 #' @param dic_name Name of the metadata sheet of which dictionary is needed.
-#'   It must be one of \code{site_md}, \code{stand_md}, \code{species_md},
-#'   \code{plant_md} or \code{environmental_md}.
+#'   It must be one of \code{site_md}, \code{plant_md}, \code{psi_data}
+#'   or \code{Questionnaire}.
 #'
 #' @return A named list, variable names being the index and class the value
 
@@ -27,8 +27,7 @@ create_dic <- function(dic_name, parent_logger = 'test') {
     # STEP 0
     # Argument checking
     # check if dictionary name is one of the five kinds of metadata allowed
-    accepted_sheets <- c('site_md', 'stand_md', 'species_md',
-                         'plant_md', 'environmental_md')
+    accepted_sheets <- c('site_md', 'plant_md', 'psi_data', 'Questionnaire')
 
     if (!is.character(dic_name) || !(dic_name %in% accepted_sheets)) {
       stop('Provided dicitonary name is not a character or is not a valid name.',
@@ -40,80 +39,64 @@ create_dic <- function(dic_name, parent_logger = 'test') {
 
     # 1.1 site metadata
     if (dic_name == 'site_md') {
-      dic <- list(si_name = 'character', si_country = 'character',
-                  si_contact_firstname = 'character', si_contact_lastname = 'character',
-                  si_contact_email = 'character', si_contact_institution = 'character',
-                  si_addcontr_firstname = 'character', si_addcontr_lastname = 'character',
-                  si_addcontr_email = 'character', si_addcontr_institution = 'character',
-                  si_lat = c('numeric', 'integer'), si_long = c('numeric', 'integer'),
-                  si_elev = c('numeric', 'integer'), si_igbp = 'character',
-                  si_paper = 'character', si_dist_mgmt = 'character',
-                  si_flux_network = 'logical', si_dendro_network = 'logical',
-                  si_remarks = 'character', si_code = 'character')
+      dic <- list(id_sfn = 'character',
+                  id_fn = 'character',
+                  site_name = 'character',
+                  site_country = 'character',
+                  lat = c('numeric', 'integer'),
+                  lon = c('numeric', 'integer'),
+                  elev = c('numeric', 'integer'),
+                  contact_firstname = 'character',
+                  contact_lastname = 'character',
+                  contact_institution = 'character',
+                  contact_email = 'character'
+                  )
 
       # 1.1.1 return dic
       return(dic)
     }
 
-    # 1.2 stand metadata
-    if (dic_name == 'stand_md'){
-      dic <- list(st_name = 'character', st_growth_condition = 'character',
-                  st_treatment = 'character', st_age = c('numeric', 'integer'),
-                  st_height = c('numeric', 'integer'), st_density = c('numeric', 'integer'),
-                  st_basal_area = c('numeric', 'integer'), st_lai = c('numeric', 'integer'),
-                  st_aspect = 'character', st_terrain = 'character',
-                  st_soil_depth = c('numeric', 'integer'), st_soil_texture = 'character',
-                  st_sand_perc = c('numeric', 'integer'), st_silt_perc = c('numeric', 'integer'),
-                  st_clay_perc = c('numeric', 'integer'), st_remarks = 'character',
-                  si_code = 'character')
+
+    # 1.2 Plant metadata
+    if (dic_name == 'plant_md') {
+      dic <- list(pl_name = c('character', 'numeric', 'integer'),
+                  pl_code = 'character',
+                  pl_species = 'character',
+                  pl_height = c('numeric', 'integer'),
+                  pl_dbh = c('numeric', 'integer'),
+                  pl_treatment = 'character',
+                  pl_status = 'character',
+                  measured_sfn = 'character')
 
       # 1.2.1 return dic
       return(dic)
     }
 
-    # 1.3 Species metadata
-    if (dic_name == 'species_md') {
-      dic <- list(sp_name = 'character', sp_ntrees = c('numeric', 'integer'),
-                  sp_leaf_habit = 'character', sp_basal_area_perc = c('numeric', 'integer'),
-                  si_code = 'character')
+
+    # 1.3 PSI metadata
+    if (dic_name == 'psi_data') {
+      dic <- list(time_psi = 'character',
+                  canopy_position = 'character',
+                  method = 'character',
+                  organ = 'character',
+                  aggregation_level = 'character',
+                  remarks = 'character'
+                  )
 
       # 1.3.1 return dic
       return(dic)
     }
 
-    # 1.4 Plant metadata
-    if (dic_name == 'plant_md') {
-      dic <- list(pl_name = c('character', 'numeric', 'integer'), pl_species = 'character',
-                  pl_treatment = 'character', pl_dbh = c('numeric', 'integer'),
-                  pl_height = c('numeric', 'integer'), pl_age = c('numeric', 'integer'),
-                  pl_social = 'character', pl_sapw_area = c('numeric', 'integer'),
-                  pl_sapw_depth = c('numeric', 'integer'), pl_bark_thick = c('numeric', 'integer'),
-                  pl_leaf_area = c('numeric', 'integer'), pl_sens_meth = 'character',
-                  pl_sens_man = 'character', pl_sens_cor_grad = 'character',
-                  pl_sens_cor_zero = 'character', pl_sap_units = 'character',
-                  pl_sens_length = c('numeric', 'integer'), pl_sens_hgt = c('numeric', 'integer'),
-                  pl_sens_timestep = c('numeric', 'integer'), pl_radial_int = 'character',
-                  pl_azimut_int = 'character', pl_remarks = 'character',
-                  pl_code = 'character', si_code = 'character',
-                  pl_sens_calib = 'logical')
+
+    # 1.4 Questionnaire
+    if (dic_name == 'Questionnaire') {
+      dic <- list(`Are the trees measured near a FLUXNET tower footprint?` = 'character',
+                  `Are the trees measured within the footprint of an eddy covariance tower?` = 'character',
+                  `Would you agree that your data are used to start a potential, global database of plant water potentials?` = 'character',
+                  `Does any species in this dataset have automatic dendrometer data (not necessarily co-located with water potential data)?` = 'character'
+                  )
 
       # 1.4.1 return dic
-      return(dic)
-    }
-
-    # 1.5 Environmental metadata
-    if (dic_name == 'environmental_md') {
-      dic <- list(env_time_zone = 'character', env_time_daylight = 'logical',
-                  env_timestep = c('numeric', 'integer'), env_ta = 'character',
-                  env_rh = 'character', env_vpd = 'character',
-                  env_sw_in = 'character', env_ppfd_in = 'character',
-                  env_netrad = 'character', env_ws = 'character',
-                  env_precip = 'character', env_swc_shallow_depth = c('numeric', 'integer'),
-                  env_swc_deep_depth = c('numeric', 'integer'), env_plant_watpot = 'character',
-                  env_leafarea_seasonal = 'character', env_remarks = 'character',
-                  si_code = 'character')
-
-      # 1.5.1 return dic
       return(dic)
     }
 
@@ -668,15 +651,15 @@ qc_env_dics <- function(variable, parent_logger = 'test') {
 #'
 #' @family Quality Checks Functions
 #'
-#' @param metadata Data frame containing the metadata in which the test will be
-#'   made.
+#' @param metadata Data frame containing the data or metadata in which the test
+#'   will be made.
 #'
 #' @param dic Name of the metadata dictionary to use as character. It must be
-#'   one of the following: \code{'stand_md'}, \code{'site_md'},
-#'   \code{'species_md'}, \code{'plant_md'} or \code{'environmental_md'}
+#'   one of the following: \code{'site_md'}, \code{'plant_md'},
+#'   \code{'psi_data'}, or \code{'Questionnaire'}
 #'
 #' @return A data frame with variable names in one column and result of the
-#'   checks in teh following columns
+#'   checks in the following columns
 #'
 #' @export
 
@@ -697,8 +680,8 @@ qc_md_cols <- function(metadata, dic,
     }
 
     # check if dictionary name is one of the five kinds of metadata allowed
-    accepted_sheets <- c('site_md', 'stand_md', 'species_md',
-                         'plant_md', 'environmental_md')
+    accepted_sheets <- c('site_md', 'plant_md', 'psi_data',
+                         'Questionnaire')
 
     if (!is.character(dic) || !(dic %in% accepted_sheets)) {
       stop('Provided dictionary name is not a character or is not a valid name.',
