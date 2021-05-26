@@ -52,7 +52,7 @@ plant_md <- dl_metadata(params$md_file, 'Data', data_type = "plant_md",
                         si_code_loc = site_md, parent_logger = logger_name)
 
 ## psi_data
-psi_data <- dl_metadata(params$psi_file, 'Data', data_type = "psi_data",
+psi_data <- dl_metadata(params$psi_data_file, 'Data', data_type = "psi_data",
                         si_code_loc = site_md, parent_logger = logger_name)
 
 ## stand_md

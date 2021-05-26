@@ -707,8 +707,7 @@ qc_md_cols <- function(metadata, dic,
       # 2.2 Class test
       d_res <- class(metadata[[name]])
       c_res <- any(dictionary[[name]] == d_res)
-      # c_res <- identical(class(metadata[[name]]),
-      #                    as.character(dictionary$Class[dictionary$Name == name]))
+
       classes_res <- c(classes_res, c_res)
       det_class_res <- c(det_class_res, d_res)
 
