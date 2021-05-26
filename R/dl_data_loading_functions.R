@@ -298,7 +298,7 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 #'
 #' @param data_type Character vector indicating the name of the data section.
 #'  It must be one of \code{site_md}, \code{plant_md} or \code{psi_data}. If
-#'  \code{sheet_name} is \code{Questionnaire} then \code{site_md} is not used.
+#'  \code{sheet_name} is \code{Questionnaire} then \code{data_type} is not used.
 #'
 #' @param si_code_loc Name of the object containing the site metadata, in order
 #'   to obtain si_code variable to include it in other metadata objects. Default
