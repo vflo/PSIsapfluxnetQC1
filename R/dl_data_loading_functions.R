@@ -342,9 +342,9 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
     }
 
     # check if data_type is one of the three values allowed
-    accepted_types <- c('site_md', 'plant_md', 'psi_data', 'NA')
+    accepted_types <- c('site_md', 'plant_md', 'psi_data')
 
-    if (!is.character(data_type) || !(data_type %in% accepted_types)) {
+    if (all(!is.character(data_type) || !(data_type %in% accepted_types), !is.na(data_type))) {
       stop('Provided data_type is not a character or is not an accepted data type. ',
            'Please see function help')
     }

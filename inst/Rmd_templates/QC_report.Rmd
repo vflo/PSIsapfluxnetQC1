@@ -44,15 +44,16 @@ library(dplyr)
 library(DT)
 # Data load
 ## site_md
-site_md <- dl_metadata(params$md_file, 'Data', parent_logger = logger_name)[c(1:11),]
+site_md <- dl_metadata(params$md_file, 'Data', data_type = "site_md",
+                       parent_logger = logger_name)
 
 ## plant_md
-plant_md <- dl_metadata(params$md_file, 'Data', si_code_loc = site_md,
-                          parent_logger = logger_name)[c(12:19),]
+plant_md <- dl_metadata(params$md_file, 'Data', data_type = "plant_md",
+                        si_code_loc = site_md, parent_logger = logger_name)
 
 ## psi_data
-psi_data <- dl_metadata(params$psi_file, 'Data', si_code_loc = site_md,
-                     parent_logger = logger_name)[c(20:29),]
+psi_data <- dl_metadata(params$psi_file, 'Data', data_type = "psi_data",
+                        si_code_loc = site_md, parent_logger = logger_name)
 
 ## stand_md
 questionnaire_md <- dl_metadata(params$md_file, 'Questionnaire', si_code_loc = site_md,
