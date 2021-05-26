@@ -296,6 +296,10 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 #' @param sheet_name Character vector indicating the name of the sheet to be
 #'   loaded. It must be one of \code{Data} or \code{Questionnaire}.
 #'
+#' @param data_type Character vector indicating the name of the data section.
+#'  It must be one of \code{site_md}, \code{plant_md}, \code{psi_data} or NA. If
+#'  \code{sheet_name} is \code{Questionnaire} then \code{data_type} is not used.
+#'
 #' @param si_code_loc Name of the object containing the site metadata, in order
 #'   to obtain si_code variable to include it in other metadata objects. Default
 #'   to \code{NULL}, as the first metadata to load must be the site metadata.
@@ -311,8 +315,8 @@ dl_data_col_classes <- function(data, parent_logger = 'test') {
 # START
 # Function declaration
 
-dl_metadata <- function(file_name, sheet_name, si_code_loc = NULL,
-                        parent_logger = 'test'){
+dl_metadata <- function(file_name, sheet_name, data_type = NA,
+                        si_code_loc = NULL, parent_logger = 'test'){
 
   # Using calling handlers to logging
   withCallingHandlers({
@@ -337,6 +341,20 @@ dl_metadata <- function(file_name, sheet_name, si_code_loc = NULL,
            'Please see function help')
     }
 
+    # check if data_type is one of the three values allowed
+    accepted_types <- c('site_md', 'plant_md', 'psi_data', 'NA')
+
+    if (!is.character(data_type) || !(data_type %in% accepted_types)) {
+      stop('Provided data_type is not a character or is not an accepted data type. ',
+           'Please see function help')
+    }
+
+    # check
+    if (sheet_name == "Data" & is.na(data_type)) {
+      stop('Since sheet name is Data, data_type parameter must be provided. ',
+           'Please see function help')
+    }
+
     # check for si_code_loc and if NULL set si_code to NA
     if (is.null(si_code_loc)) {
       si_code_txt <- NA
@@ -349,27 +367,63 @@ dl_metadata <- function(file_name, sheet_name, si_code_loc = NULL,
     # STEP 1
     # Load xlsx sheet and tidy it
 
-    # 1.1 If sheet is Data load as it is.
-    if (any(sheet_name == 'Data')) {
+    # 1.1 If sheet is Data and data_type is site_md.
+    if (all(sheet_name == 'Data', data_type == "site_md")) {
       # read the sheet
       res <- readxl::read_excel(file_name, sheet_name, skip = 0) %>%
         # check for duplicate columns
-        remove_dupcols()
+        remove_dupcols() %>%
+        # column selection
+        dplyr::select('id_sfn','id_fn', 'site_name', 'site_country', 'lat', 'lon',
+               'elev', 'contact_firstname', 'contact_lastname',
+               'contact_institution',	'contact_email')
 
       # 1.1.2 return the Data sheet
       return(res)
     }
 
-    # 1.2 If sheet is Questionnaire we need to take extra steps to tidy the data
-    if (sheet_name == 'Questionnaire') {
+    # 1.2 If sheet is Data and data_type is plant_md.
+    if (all(sheet_name == 'Data', data_type == "plant_md")) {
       # read the sheet
       res <- readxl::read_excel(file_name, sheet_name, skip = 0) %>%
+        # check for duplicate columns
+        remove_dupcols() %>%
+        # column selection
+        dplyr::select('pl_name','pl_code', 'pl_species', 'pl_height', 'pl_dbh',
+        'pl_treatment', 'pl_status','measured_sfn')
+
+      # 1.2.2 return the Data sheet
+      return(res)
+    }
+
+    # 1.3 If sheet is Data and data_type is psi_data.
+    if (all(sheet_name == 'Data', data_type == "psi_data")) {
+      # read the sheet
+      res <- readxl::read_excel(file_name, sheet_name, skip = 0) %>%
+        # check for duplicate columns
+        remove_dupcols() %>%
+        # rename psi columns
+        dplyr::rename(psi = 25, psi_SE = 26, psi_N = 27) %>%
+        # column selection
+        dplyr::select('timestamp', 'time_psi', 'canopy_position', 'method',
+                      'organ', 'psi','psi_SE', 'psi_N', 'aggregation_level',
+                      'remarks')
+
+      # 1.3.2 return the Data sheet
+      return(res)
+    }
+
+
+    # 1.4 If sheet is Questionnaire we need to take extra steps to tidy the data
+    if (sheet_name == 'Questionnaire') {
+      # read the sheet
+      res <- readxl::read_excel(file_name, sheet_name) %>%
         # check for duplicate columns
         remove_dupcols() %>%
         # select only 4 rows
         dplyr::slice(c(1:4))
 
-      # 1.2.2 return the plant metadata
+      # 1.4.2 return the plant metadata
       return(res)
     }
 
