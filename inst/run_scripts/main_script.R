@@ -1,12 +1,13 @@
 # Main script
 
 library(psiQC)
+library(tidyverse)
 
 ################################################################################
 # server management run when necessary
 ################################################################################
-
-# log_psi_setup('Logs/psi.log',
+#
+# psiQC::log_psi_setup('Logs/psi.log',
 #                      logger = 'Server_Management',
 #                      level = "WARNING")
 #

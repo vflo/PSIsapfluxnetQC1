@@ -5,41 +5,30 @@ library(DT)
 
 params <- list(
   wd = '../',
-  md_file = 'foo.xlsx',
-  sapf_data_file = 'foo.xlsx',
-  env_data_file = 'foo.xlsx',
-  code = 'foo'
+  md_file = 'FOO_FAA.xlsx',
+  psi_data_file = 'FOO_FAA.xlsx',
+  code = 'FOO_FAA'
 )
 
 logger_name <- 'test'
 
 # Data load
 ## site_md
-site_md <- dl_metadata(params$md_file, 'site_md', parent_logger = logger_name)
-
-## stand_md
-stand_md <- dl_metadata(params$md_file, 'stand_md', si_code_loc = site_md,
-                        parent_logger = logger_name)
-
-## species_md
-species_md <- dl_metadata(params$md_file, 'species_md', si_code_loc = site_md,
-                          parent_logger = logger_name)
+site_md <- dl_metadata(params$md_file, 'Data', data_type = "site_md",
+                       parent_logger = logger_name)
 
 ## plant_md
-plant_md <- dl_metadata(params$md_file, 'plant_md', si_code_loc = site_md,
-                        parent_logger = logger_name)
+plant_md <- dl_metadata(params$md_file, 'Data', data_type = "plant_md",
+                        si_code_loc = site_md, parent_logger = logger_name)
 
-## env_md
-env_md <- dl_metadata(params$md_file, 'environmental_md', si_code_loc = site_md,
-                      parent_logger = logger_name)
+## psi_data
+psi_data <- dl_metadata(params$psi_data_file, 'Data', data_type = "psi_data",
+                        si_code_loc = site_md, parent_logger = logger_name)
 
-## sapf_data
-sapf_data <- dl_data(params$sapf_data_file, 'sapflow_hd', n = 2000, na = '',
-                     parent_logger = logger_name)
-
-## env_data
-env_data <- dl_data(params$env_data_file, 'environmental_hd', n = 2000, na = '',
-                    parent_logger = logger_name)
+## questionnaire
+questionnaire_md <- dl_metadata(params$md_file, 'Questionnaire',
+                                si_code_loc = site_md,
+                                parent_logger = logger_name)
 
 ################################################################################
 
@@ -48,15 +37,14 @@ env_data <- dl_data(params$env_data_file, 'environmental_hd', n = 2000, na = '',
 ## metadata columns
 md_cols <- bind_rows(
   qc_md_cols(site_md, 'site_md', parent_logger = logger_name),
-  qc_md_cols(stand_md, 'stand_md', parent_logger = logger_name),
-  qc_md_cols(species_md, 'species_md', parent_logger = logger_name),
   qc_md_cols(plant_md, 'plant_md', parent_logger = logger_name),
-  qc_md_cols(env_md, 'environmental_md', parent_logger = logger_name)
+  qc_md_cols(psi_data, 'psi_data', parent_logger = logger_name),
+  qc_md_cols(questionnaire_md, 'Questionnaire', parent_logger = logger_name)
 )
 
 ## factor variables values
-factor_values <- qc_factor_values(site_md, stand_md, species_md,
-                                  plant_md, env_md, parent_logger = logger_name)
+factor_values <- qc_factor_values(site_md, plant_md, psi_data,
+                                  parent_logger = logger_name)
 
 ## email
 email_check <- qc_email_check(site_md, parent_logger = logger_name)

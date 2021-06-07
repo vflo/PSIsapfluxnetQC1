@@ -16,7 +16,7 @@ knitr::opts_knit$set(root.dir = params$wd)
 ```{r setup_log, include = FALSE}
 # log setup
 log_file <- "Logs/psi.log"
-log_psi_setup(log_file, logger = 'DataFlow.rep_sfn_render', level = 'DEBUG')
+log_psi_setup(log_file, logger = 'DataFlow.rep_psi_render', level = 'DEBUG')
 ```
 
 ## Received folder content
@@ -28,4 +28,4 @@ dir('received_data')
 ## Transfer files
 
 ```{r transfer_files}
-df_received_to_accepted_psi(remove = FALSE, parent_logger = 'DataFlow.rep_sfn_render')
+df_received_to_accepted_psi(remove = FALSE, parent_logger = 'DataFlow.rep_psi_render')

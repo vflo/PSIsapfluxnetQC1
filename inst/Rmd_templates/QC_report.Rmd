@@ -68,8 +68,8 @@ md_cols <- bind_rows(
   qc_md_cols(questionnaire_md, 'Questionnaire', parent_logger = logger_name)
 )
 ## factor variables values
-factor_values <- qc_factor_values(site_md, stand_md, species_md,
-                                  plant_md, env_md, parent_logger = logger_name)
+factor_values <- qc_factor_values(site_md, stand_md, psi_data,
+                                  questionnaire_md, parent_logger = logger_name)
 ## email
 email_check <- qc_email_check(site_md, parent_logger = logger_name)
 ## coordinates and biome
