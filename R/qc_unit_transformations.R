@@ -1262,7 +1262,7 @@ qc_rad_conversion <- function(data, parent_logger = 'test') {
 #' @param data Environmental data frame containing the TIMESTAMP variable.
 #'
 #' @param site_md Data frame containing the latitude and longitude variables of
-#'   the site (\code{si_lat} and \code{si_long})
+#'   the site (\code{lat} and \code{lon})
 #'
 #' @param add_solar_ts Logical indicating if solar timestamp must be added to
 #'   the environmental data frame.
@@ -1292,7 +1292,7 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
       stop('data has not a TIMESTAMP variable')
     }
     # have metadata objects the mandatory variables?
-    if (any(is.null(site_md$si_lat), is.null(site_md$si_long))) {
+    if (any(is.null(site_md$lat), is.null(site_md$lon))) {
       stop('site_md has not the needed variables. ',
            'See function help (?qc_solar_timestamp)')
     }
@@ -1303,8 +1303,8 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
 
     # STEP 1
     # Retrieve the accessory info
-    lat <- site_md$si_lat
-    long <- site_md$si_long
+    lat <- site_md$lat
+    long <- site_md$lon
     timestamp <- data$TIMESTAMP
 
     # STEP 2
@@ -1586,13 +1586,13 @@ qc_transformation_vars <- function(sfndata, parent_logger = 'test') {
 
     # STEP 2
     # Extraterrestrial radiation
-    exr_vars <- c('TIMESTAMP', 'si_lat', 'si_long')
-    exr_loc <- c('env_data', 'site_md', 'site_md')
+    exr_vars <- c('TIMESTAMP', 'lat', 'lon')
+    exr_loc <- c('psi_data', 'site_md', 'site_md')
     exr_transf <- rep('solar_time', length(exr_vars))
     exr_presence <- c(
       !all(is.na(get_env(sfndata)$TIMESTAMP)),
-      !all(is.na(get_site_md(sfndata)$si_lat)),
-      !all(is.na(get_site_md(sfndata)$si_long))
+      !all(is.na(get_site_md(sfndata)$lat)),
+      !all(is.na(get_site_md(sfndata)$lon))
     )
 
     # STEP 3

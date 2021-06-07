@@ -23,6 +23,7 @@ Imports:
     lubridate,
     data.table,
     tools,
+    Taxonstand,
     logging,
     rmarkdown,
     DT,

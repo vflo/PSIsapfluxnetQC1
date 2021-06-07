@@ -53,32 +53,19 @@ email_check <- qc_email_check(site_md, parent_logger = logger_name) %>% unique()
 site_md_coordfix <- qc_coordinates(site_md, parent_logger = logger_name) %>% unique()
 
 ## species
-species_md_spnames <- qc_species_names_info(
-  species_md$sp_name,
-  parent_logger = logger_name
-) %>%
-  mutate(Md = 'sp')
-
 plant_md_spnames <- qc_species_names_info(
   plant_md$pl_species,
   parent_logger = logger_name
 ) %>%
   mutate(Md = 'pl')
 
-species_md$sp_name <- qc_species_names(species_md$sp_name,
-                                       parent_logger = logger_name)
 plant_md$pl_species <- qc_species_names(plant_md$pl_species,
                                         parent_logger = logger_name)
-sp_verification <- qc_species_verification(species_md, plant_md,
-                                           parent_logger = logger_name)
+
 
 ## plant treatment check
 pl_treatments_check <- qc_pl_treatments(plant_md, parent_logger = logger_name)
 
-## environmental vars presence
-env_var_presence <- qc_env_vars_presence(
-  env_data, env_md, parent_logger = logger_name
-)
 
 ################################################################################
 

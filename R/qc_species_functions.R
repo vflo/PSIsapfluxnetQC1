@@ -1,27 +1,17 @@
 ################################################################################
 #' Verify provided species names (spelling and correctness)
 #'
-#' \code{qc_species_names} uses \code{tpl} package
-#' (\code{\link{https://github.com/gustavobio/tpl}}) to verify the species
-#' introduced by the contributors and fix spelling errors.
+#' \code{qc_species_names} uses \code{Taxonstand} package.
 #'
 #' This function takes a vector of species names and check if they are right
 #' spelled. Also, if a synonym is used, the function changes it automatically in
-#' order to have the same name for the same species.
-#'
-#' @section GitHub package:
-#' \code{tpl} and \code{tpldata} are GitHub packages, and they are not available
-#' for install in the ususal way. In order to achieve that
-#' \code{qc_species_verification} works as expected, manual installation of
-#' those two packages must be done previously:
-#' \code{devtools::install_github("gustavobio/tpldata")}
-#' \code{devtools::install_github("gustavobio/tpl")}
+#' order to have the same name for the same species
 #'
 #' @param data Data frame as the obtained from \code{\link{qc_species_names_info}}
 #'
 #' @return A character vector with species fixed in spelling and correctness.
 #'
-#' @import tpl
+#' @import Taxonstand
 #'
 #' @export
 
@@ -46,9 +36,9 @@ qc_species_names_fix <- function(data, parent_logger = 'test') {
     }
 
     # STEP 1
-    # If tpl generated NAs, return the original species with a warning
+    # If TPL generated NAs, return the original species with a warning
     if (any(data$IsNA)) {
-      warning('NAs have been generated, please try again with a lower value of conservatism')
+      warning('NAs have been generated, please try again with a lower value of max_distance')
       return(data$data_names)
 
       # STEP 2
@@ -79,9 +69,8 @@ qc_species_names_fix <- function(data, parent_logger = 'test') {
 #'
 #' @param species Character vector containing the species names to verify
 #'
-#' @param conservatism Numerical value between 0 and 1 indicating the
-#'   conservatism level of the tpl spelling check algorithm. Default to
-#'   0.9
+#' @param max_distance A number indicating the maximum distance allowed
+#' for a match in agrep
 #'
 #' @return A data frame summarizing the species names declared, the species
 #'   names obtained after tpl and the concordance and NAs info
@@ -90,7 +79,7 @@ qc_species_names_fix <- function(data, parent_logger = 'test') {
 
 # START
 # Function declaration
-qc_species_names_info <- function(species, conservatism = 0.9,
+qc_species_names_info <- function(species, max_distance = 1,
                                   parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -101,9 +90,9 @@ qc_species_names_info <- function(species, conservatism = 0.9,
     if (!is.vector(species, 'character')) {
       stop('species object is not a character vector, please verify data object')
     }
-    # Warning if conservatism is under 0.75
-    if (conservatism < 0.75) {
-      message('Conservatism value for spelling algorithm is under 0.75',
+    # Warning if max_distance is under 0.75
+    if (max_distance > 5) {
+      message('Maximum distance value for spelling algorithm is over 5',
               ' and this can be cause of species name changes.',
               ' Maybe manual fix of some species should be done')
     }
@@ -114,9 +103,8 @@ qc_species_names_info <- function(species, conservatism = 0.9,
 
     # STEP 2
     # Obtaining tpl info
-    tpl_df <- tpl::tpl.get(species, replace.synonyms = FALSE,
-                           suggestion.distance = conservatism)
-    species_tpl <- tpl_df$name
+    tpl_df <- Taxonstand::TPL(species, max.distance = max_distance)
+    species_tpl <- tpl_df$Taxon
 
     # 2.1 Checking for concordance taking into account that species_tpl maybe
     #     is NA
@@ -161,9 +149,9 @@ qc_species_names_info <- function(species, conservatism = 0.9,
 #'
 #' @param species Character vector containing the species names to verify
 #'
-#' @param conservatism Numerical value between 0 and 1 indicating the
-#'   conservatism level of the tpl spelling check algorithm. Default to
-#'   0.9
+#' @param max_distance NA number indicating the maximum distance allowed for
+#'   a match in agrep when performing corrections of spelling errors in
+#'   specific epithets. Not used if corr = FALSE.
 #'
 #' @return a vector with the fixed names of the species if fix is possible or
 #'   needed, or a vector with the original names of the species if the fix is not
@@ -173,7 +161,7 @@ qc_species_names_info <- function(species, conservatism = 0.9,
 
 # START
 # Function declaration
-qc_species_names <- function(species, conservatism = 0.9,
+qc_species_names <- function(species, max_distance = 1,
                              parent_logger= 'test') {
 
   # Using calling handlers to manage errors
@@ -184,7 +172,7 @@ qc_species_names <- function(species, conservatism = 0.9,
 
     # STEP 1
     # Get names and tpl info
-    info <- qc_species_names_info(species, conservatism, parent_logger)
+    info <- qc_species_names_info(species, max_distance, parent_logger)
 
     # STEP 2
     # Return the names
