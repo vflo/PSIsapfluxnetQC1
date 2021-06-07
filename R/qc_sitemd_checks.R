@@ -36,28 +36,28 @@ qc_email_check <- function(data, parent_logger = 'test') {
     # STEP 0
     # Argument checks
     # Has data valid email variables
-    if (is.null(data$si_contact_email) & is.null(data$si_addcontr_email)) {
+    if (is.null(data$contact_email)) {
       stop('Data provided has not valid email variables')
     }
 
     # STEP 1
     # Initialize pattern
-    emilio_pattern <- "^([a-zA-Z0-9_\\.-]+)@([\\da-zA-Z\\.-]+)\\.([a-zA-Z\\.]{2,6})$"
+    email_pattern <- "^([a-zA-Z0-9_\\.-]+)@([\\da-zA-Z\\.-]+)\\.([a-zA-Z\\.]{2,6})$"
 
-    # Initialize email directions object
-    emilio_vec <- c(data$si_contact_email, data$si_addcontr_email)
+    # Initialize email direction object
+    email_vec <- c(data$contact_email)
 
     # STEP 2
     # Check the email
-    emilio_res <- stringr::str_detect(string = emilio_vec, pattern = emilio_pattern)
+    email_res <- stringr::str_detect(string = email_vec, pattern = email_pattern)
 
     # STEP 3
     # Results object
-    emilio_df <- data.frame(email = emilio_vec, Is_correct = emilio_res,
+    email_df <- data.frame(email = email_vec, Is_correct = email_res,
                             stringsAsFactors = FALSE)
 
     # 3.1 return de results
-    return(emilio_df)
+    return(email_df)
 
     # END FUNCTION
   },

@@ -47,13 +47,10 @@ factor_values <- qc_factor_values(site_md, plant_md, psi_data,
                                   parent_logger = logger_name)
 
 ## email
-email_check <- qc_email_check(site_md, parent_logger = logger_name)
+email_check <- qc_email_check(site_md, parent_logger = logger_name) %>% unique()
 
 ## coordinates
-site_md_coordfix <- qc_coordinates(site_md, parent_logger = logger_name)
-
-## soil_texture
-stand_md <- qc_soil_texture(stand_md, parent_logger = logger_name)
+site_md_coordfix <- qc_coordinates(site_md, parent_logger = logger_name) %>% unique()
 
 ## species
 species_md_spnames <- qc_species_names_info(
