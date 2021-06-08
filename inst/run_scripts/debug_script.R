@@ -93,7 +93,7 @@ psi_data_object <- psi_data_constructor(
   psi_data = psi_data_fixed,
   site_md = site_md_coordfix,
   plant_md = plant_md,
-  question_data = questionnaire_simplified,
+  question_md = questionnaire_simplified,
   parent_logger = logger_name
 )
 
