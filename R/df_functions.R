@@ -940,7 +940,7 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
 # START
 # Function declaration
 psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
-                                 plant_md = NULL, question_data = NULL,
+                                 plant_md = NULL, question_md = NULL,
                                  solar_timestamp = NULL, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -984,7 +984,7 @@ psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
       si_code = rep(site_md$site_name, length(psi_timestamp[[1]])),
       site_md = site_md,
       plant_md = plant_md,
-      question_data = question_data
+      question_md = question_md
     )
 
     # 2.1 Return it!!

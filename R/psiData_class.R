@@ -32,6 +32,6 @@ psiData <- setClass(
     solar_timestamp = "POSIXt",
     site_md = "data.frame",
     plant_md = "data.frame",
-    question_data = "data.frame"
+    question_md = "data.frame"
   )
 )

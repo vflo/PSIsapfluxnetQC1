@@ -1,1248 +1,4 @@
 ################################################################################
-#' Helper function for unit conversion
-#'
-#' \code{qc_get_sapw_md} allows to extract all necessary variables from plant
-#' metadata in order to be able to convert sap flow units.
-#'
-#' @family Quality Checks Functions
-#'
-#' @param pl_metadata Data frame containing the plant metadata
-#'
-#' @return A data frame with extracted plant metadata variables as columns and
-#'   individual plants as rows. Also a new variable \code{pl_sapw_area_est} is
-#'   created as an empty numeric vector.
-#'
-#' @importFrom magrittr %>%
-#'
-#' @export
-
-# START
-# Function declaration
-qc_get_sapw_md <- function(pl_metadata, parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Argument checks
-    # Is pl_data a data frame?
-    if (!is.data.frame(pl_metadata)) {
-      stop('Provided pl_data object is not a data frame')
-    }
-    # Is the correct metadata? (Check for pl_code variable)
-    if (is.null(pl_metadata$pl_code)) {
-      stop('pl_code variable is missing from pl_data')
-    }
-
-    # STEP 1
-    # Extract the desired variables
-    res <- pl_metadata %>%
-      dplyr::select(pl_code, pl_sap_units, pl_sapw_area, pl_leaf_area,
-                    pl_dbh, pl_sapw_depth, pl_bark_thick) %>%
-      dplyr::mutate(pl_sapw_area_est = 0)
-
-    # STEP 2
-    # Return the results
-    return(res)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_get_sapw_md', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_get_sapw_md', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_get_sapw_md', sep = '.'))})
-
-}
-
-################################################################################
-#' Sapwood area calculator
-#'
-#' Function to calculate sapwood area from DBH, bark thickness and sapwood depth
-#'
-#' In the case that sapwood area variable (\code{pl_sapw_area}) is not provided,
-#' it still is needed to perform the unit conversion. In this case sapwood area
-#' can be estimated from DBH and sapwood depth and bark thickness. If bark
-#' thickness is not provided, estimation can be made but results should be
-#' revised as, depending on the species, error in the estimates can be large.
-#'
-#' @section Ring area formula:
-#' The area of a ring is \eqn{\pi(R² - r²)}, where \code{R} is the radius
-#'   including the ring and \code{r} is the radius till the ring. Thus,
-#'   \eqn{R = (dbh / 2) - bark_thickness} and
-#'   \eqn{r = (dbh / 2) - bark_thickness - sapwood_depth}.
-#'
-#' @family Quality Checks Functions
-#'
-#' @param pl_vars Data frame containing the needed variables, usually the result
-#'   of \code{\link{qc_get_sapw_md}}.
-#'
-#' @return A data frame, exactly as returned by \code{\link{qc_get_sapw_md}},
-#'   but with the variable pl_sapw_area_est filled with the estimated values.
-#'
-#' @export
-
-# START
-# Function declaration
-qc_sapw_area_calculator <- function(pl_vars, parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Argument checking
-    # is pl_vars a data frame?
-    if (!is.data.frame(pl_vars)) {
-      stop('Provided pl_vars object is not a data frame')
-    }
-    # has pl_vars the necessary variables?
-    if (!all(c('pl_sapw_depth', 'pl_dbh',
-               'pl_bark_thick', 'pl_sapw_area') %in% names(pl_vars))) {
-      stop('Provided pl_vars object has not the needed variables to make ',
-           'the conversion')
-    }
-
-    # STEP 1
-    # Helper function to use in vapply
-    helper <- function(i) {
-      # mandatory variables + bark
-      depth_dbh_bark <- all(!is.na(pl_vars$pl_sapw_depth[i]),
-                            !is.na(pl_vars$pl_dbh[i]),
-                            !is.na(pl_vars$pl_bark_thick[i]))
-      # mandatory variables only
-      depth_dbh <- all(!is.na(pl_vars$pl_sapw_depth[i]),
-                       !is.na(pl_vars$pl_dbh[i]),
-                       is.na(pl_vars$pl_bark_thick[i]))
-
-
-      # if there is a sapwood area value, return it
-      if (!is.na(pl_vars$pl_sapw_area[i])) {
-        return(pl_vars$pl_sapw_area[i])
-      } else {
-        # if all mandatory variables and bark thickness are present, return the
-        # estimate
-        if (depth_dbh_bark) {
-          return(pi*(((pl_vars$pl_dbh[i] / 2) - (pl_vars$pl_bark_thick[i]*0.1))^2 - ((pl_vars$pl_dbh[i] / 2) - (pl_vars$pl_bark_thick[i]*0.1) - pl_vars$pl_sapw_depth[i])^2))
-        } else {
-          # if all mandatory variables are present, but no bark thickness value
-          # return estimate with a message
-          if (depth_dbh) {
-            message(pl_vars$pl_code[i], ' has no bark thickness value.',
-                    ' Estimate of sapwood area must be taken with caution')
-            return(pi*(((pl_vars$pl_dbh[i] / 2))^2 - ((pl_vars$pl_dbh[i] / 2) - pl_vars$pl_sapw_depth[i])^2))
-          } else {
-            # if one or more mandatory variables are missing, return NA with a
-            # messege
-            message(pl_vars$pl_code[i], ' has no sapwood depth and/or ',
-                    'dbh values.', ' Estimate of sapwood area ',
-                    'can not be calculated. Returning NA.')
-            return(NA)
-          }
-        }
-      }
-    }
-
-    # STEP 2
-    # Calculate the estimates, if possible
-    res_vec <- vapply(seq_along(pl_vars$pl_code), helper, numeric(1))
-
-    # STEP 3
-    # Return the results
-    pl_vars$pl_sapw_area_est <- res_vec
-    return(pl_vars)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_sapw_area_calculator', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_sapw_area_calculator', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_sapw_area_calculator', sep = '.'))})
-
-}
-
-################################################################################
-#' Unit conversion
-#'
-#' Conversion of sap flow units to sapwood level
-#' (cm³·cm⁻²·h⁻¹), plant level (cm³·h⁻¹) or leaf area level (cm³·cm⁻²·h⁻¹)
-#'
-#' @family Unit conversion
-#'
-#' @param x Numeric value in which the conversion must be done
-#'
-#' @param sapw_area Numeric value with the plant sapwood area in cm²
-#'
-#' @param leaf_area Numeric value with the plant leaf area in m²
-#'
-#' @param output_units Character vector indicating the kind of output units.
-#'   Allowed values are \code{'plant'}, \code{'sapwood'} and \code{'leaf'}.
-#'
-#' @return A numeric value resulting from unit conversion
-#'
-#' @export
-
-# START
-# Function declaration
-qc_cm_cm_h <- function(x, sapw_area, leaf_area, output_units,
-                       parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area)/(leaf_area*10000)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_cm_cm_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_cm_cm_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_cm_cm_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from cm³·m⁻²·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_cm_m_s <- function(x, sapw_area, leaf_area, output_units,
-                      parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*0.36
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*0.36
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*1e-4*0.36)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_cm_m_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_cm_m_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_cm_m_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from dm³·dm⁻²·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_dm_dm_h <- function(x, sapw_area, leaf_area, output_units,
-                       parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*10
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*10
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*1e-3)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_dm_dm_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_dm_dm_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_dm_dm_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from dm³·dm⁻²·s⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_dm_dm_s <- function(x, sapw_area, leaf_area, output_units,
-                       parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*36000
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*36000
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*3.6)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_dm_dm_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_dm_dm_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_dm_dm_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from mm³·mm⁻²·s⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_mm_mm_s <- function(x, sapw_area, leaf_area, output_units,
-                       parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*360
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*360
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*0.036)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_mm_mm_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_mm_mm_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_mm_mm_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from g·m⁻²·s⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_g_m_s <- function(x, sapw_area, leaf_area, output_units,
-                     parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*0.36
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*0.36
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*0.36*1e-4)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_g_m_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_g_m_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_g_m_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from kg·m⁻²·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_kg_m_h <- function(x, sapw_area, leaf_area, output_units,
-                      parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*1e-1
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*1e-1
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*1e-5)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_kg_m_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_kg_m_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_kg_m_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from kg·m⁻²·s⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_kg_m_s <- function(x, sapw_area, leaf_area, output_units,
-                      parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x*360
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*sapw_area*360
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*sapw_area*0.036)/(leaf_area)
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_kg_m_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_kg_m_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_kg_m_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from cm³·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_cm_h <- function(x, sapw_area, leaf_area, output_units,
-                    parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x/sapw_area
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*1e-4)/leaf_area
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_cm_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_cm_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_cm_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from dm³·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_dm_h <- function(x, sapw_area, leaf_area, output_units,
-                    parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- (x*1e3)/sapw_area
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*1e3
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*1e-1)/leaf_area
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_dm_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_dm_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_dm_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from cm³·s⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_cm_s <- function(x, sapw_area, leaf_area, output_units,
-                    parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- (x*3600)/sapw_area
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*3600
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*0.36)/leaf_area
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_cm_s', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_cm_s', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_cm_s', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from g·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_g_h <- function(x, sapw_area, leaf_area, output_units,
-                   parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- x/sapw_area
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*1e-4)/leaf_area
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_g_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_g_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_g_h', sep = '.'))})
-
-}
-
-################################################################################
-#' @describeIn qc_cm_cm_h Conversion of sap flow units from kg·h⁻¹
-#'
-#' @export
-
-# START
-# Function declaration
-qc_kg_h <- function(x, sapw_area, leaf_area, output_units,
-                    parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # If x is NA, return NA to avoid check for numeric error
-    if (is.na(x)) {return(NA)}
-    # Are values numeric?
-    if (any(!is.numeric(x), !is.numeric(sapw_area), !is.numeric(leaf_area))) {
-      stop('x, sapw_area and/or leaf_area are not numeric values')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Sapwood
-    if (output_units == 'sapwood') {
-      res <- (x*1e3)/sapw_area
-      return(res)
-    } else {
-
-      # STEP 2
-      # Plant
-      if (output_units == 'plant') {
-        res <- x*1e3
-        return(res)
-      } else {
-
-        # STEP 3
-        # Leaf area
-        if (output_units == 'leaf') {
-          res <- (x*1e-1)/leaf_area
-          return(res)
-        }
-      }
-    }
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_kg_h', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_kg_h', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_kg_h', sep = '.'))})
-
-}
-
-################################################################################
-#' Sap flow units transformation
-#'
-#' Function to transform between sap flow units
-#'
-#' Sap flow accepted units can be of two kinds, \code{per sapwood area} and
-#' \code{per plant}. Both kinds can come in many flavours and unit conversion
-#' must be done to allow data integration and analysis.
-#' This function can return three kind of units:
-#' \describe{
-#'   \item{\bold{Per sapwood  area}}{
-#'   In this case, units returned are \eqn{cm³·cm⁻²·h⁻¹}
-#'   }
-#'   \item{\bold{Per plant}}{
-#'   In this case, units returned are \eqn{cm³·h⁻¹}
-#'   }
-#'   \item{\bold{Per leaf area unit}}{
-#'   In this case, units returned are \eqn{cm³·cm⁻²·h⁻¹}
-#'   }
-#' }
-#'
-#' @section Sapwood area:
-#' If origin units are \emph{per sapwood area}, direct transformation is made. If
-#' origin units are \emph{per plant} then \code{pl_sapw_area} variable from
-#' plant metadata is needed to make the conversion.
-#'
-#' @section Plant:
-#' If origin units are \emph{per plant}, direct transformation is made. If
-#' origin units are \emph{per sapwood area} then \code{pl_sapw_area} variable
-#' from plant metadata is needed to make the conversion.
-#'
-#' @section Leaf area:
-#' If origin units are \emph{per plant} then \code{pl_leaf_area} variable from
-#' plant metadata is needed to make the conversion. If origin units are
-#' \emph{per sapwood area} then \code{pl_leaf_area} and \code{pl_sapw_area}
-#' variables from plant metadata are needed.
-#'
-#' @section \code{pl_sapw_area}:
-#' If \code{pl_sapw_area} is not available but \code{pl_sapw_depth} and
-#' \code{pl_dbh} are provided, sapwood area value can be estimated by means of
-#' \code{\link{qc_sapw_area_calculator}} function previous to the use of this
-#' function.
-#'
-#' @family Quality Checks Functions
-#'
-#' @param data Data frame containing the sap flow measurements
-#'
-#' @param sapw_md Data frame containing the sapwood metadata, as obtained from
-#'   \code{\link{qc_get_sapw_md}} or \code{\link{qc_sapw_area_calculator}}.
-#'
-#' @param output_units Character vector indicating the kind of output units.
-#'   Allowed values are \code{'plant'}, \code{'sapwood'} and \code{'leaf'}.
-#'   See details to obtain more information
-#'
-#' @export
-
-# START
-# Function declaration
-qc_sapw_conversion <- function(data, sapw_md, output_units = 'plant',
-                               parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Arguments checking
-    # Are data and sapw_md data frames?
-    if (any(!is.data.frame(data), !is.data.frame(sapw_md))) {
-      stop('data and/or sapw_md objects are not data frames')
-    }
-    # Is output units a character vector?
-    if (!is.character(output_units)) {
-      stop('output_units value is not a character vector')
-    }
-    # Is output units a valid value?
-    if (!(output_units %in% c('plant', 'sapwood', 'leaf'))) {
-      stop('output_units = "', output_units, '" is not a valid value. See function ',
-           'help (?qc_sapw_conversion) for a list of valid values')
-    }
-
-    # STEP 1
-    # Needed objects
-
-    # 1.1 create a list/dictionary with the conversion functions
-    funs_list <- list(
-      '“cm3 cm-2 h-1”' = sapfluxnetQC1::qc_cm_cm_h,
-      '“cm3 m-2 s-1”' = sapfluxnetQC1::qc_cm_m_s,
-      '“dm3 dm-2 h-1”' = sapfluxnetQC1::qc_dm_dm_h,
-      '“dm3 dm-2 s-1”' = sapfluxnetQC1::qc_dm_dm_s,
-      '“mm3 mm-2 s-1”' = sapfluxnetQC1::qc_mm_mm_s,
-      '“g m-2 s-1”' = sapfluxnetQC1::qc_g_m_s,
-      '“kg m-2 h-1”' = sapfluxnetQC1::qc_kg_m_h,
-      '“kg m-2 s-1”' = sapfluxnetQC1::qc_kg_m_s,
-      '“cm3 s-1”' = sapfluxnetQC1::qc_cm_s,
-      '“cm3 h-1”' = sapfluxnetQC1::qc_cm_h,
-      '“dm3 h-1”' = sapfluxnetQC1::qc_dm_h,
-      '“g h-1”' = sapfluxnetQC1::qc_g_h,
-      '“kg h-1”' = sapfluxnetQC1::qc_kg_h
-    )
-
-    # 1.2 TIMESTAMP variable is not needed for the loop, drop it
-    data_tmp <- data
-    data_tmp$TIMESTAMP <- NULL
-
-    # 1.3 Results data frame, here TIMESTAMP is needed
-    res_df <- data.frame(TIMESTAMP = data$TIMESTAMP,
-                         stringsAsFactors = FALSE)
-
-    # STEP 2
-    # Loop for each plant/tree
-    for (code in names(data_tmp)) {
-
-      # 3.1 units, sapw area and leaf area values
-      sapw_units <- as.character(sapw_md[sapw_md[,'pl_code'] == code, 'pl_sap_units'])
-      sapw_area <- as.numeric(sapw_md[sapw_md[,'pl_code'] == code, 'pl_sapw_area'])
-      leaf_area <- as.numeric(sapw_md[sapw_md[,'pl_code'] == code, 'pl_leaf_area'])
-
-      # 3.2 vapply to convert all the plant measures
-      plant_res <- vapply(
-        data_tmp[[code]],
-        funs_list[[sapw_units]],
-        numeric(1),
-        sapw_area = sapw_area, leaf_area = leaf_area, output_units = output_units,
-        parent_logger = parent_logger
-      )
-
-      # 3.3 add the plant results to the data frame results
-      res_df[[code]] <- plant_res
-    }
-
-    # STEP 4
-    # Return the results
-    return(res_df)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_sapw_conversion', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_sapw_conversion', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_sapw_conversion', sep = '.'))})
-
-}
-
-################################################################################
-#' Radiation units transformation
-#'
-#' Function to transform between radiation units
-#'
-#' Radiation accepted measures can be of two kinds, \code{incoming photosynthetic photon flux density}
-#' and \code{shortwave incoming radiation}. Unit conversion must be done to allow data
-#' integration and analysis.
-#' This function converts between:
-#' \describe{
-#'   \item{\bold{Incoming photosynthetic photon flux density}}{
-#'   In this case, units returned are \eqn{{\mu}mol·m⁻²·s⁻¹}
-#'   }
-#'   \item{\bold{Shortwave incoming radiation}}{
-#'   In this case, units returned are \eqn{W·m⁻²}
-#'   }
-#' }
-#'
-#' @section Incoming photosynthetic photon flux density:
-#' Direct transformation is made from \emph{shortwave incoming radiation}.
-#'
-#' @section Shortwave incoming radiation:
-#' Direct transformation is made from \emph{incoming photosynthetic photon flux density}.
-#'
-#' @family Quality Checks Functions
-#'
-#' @param data Data frame containing the environmental measurements
-#'
-#' @export
-
-# START
-# Function declaration
-qc_rad_conversion <- function(data, parent_logger = 'test') {
-
-  # Using calling handlers to logging
-  withCallingHandlers({
-
-    # STEP 0
-    # Is data a data frame?
-    if (!is.data.frame(data)) {
-      stop('data object is not a data frame')
-    }
-
-    # STEP 1
-    # Convert radiation values
-
-    # 1.1 If both measures appear in the data frame, no transformation is made
-    if (all(c('sw_in', 'ppfd_in') %in% names(data))){
-
-      message('Radiation in both sw_in and ppfd_in units already exists. No transformation made.')
-
-      # 1.2 If none of the measures appear in the data frame, no transformation is made,
-      # with a warning
-    } else if (all(!(c('sw_in', 'ppfd_in') %in% names(data)))){
-
-      warning('Both sw_in and ppfd_in are missing. No transformation is possible.')
-
-      # 1.3 If only sw_in appears in the data frame, transformation to ppfd_in is made
-    } else if ('sw_in' %in% names(data)){
-
-      # ppfd_in <- LakeMetabolizer::sw.to.par.base(data$sw_in)
-      # data <- cbind(data, ppfd_in)
-      # coefficient from Britton and Dodd (1976)
-      data$ppfd_in <- data$sw_in * 2.114
-
-      # 1.3 If only ppfd_in appears in the data frame, transformation to sw_in is made
-    } else if ('ppfd_in' %in% names(data)){
-
-      # sw_in <- LakeMetabolizer::par.to.sw.base(data$ppfd_in)
-      # data <- cbind(data,sw_in)
-      # coefficient from Britton and Dodd (1976)
-      data$sw_in <- data$ppfd_in * 0.473
-
-    }
-
-    # STEP 2
-    # Return the results
-    return(data)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger, 'qc_rad_conversion', sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger, 'qc_rad_conversion', sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger, 'qc_rad_conversion', sep = '.'))})
-
-}
-
-
-################################################################################
 #' Solar time conversion
 #'
 #' Calculate the Extraterrestrial Radiation from the TIMESTAMP
@@ -1288,8 +44,8 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
       stop('data and/or site_md are not data frames')
     }
     # have data the timestamp variable?
-    if (is.null(data$TIMESTAMP)) {
-      stop('data has not a TIMESTAMP variable')
+    if (is.null(data$timestamp)) {
+      stop('data has not a timestamp variable')
     }
     # have metadata objects the mandatory variables?
     if (any(is.null(site_md$lat), is.null(site_md$lon))) {
@@ -1305,7 +61,7 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
     # Retrieve the accessory info
     lat <- site_md$lat
     long <- site_md$lon
-    timestamp <- data$TIMESTAMP
+    timestamp <- data$timestamp
 
     # STEP 2
     # Intermediate objects
@@ -1339,7 +95,7 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
     data$ext_rad <- solI
 
     if (add_solar_ts) {
-      data$solarTIMESTAMP <- ast
+      data$solartimestamp <- ast
     }
 
     # STEP 4
@@ -1364,177 +120,6 @@ qc_ext_radiation <- function(data, site_md, add_solar_ts = FALSE,
                                                         sep = '.'))})
 }
 
-################################################################################
-#' Calculation of VPD from rh and ta
-#'
-#' Calculate the VPD if needed from other environmental variables
-#'
-#' The calculations for this function were obtained from the REddyProc R package
-#' (https://cran.r-project.org/package=REddyProc) by the MPI-BGC in Jena
-#' licensed under GPL > 2
-#'
-#' @family Unit conversion
-#'
-#' @param data Data frame containing the environmental data
-#'
-#' @return a Data frame of the environmental data with the new VPD variable
-#'   calculated
-#'
-#' @export
-
-# START
-# Function declaration
-qc_vpd <- function(data, parent_logger = 'test') {
-
-  # using calling handlers to manage errors
-  withCallingHandlers({
-
-    # STEP 0
-    # Check arguments
-    # data frame
-    if (!is.data.frame(data)) {
-      stop("data object is not a data frame")
-    }
-
-    # check variables
-    if (any(is.null(data[['rh']]), is.null(data[['ta']]))) {
-      stop("data not contains rh and/or ta variables")
-    }
-
-    # check if vpd already exists
-    if (!is.null(data[['vpd']])) {
-      warning("data already has a vpd variable. Please revise if there",
-              " is really necessary to recalculate vpd")
-      return(data)
-    }
-
-    # STEP 1
-    # Get the values of ta and rh
-    ta <- data[['ta']]
-    rh <- data[['rh']]
-
-    # STEP 2
-    # Calculate the VPD
-    vpd <- 0.61078 * (1 - rh / 100) * exp(17.08085 * ta / (234.175 + ta))
-
-    # 2.1 check for sure that vpd is not negative, and if it is transform to 0
-    vpd_checked <- dplyr::case_when(
-      vpd < 0 ~ 0,
-      TRUE ~ vpd
-    )
-
-    # STEP 3
-    # Build the data res object
-    data[['vpd']] <- vpd_checked
-
-    # STEP 4
-    # Return the data
-    return(data)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger,
-                                                        'qc_vpd',
-                                                        sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger,
-                                                       'qc_vpd',
-                                                       sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger,
-                                                        'qc_vpd',
-                                                        sep = '.'))})
-}
-
-################################################################################
-#' Calculation of rh from vpd and ta
-#'
-#' Calculate the rh if needed from other environmental variables
-#'
-#' The calculations for this function were obtained from "Plants and Microclimate"
-#' by Hamlyn G. Jones (Cambridge University Press, 3rd Edition). The enhancement
-#' factor that corrects for the slight departure of the behaviour of water in
-#' air from that of a pure gas is NOT implemented
-#'
-#' @family Unit conversion
-#'
-#' @param data Data frame containing the environmental data
-#'
-#' @return a Data frame of the environmental data with the new rh variable
-#'   calculated
-#'
-#' @export
-
-# START
-# Function declaration
-qc_rh <- function(data, parent_logger = 'test') {
-
-  # using calling handlers to manage errors
-  withCallingHandlers({
-
-    # STEP 0
-    # Check arguments
-    # data frame
-    if (!is.data.frame(data)) {
-      stop("data object is not a data frame")
-    }
-
-    # check variables
-    if (any(is.null(data[['vpd']]), is.null(data[['ta']]))) {
-      stop("data not contains vpd and/or ta variables")
-    }
-
-    # check if vpd already exists
-    if (!is.null(data[['rh']])) {
-      warning("data already has a rh variable. Please revise if there",
-              " is really necessary to recalculate rh")
-      return(data)
-    }
-
-    # STEP 1
-    # Get the values of ta and vpd
-    ta <- data[['ta']]
-    vpd <- data[['vpd']]
-
-    # STEP 2
-    # Calculate the rh from sat_pd and vpd
-    sat_pd <- 0.001 * 611.21 * exp((18.678 - (ta / 234.5)) * ta / (257.14 + ta))
-    rh <- (1 - vpd / sat_pd) * 100
-
-    # 2.1 check for sure that vpd is not negative, and if it is transform to 0
-    rh_checked <- dplyr::case_when(
-      rh > 100 ~ 100,
-      TRUE ~ rh
-    )
-
-    # STEP 3
-    # Build the data res object
-    data[['rh']] <- rh_checked
-
-    # STEP 4
-    # Return the data
-    return(data)
-
-    # END FUNCTION
-  },
-
-  # handlers
-  warning = function(w){logging::logwarn(w$message,
-                                         logger = paste(parent_logger,
-                                                        'qc_rh',
-                                                        sep = '.'))},
-  error = function(e){logging::logerror(e$message,
-                                        logger = paste(parent_logger,
-                                                       'qc_rh',
-                                                       sep = '.'))},
-  message = function(m){logging::loginfo(m$message,
-                                         logger = paste(parent_logger,
-                                                        'qc_rh',
-                                                        sep = '.'))})
-}
 
 ################################################################################
 #' Presence of variables needed for transformations summary
@@ -1547,7 +132,7 @@ qc_rh <- function(data, parent_logger = 'test') {
 #'
 #' @family Unit conversion
 #'
-#' @param sfndata SfnData object for the site containing all the information
+#' @param psidata psiData object for the site containing all the information
 #'
 #' @return A data frame with the following columns:
 #'
@@ -1562,69 +147,35 @@ qc_rh <- function(data, parent_logger = 'test') {
 
 # START
 # Function declaration
-qc_transformation_vars <- function(sfndata, parent_logger = 'test') {
+qc_transformation_vars <- function(psidata, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
 
     # STEP 0
     # Checking arguments
-    # Is sfndata a SfnData object?
-    if (!is(sfndata, "SfnData")) {
-      stop('Data provided is not a SfnData object')
+    # Is psidata a psiData object?
+    if (!is(psidata, "psiData")) {
+      stop('Data provided is not a psiData object')
     }
 
     # STEP 1
-    # Radiation conversion
-    rad_vars <- c('sw_in', 'ppfd_in')
-    rad_loc <- rep('env_data', length(rad_vars))
-    rad_transf <- rep('radiation_conversion', length(rad_vars))
-    rad_presence <- c(
-      !is.null(get_env(sfndata)$sw_in),
-      !is.null(get_env(sfndata)$ppfd_in)
-    )
-
-    # STEP 2
     # Extraterrestrial radiation
-    exr_vars <- c('TIMESTAMP', 'lat', 'lon')
+    exr_vars <- c('timestamp', 'lat', 'lon')
     exr_loc <- c('psi_data', 'site_md', 'site_md')
     exr_transf <- rep('solar_time', length(exr_vars))
     exr_presence <- c(
-      !all(is.na(get_env(sfndata)$TIMESTAMP)),
-      !all(is.na(get_site_md(sfndata)$lat)),
-      !all(is.na(get_site_md(sfndata)$lon))
-    )
-
-    # STEP 3
-    # Sapflow unit transformations. Here we have to add units info
-    sfu_vars <- c('pl_sap_units', 'pl_sapw_area', 'pl_leaf_area', 'pl_sap_units')
-    sfu_loc <- c(rep('plant_md', length(sfu_vars) - 1),
-                 unique(get_plant_md(sfndata)$pl_sap_units))
-    sfu_transf <- rep('sapf_units', length(sfu_vars))
-    sfu_presence <- c(
-      !all(is.na(get_plant_md(sfndata)$pl_sap_units)),
-      !all(is.na(get_plant_md(sfndata)$pl_sapw_area)),
-      !all(is.na(get_plant_md(sfndata)$pl_leaf_area)),
-      NA
-    )
-
-    # STEP 4
-    # VPD & rh calculation
-    vpd_vars <- c('rh', 'ta', 'vpd')
-    vpd_loc <- rep('env_data', length(vpd_vars))
-    vpd_transf <- rep('vpd_and_rh_calc', length(vpd_vars))
-    vpd_presence <- c(
-      !is.null(get_env(sfndata)$rh),
-      !is.null(get_env(sfndata)$ta),
-      !is.null(get_env(sfndata)$vpd)
+      !all(is.na(get_env(psidata)$timestamp)),
+      !all(is.na(get_site_md(psidata)$lat)),
+      !all(is.na(get_site_md(psidata)$lon))
     )
 
     # STEP n
     # combining vector for each transformation in a data frame
-    vars <- c(rad_vars, exr_vars, vpd_vars, sfu_vars)
-    loc <- c(rad_loc, exr_loc, vpd_loc, sfu_loc)
-    transf <- c(rad_transf, exr_transf, vpd_transf, sfu_transf)
-    presence <- c(rad_presence, exr_presence, vpd_presence, sfu_presence)
+    vars <- c(exr_vars)
+    loc <- c(exr_loc)
+    transf <- c(exr_transff)
+    presence <- c(exr_presence)
 
     # n.1 data frame
     res <- data.frame(
@@ -1713,9 +264,9 @@ qc_transf_list <- function(transf_info, parent_logger = 'test') {
     } else {exr_avail <- FALSE}
 
     # STEP 3
-    # Sapflow unit conversions
+    # psi unit conversions
     sfu_info <- transf_info %>%
-      dplyr::filter(Transformation == 'sapf_units')
+      dplyr::filter(Transformation == 'psi_units')
 
     # 3.0 get the units for plant and the units for sapwood
     sapwood_level_units <- c(
@@ -1745,11 +296,11 @@ qc_transf_list <- function(transf_info, parent_logger = 'test') {
     } else {
       sfu_plant_avail <- all(sfu_info$Presence[1:2])
     }
-    sfu_plant_transf <- 'sapf_units_to_plant'
+    sfu_plant_transf <- 'psi_units_to_plant'
 
     # sfu_info_plant <- sfu_info %>%
     #   dplyr::filter(Variable != 'pl_leaf_area')
-    # sfu_plant_trasnf <- 'sapf_units_to_plant'
+    # sfu_plant_trasnf <- 'psi_units_to_plant'
     # sfu_plant_avail <- all(sfu_info_plant$Presence)
 
     # 3.2 sapwood level (is the same that for plant)
@@ -1760,9 +311,9 @@ qc_transf_list <- function(transf_info, parent_logger = 'test') {
     } else {
       sfu_sapw_avail <- all(sfu_info$Presence[1:2])
     }
-    sfu_sapw_transf <- 'sapf_units_to_sapwood'
+    sfu_sapw_transf <- 'psi_units_to_sapwood'
 
-    # sfu_sapw_trasnf <- 'sapf_units_to_sapwood'
+    # sfu_sapw_trasnf <- 'psi_units_to_sapwood'
     # sfu_sapw_avail <- all(sfu_info_plant$Presence)
 
     # 3.3 leaf area level
@@ -1772,10 +323,10 @@ qc_transf_list <- function(transf_info, parent_logger = 'test') {
     } else {
       sfu_leaf_avail <- all(sfu_info$Presence[c(1:3)])
     }
-    sfu_leaf_transf <- 'sapf_units_to_leaf_area'
+    sfu_leaf_transf <- 'psi_units_to_leaf_area'
 
     # sfu_info_leaf <- sfu_info
-    # sfu_leaf_transf <- 'sapf_units_to_leaf_area'
+    # sfu_leaf_transf <- 'psi_units_to_leaf_area'
     # sfu_leaf_avail <- all(sfu_info_leaf$Presence)
 
     # STEP 4
@@ -1851,33 +402,33 @@ qc_transf_list <- function(transf_info, parent_logger = 'test') {
 #'
 #' @family Unit conversion
 #'
-#' @param sfndata SfnData object to perform the conversions
+#' @param psidata psiData object to perform the conversions
 #'
-#' @return An SfnData object with the newly calculated variables included
+#' @return An psiData object with the newly calculated variables included
 #'
 #' @export
 
 # START FUNCTION
 # Function declaration
-qc_units_process <- function(sfndata, parent_logger = 'test') {
+qc_units_process <- function(psidata, parent_logger = 'test') {
 
   # using calling handlers to manage errors
   withCallingHandlers({
     # STEP 0
     # Argument checks
-    if (!is(sfndata, "SfnData")) {
-      stop('Data provided is not a SfnData object')
+    if (!is(psidata, "psiData")) {
+      stop('Data provided is not a psiData object')
     }
 
     # progress message
     message(
-      'Unit conversion for ', get_si_code(sfndata)[1]
+      'Unit conversion for ', get_si_code(psidata)[1]
     )
 
     # STEP 1
     # Get the transformation list
     transf_list <- qc_transf_list(
-      qc_transformation_vars(sfndata, parent_logger = parent_logger),
+      qc_transformation_vars(psidata, parent_logger = parent_logger),
       parent_logger = parent_logger
     )
 
@@ -1892,9 +443,9 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         'Radiation units'
       )
 
-      env_data <- get_env(sfndata)
+      env_data <- get_env(psidata)
       env_modf <- qc_rad_conversion(env_data, parent_logger = parent_logger)
-      env_flags <- get_env_flags(sfndata)
+      env_flags <- get_env_flags(psidata)
       vars_names <- names(env_modf)[!(names(env_modf) %in% names(env_flags))]
       vars_to_create <- as.list(rep('CALCULATED', length(vars_names)))
       names(vars_to_create) <- vars_names
@@ -1902,8 +453,8 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         dplyr::mutate(!!! vars_to_create) %>%
         dplyr::select(names(env_modf))
 
-      get_env(sfndata) <- env_modf[,-1]
-      get_env_flags(sfndata) <- env_flags_modf[,-1]
+      get_env(psidata) <- env_modf[,-1]
+      get_env_flags(psidata) <- env_flags_modf[,-1]
     }
 
     # STEP 3
@@ -1915,9 +466,9 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         'VPD'
       )
 
-      env_data <- get_env(sfndata)
+      env_data <- get_env(psidata)
       env_modf <- qc_vpd(env_data, parent_logger = parent_logger)
-      env_flags <- get_env_flags(sfndata)
+      env_flags <- get_env_flags(psidata)
       vars_names <- names(env_modf)[!(names(env_modf) %in% names(env_flags))]
       vars_to_create <- as.list(rep('CALCULATED', length(vars_names)))
       names(vars_to_create) <- vars_names
@@ -1925,9 +476,9 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         dplyr::mutate(!!! vars_to_create) %>%
         dplyr::select(names(env_modf))
 
-      # 3.1 modify the env_data from the sfndata
-      get_env(sfndata) <- env_modf[,-1]
-      get_env_flags(sfndata) <- env_flags_modf[,-1]
+      # 3.1 modify the env_data from the psidata
+      get_env(psidata) <- env_modf[,-1]
+      get_env_flags(psidata) <- env_flags_modf[,-1]
     }
 
     # STEP 4
@@ -1939,9 +490,9 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         'Relative humidity units'
       )
 
-      env_data <- get_env(sfndata)
+      env_data <- get_env(psidata)
       env_modf <- qc_rh(env_data, parent_logger = parent_logger)
-      env_flags <- get_env_flags(sfndata)
+      env_flags <- get_env_flags(psidata)
       vars_names <- names(env_modf)[!(names(env_modf) %in% names(env_flags))]
       vars_to_create <- as.list(rep('CALCULATED', length(vars_names)))
       names(vars_to_create) <- vars_names
@@ -1949,9 +500,9 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
         dplyr::mutate(!!! vars_to_create) %>%
         dplyr::select(names(env_modf))
 
-      # 4.1 modify the env_data from the sfndata
-      get_env(sfndata) <- env_modf[,-1]
-      get_env_flags(sfndata) <- env_flags_modf[,-1]
+      # 4.1 modify the env_data from the psidata
+      get_env(psidata) <- env_modf[,-1]
+      get_env_flags(psidata) <- env_flags_modf[,-1]
     }
 
     # STEP 5
@@ -1960,135 +511,135 @@ qc_units_process <- function(sfndata, parent_logger = 'test') {
 
       # progress message
       message(
-        'Extraterrestrial radiation and solarTIMESTAMP'
+        'Extraterrestrial radiation and solartimestamp'
       )
 
-      env_data <- get_env(sfndata)
-      site_md <- get_site_md(sfndata)
+      env_data <- get_env(psidata)
+      site_md <- get_site_md(psidata)
       env_modf <- qc_ext_radiation(
         env_data, site_md, add_solar_ts = TRUE,
         parent_logger = parent_logger
       )
 
-      env_flags <- get_env_flags(sfndata)
+      env_flags <- get_env_flags(psidata)
       env_flags_modf <- env_flags %>%
         dplyr::mutate(ext_rad = 'CALCULATED')
 
-      # 5.1 add the solar timestamp to the SfnData
-      get_solar_timestamp(sfndata) <- env_modf[['solarTIMESTAMP']]
+      # 5.1 add the solar timestamp to the psiData
+      get_solar_timestamp(psidata) <- env_modf[['solartimestamp']]
 
-      # 5.2 modify the env_data from the sfndata
-      get_env(sfndata) <- env_modf %>%
-        dplyr::select(-TIMESTAMP, -solarTIMESTAMP) %>%
+      # 5.2 modify the env_data from the psidata
+      get_env(psidata) <- env_modf %>%
+        dplyr::select(-timestamp, -solartimestamp) %>%
         as.data.frame(stringsAsFactors = FALSE)
 
-      get_env_flags(sfndata) <- env_flags_modf %>%
-        dplyr::select(-TIMESTAMP)
+      get_env_flags(psidata) <- env_flags_modf %>%
+        dplyr::select(-timestamp)
     }
 
     # STEP 6
-    # sapf_units
+    # psi_units
     # 6.1 get the sapwood metadata
-    sapw_md <- get_plant_md(sfndata) %>%
+    sapw_md <- get_plant_md(psidata) %>%
       qc_get_sapw_md(parent_logger = parent_logger) %>%
       qc_sapw_area_calculator(parent_logger = parent_logger)
 
     # 6.2 to plant
-    if (transf_list['sapf_units_to_plant', 'Available']) {
+    if (transf_list['psi_units_to_plant', 'Available']) {
 
       # progress message
       message(
-        'Sapflow plant level'
+        'psi plant level'
       )
 
-      # 6.2.1 get the sapf_modif
-      sapf_modf <- get_sapf(sfndata) %>%
+      # 6.2.1 get the psi_modif
+      psi_modf <- get_psi(psidata) %>%
         qc_sapw_conversion(
           sapw_md, output_units = 'plant', parent_logger = parent_logger
         )
 
       # 6.2.2 get the plant_md
-      plant_md <- get_plant_md(sfndata)
+      plant_md <- get_plant_md(psidata)
 
-      # 6.2.3 modify the sapf data and the plant md to add the units
-      sfndata_plant <- sfndata
+      # 6.2.3 modify the psi data and the plant md to add the units
+      psidata_plant <- psidata
 
-      get_sapf(sfndata_plant) <- sapf_modf %>%
-        dplyr::select(-TIMESTAMP) %>%
+      get_psi(psidata_plant) <- psi_modf %>%
+        dplyr::select(-timestamp) %>%
         as.data.frame(stringsAsFactors = FALSE)
 
-      get_plant_md(sfndata_plant) <- plant_md %>%
+      get_plant_md(psidata_plant) <- plant_md %>%
         dplyr::mutate(pl_sap_units_orig = pl_sap_units,
                       pl_sap_units = "“cm3 h-1”")
 
-      # 6.2.4 write the plant SfnData object
-      df_write_SfnData(sfndata_plant, 'unit_trans', 'plant',
+      # 6.2.4 write the plant psiData object
+      df_write_psiData(psidata_plant, 'unit_trans', 'plant',
                        parent_logger = parent_logger)
     }
 
     # 6.3 to sapwood
-    if (transf_list['sapf_units_to_sapwood', 'Available']) {
+    if (transf_list['psi_units_to_sapwood', 'Available']) {
 
       # progress message
       message(
-        'Sapflow sapwood level'
+        'psi sapwood level'
       )
 
-      # 6.3.1 get the sapf_modif
-      sapf_modf <- get_sapf(sfndata) %>%
+      # 6.3.1 get the psi_modif
+      psi_modf <- get_psi(psidata) %>%
         qc_sapw_conversion(
           sapw_md, output_units = 'sapwood', parent_logger = parent_logger
         )
 
       # 6.3.2 get the plant md
-      plant_md <- get_plant_md(sfndata)
+      plant_md <- get_plant_md(psidata)
 
-      # 6.3.3 modify the sapf data from the sfndata
-      sfndata_sapwood <- sfndata
+      # 6.3.3 modify the psi data from the psidata
+      psidata_sapwood <- psidata
 
-      get_sapf(sfndata_sapwood) <- sapf_modf %>%
-        dplyr::select(-TIMESTAMP) %>%
+      get_psi(psidata_sapwood) <- psi_modf %>%
+        dplyr::select(-timestamp) %>%
         as.data.frame(stringsAsFactors = FALSE)
 
-      get_plant_md(sfndata_sapwood) <- plant_md %>%
+      get_plant_md(psidata_sapwood) <- plant_md %>%
         dplyr::mutate(pl_sap_units_orig = pl_sap_units,
                       pl_sap_units = "“cm3 cm-2 h-1”")
 
-      # 6.3.4 write the plant SfnData object
-      df_write_SfnData(sfndata_sapwood, 'unit_trans', 'sapwood',
+      # 6.3.4 write the plant psiData object
+      df_write_psiData(psidata_sapwood, 'unit_trans', 'sapwood',
                        parent_logger = parent_logger)
     }
 
     # 6.4 to leaf
-    if (transf_list['sapf_units_to_leaf', 'Available']) {
+    if (transf_list['psi_units_to_leaf', 'Available']) {
 
       # progress message
       message(
-        'Sapflow leaf level'
+        'psi leaf level'
       )
 
-      # 6.4.1 get the sapf_modif
-      sapf_modf <- get_sapf(sfndata) %>%
+      # 6.4.1 get the psi_modif
+      psi_modf <- get_psi(psidata) %>%
         qc_sapw_conversion(
           sapw_md, output_units = 'leaf', parent_logger = parent_logger
         )
 
       # 6.4.2 get the plant md
-      plant_md <- get_plant_md(sfndata)
+      plant_md <- get_plant_md(psidata)
 
-      # 6.4.2 modify the sapf data from the sfndata
-      sfndata_leaf <- sfndata
+      # 6.4.2 modify the psi data from the psidata
+      psidata_leaf <- psidata
 
-      get_sapf(sfndata_leaf) <- sapf_modf %>%
-        dplyr::select(-TIMESTAMP) %>%
+      get_psi(psidata_leaf) <- psi_modf %>%
+        dplyr::select(-timestamp) %>%
         as.data.frame(stringsAsFactors = FALSE)
 
-      get_plant_md(sfndata_leaf) <- plant_md %>%
+      get_plant_md(psidata_leaf) <- plant_md %>%
         dplyr::mutate(pl_sap_units_orig = pl_sap_units,
                       pl_sap_units = "“cm3 cm-2 h-1”")
 
-      # 6.4.3 write the plant SfnData object
-      df_write_SfnData(sfndata_leaf, 'unit_trans', 'leaf',
+      # 6.4.3 write the plant psiData object
+      df_write_psiData(psidata_leaf, 'unit_trans', 'leaf',
                        parent_logger = parent_logger)
     }
   },
