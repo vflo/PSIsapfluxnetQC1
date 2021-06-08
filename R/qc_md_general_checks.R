@@ -441,6 +441,7 @@ qc_md_cols <- function(metadata, dic,
     det_class_res <- vector() # detected class
     na_res <- vector() # results of all NA test
     na_some_res <- vector() # results of all NA test
+    unique_res <- vector() # results of unique values test
 
     # STEP 2
     # Checks
@@ -486,7 +487,16 @@ qc_md_cols <- function(metadata, dic,
       some_res <- NA
       na_some_res <- c(na_some_res, some_res)
     }
-  }
+
+    # 2.5 Unique value test
+    if (p_res) {
+      u_res <- ifelse(unique(metadata[[name]]) %>% length() == 1,TRUE,FALSE)
+      unique_res <- c(unique_res, u_res)
+    } else {
+      u_res <- NA
+      unique_res <- c(unique_res, u_res)
+    }
+    }
 
     # STEP 3
     # Create and return the result object
@@ -496,6 +506,7 @@ qc_md_cols <- function(metadata, dic,
                          ClassOK = classes_res,
                          allNA = na_res,
                          anyNA = na_some_res,
+                         UniqueValue = unique_res,
                          stringsAsFactors = FALSE)
 
     return(result)

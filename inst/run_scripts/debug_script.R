@@ -71,86 +71,39 @@ pl_treatments_check <- qc_pl_treatments(plant_md, parent_logger = logger_name)
 
 # data qc
 ## timestamp
-### sapf
-sapf_data_fixed <- qc_fix_timestamp(sapf_data, env_md,  logger_name)
-### env
-env_data_fixed <- qc_fix_timestamp(env_data, env_md, logger_name)
+### psi
+psi_data_fixed <- qc_as_timestamp(psi_data, site_md, logger_name)
+
 
 ## timestamp NAs
-### sapf
-sapf_timestamp_nas <- qc_timestamp_nas(sapf_data_fixed, logger_name)
-### env
-env_timestamp_nas <- qc_timestamp_nas(env_data_fixed, logger_name)
+### psi
+psi_timestamp_nas <- qc_timestamp_nas(psi_data_fixed, logger_name)
 
-## timestamp errors
-### sapf
-timestamp_errors_sapf <- qc_timestamp_errors(
-  sapf_data_fixed,
-  timestep = qc_get_timestep(plant_md, parent_logger = logger_name),
-  parent_logger = logger_name
-)
-### env
-timestamp_errors_env <- qc_timestamp_errors(
-  env_data_fixed,
-  timestep = qc_get_timestep(env_md, parent_logger = logger_name),
-  parent_logger = logger_name
-)
-
-## Timestamp concordance
-timestamp_concordance <- qc_timestamp_concordance(
-  sapf_data_fixed, env_data_fixed,
-  plot = FALSE, parent_logger = logger_name
-)
-timestamp_concordance_plot <- qc_timestamp_concordance(
-  sapf_data_fixed, env_data_fixed,
-  plot = TRUE, parent_logger = logger_name
-)
-
-### concordance and gaps info
-gap_lines_plot <- vis_gap_lines(sapf_data_fixed, env_data_fixed,
-                                parent_logger = logger_name)
-
-## Gaps
-sapf_gaps_info <- qc_mind_the_gap(
-  sapf_data_fixed, parent_logger = logger_name
-)
-env_gaps_info <- qc_mind_the_gap(
-  env_data_fixed, parent_logger = logger_name
-)
-
-### plots
-#### calendars
-sapf_gaps_cal <- vis_gaps_calendar(sapf_data_fixed, parent_logger = logger_name)
-env_gaps_cal <- vis_gaps_calendar(env_data_fixed, parent_logger = logger_name)
-
-#### plot the gaps coverage
-sapf_gaps_plot <- vis_plot_the_gap(sapf_gaps_info, type = "gap_coverage",
-                                   parent_logger = logger_name)
-env_gaps_plot <- vis_plot_the_gap(env_gaps_info, type = "gap_coverage",
-                                  parent_logger = logger_name)
-
-#### plot the gaps interval
-sapf_gaps_plot_int <- vis_plot_the_gap(sapf_gaps_info, type = "gap_interval",
-                                       parent_logger = logger_name)
-env_gaps_plot_int <- vis_plot_the_gap(env_gaps_info, type = "gap_interval",
-                                      parent_logger = logger_name)
 
 ################################################################################
-# create the SfnData object and save it as a RData file for later use
+
+#Simplify questions of the questionnaire
+questionnaire_simplified <- qc_simplify_questions(questionnaire_md)
+
+
+################################################################################
+# create the psiData object and save it as a RData file for later use
 ## sfndata_object
-sfn_data_object <- sfn_data_constructor(
-  sapf_data = sapf_data_fixed, env_data = env_data_fixed,
-  site_md = site_md_coordfix, stand_md = stand_md, plant_md = plant_md,
-  species_md = species_md, env_md = env_md,
+psi_data_object <- psi_data_constructor(
+  psi_data = psi_data_fixed,
+  site_md = site_md_coordfix,
+  plant_md = plant_md,
+  question_data = questionnaire_simplified,
   parent_logger = logger_name
 )
 
 # save it!
-assign(params$code, sfn_data_object)
+assign(params$code, psi_data_object)
 save(list = c(params$code),
      file = file.path('Data', params$code, 'Lvl_1',
                       paste(params$code, '.RData', sep = '')),
      envir = environment())
+
 
 ################################################################################
 # trasnformations availabilty

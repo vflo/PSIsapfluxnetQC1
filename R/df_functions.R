@@ -939,8 +939,8 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
 
 # START
 # Function declaration
-psi_data_constructor <- function(psi_data = NULL, question_data = NULL,
-                                 site_md = NULL, plant_md = NULL, methods_md = NULL,
+psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
+                                 plant_md = NULL, question_data = NULL,
                                  solar_timestamp = NULL, parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -955,28 +955,19 @@ psi_data_constructor <- function(psi_data = NULL, question_data = NULL,
     }
 
     # STEP 1
-    # match nrow between sapf and env data, and if new rows are
-    # needed, flag them!!
-
     # 1.1 Get timestamp from psi_data
-    psi_timestamp <- psi_data %>% dplyr::select(TIMESTAMP)%>%
-      dplyr::arrange(TIMESTAMP)
+    psi_timestamp <- psi_data %>% dplyr::select(timestamp)
 
 
     # 1.2 flags indicating the pre-existent NAs and the new added NAs
     .psi_flags <- psi_data[,-1] %>%
       is.na() %>%
       tibble::as_tibble() %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(. == TRUE), "NA_PRESENT"))) %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(. == FALSE), ""))) %>%
-      dplyr::mutate(TIMESTAMP = psi_data$TIMESTAMP) %>%
-      dplyr::full_join(psi_timestamp, "TIMESTAMP") %>%
-      dplyr::arrange(TIMESTAMP) %>%
-      dplyr::select(-TIMESTAMP) %>%
-      dplyr::mutate_all(dplyr::funs(replace(., which(is.na(.)), "NA_ADDED")))
+      dplyr::mutate_all(~replace(., which(. == TRUE), "NA_PRESENT")) %>%
+      dplyr::mutate_all(~replace(., which(. == FALSE), ""))
 
 
-    # 1.4 empty solar timestamp
+    # 1.3 empty solar timestamp
     if (is.null(solar_timestamp)) {
       .solar_timestamp <- as.POSIXct(rep(NA, length(psi_timestamp[[1]])))
     } else {
@@ -985,16 +976,15 @@ psi_data_constructor <- function(psi_data = NULL, question_data = NULL,
 
     # STEP 2
     # Build the PsiData object and return it
-    res <- PsiData(
+    res <- psiData(
       psi_data = psi_data[, -1],
       psi_flags = .psi_flags,
       timestamp = psi_timestamp[[1]],
       solar_timestamp = .solar_timestamp,
-      si_code = rep(site_md$si_code, length(psi_timestamp[[1]])),
-      question_data = question_data,
+      si_code = rep(site_md$site_name, length(psi_timestamp[[1]])),
       site_md = site_md,
       plant_md = plant_md,
-      methods_md = methods_md
+      question_data = question_data
     )
 
     # 2.1 Return it!!
@@ -1821,3 +1811,4 @@ df_rem_to_units <- function(parent_logger = 'test') {
                                                         'df_rem_to_units',
                                                         sep = '.'))})
 }
+
