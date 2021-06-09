@@ -569,7 +569,7 @@ df_get_data_folders <- function(parent_logger = 'test') {
 #'
 #' @param psi_data Data frame with the fixed psi data
 #'
-#' @param question_data Data frame with the fixed questionnaire data
+#' @param question_md Data frame with the fixed questionnaire data
 #'
 #' @return Nothing
 #'
@@ -577,7 +577,7 @@ df_get_data_folders <- function(parent_logger = 'test') {
 
 # START
 # Function declaration
-df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NULL,
+df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL,
                                 parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -587,11 +587,11 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NU
     # Argument checks
     # if any of the data is NULL (does not exists), stop and report, except
     # for the different sapflow unit conversions, as they can be missing
-    if(any(is.null(psi_data), is.null(question_data))) {
+    if(any(is.null(psi_data), is.null(question_md))) {
       stop('One or more datasets were not provided')
     }
     # are datasets dataframes?
-    if(any(!is.data.frame(psi_data), !is.data.frame(question_data))) {
+    if(any(!is.data.frame(psi_data), !is.data.frame(question_md))) {
       stop('One or more datasets provided are not data frames')
     }
     # is si_code a character string?
@@ -603,7 +603,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NU
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'psi_data.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'question_data.csv', sep = '_')))
+                            paste(si_code, 'question_md.csv', sep = '_')))
     )) {
       stop('csv files already exist in Lvl_1 folder. Please revise manually')
     }
@@ -614,10 +614,6 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NU
               file.path('Data', si_code, 'Lvl_1',
                         paste(si_code, 'psi_data.csv', sep = '_')),
               row.names = FALSE)
-    write.csv(env_data,
-              file.path('Data', si_code, 'Lvl_1',
-                        paste(si_code, 'question_data.csv', sep = '_')),
-              row.names = FALSE)
 
 
     # STEP 2
@@ -627,7 +623,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_data = NU
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'psi_data.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
-                            paste(si_code, 'question_data.csv', sep = '_')))
+                            paste(si_code, 'question_md.csv', sep = '_')))
     )) {
       df_set_status(si_code,
                     LVL1 = list(STORED = TRUE, DATE = as.character(Sys.Date())))
@@ -923,7 +919,7 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
 #'
 #' @param psi_data Data frame with metadata and psi data after QC process
 #'
-#' @param question_data Data frame with questionnaire data after QC process
+#' @param question_md Data frame with questionnaire data after QC process
 #'
 #' @param site_md Data frame with site metadata after QC process
 #'
@@ -949,7 +945,7 @@ psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
     # STEP 0
     # Argument checks
     if (any(
-      !is.data.frame(psi_data), !is.data.frame(question_data)
+      !is.data.frame(psi_data), !is.data.frame(question_md)
     )) {
       stop('Data and/or metadata objects provided are not data.frames')
     }

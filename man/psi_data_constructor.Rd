@@ -20,9 +20,9 @@ psi_data_constructor(
 
 \item{plant_md}{Data frame with plant metadata after QC process}
 
-\item{solar_timestamp}{Vector with solar timestamp}
+\item{question_md}{Data frame with questionnaire data after QC process}
 
-\item{question_data}{Data frame with questionnaire data after QC process}
+\item{solar_timestamp}{Vector with solar timestamp}
 
 \item{methods_md}{Data frame with methods metadata after QC process}
 }

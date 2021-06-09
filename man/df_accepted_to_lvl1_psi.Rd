@@ -7,7 +7,7 @@
 df_accepted_to_lvl1_psi(
   si_code,
   psi_data = NULL,
-  question_data = NULL,
+  question_md = NULL,
   parent_logger = "test"
 )
 }
@@ -16,7 +16,7 @@ df_accepted_to_lvl1_psi(
 
 \item{psi_data}{Data frame with the fixed psi data}
 
-\item{question_data}{Data frame with the fixed questionnaire data}
+\item{question_md}{Data frame with the fixed questionnaire data}
 }
 \value{
 Nothing

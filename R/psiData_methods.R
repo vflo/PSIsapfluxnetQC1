@@ -139,11 +139,8 @@ setMethod(
     # site code
     cat("Data from ", unique(get_si_code(object)), " site/s\n\n", sep = "")
     # number of trees
-    cat("Sapflow data: ", nrow(slot(object, "psi_data")), " observations of ",
-        length(names(slot(object, "psi_data"))), " trees/plants\n\n")
-    # env_vars
-    cat("Environmental data: ", nrow(slot(object, "env_data")), " observations.\n",
-        "Env vars: ", paste(names(slot(object, "env_data"))), "\n\n")
+    cat("Psi data: ", nrow(slot(object, "psi_data")), " observations of ",
+        nrow(unique(slot(object, "plant_md") %>% dplyr::select(pl_code))), " trees/plants\n\n")
     # timestamp span
     cat("TIMESTAMP span, from ", as.character(head(get_timestamp(object), 1)),
         "to ", as.character(tail(get_timestamp(object), 1)), "\n\n")
@@ -156,19 +153,9 @@ setMethod(
     psi_flags <- unique(unlist(stringr::str_split(unlist(lapply(slot(object, "psi_flags"), unique)), '; ')))
     psi_flags_table <- vapply(psi_flags, function(flag){sum(stringr::str_count(as.matrix(slot(object, "psi_flags")), flag))}, numeric(1))
     psi_flags_table <- psi_flags_table[names(psi_flags_table) != '']
-    cat("Sapflow data flags:\n")
+    cat("Psi data flags:\n")
     if (length(psi_flags_table)) {
       print(sort(psi_flags_table))
-    } else {cat("No flags present")}
-    cat("\n")
-
-    # env_flags
-    env_flags <- unique(unlist(stringr::str_split(unlist(lapply(slot(object, "env_flags"), unique)), '; ')))
-    env_flags_table <- vapply(env_flags, function(flag){sum(stringr::str_count(as.matrix(slot(object, "env_flags")), flag))}, numeric(1))
-    env_flags_table <- env_flags_table[names(env_flags_table) != '']
-    cat("Environmental data flags:\n")
-    if (length(env_flags_table)) {
-      print(sort(env_flags_table))
     } else {cat("No flags present")}
     cat("\n")
 
@@ -231,14 +218,16 @@ setMethod(
     # get the type with match argument
     type <- match.arg(type)
 
+    data <- get_psi(x, solar) %>% cbind(get_plant_md(x) %>%
+                                          dplyr::select(pl_code))
+
     # psi
     if (type == 'psi') {
-      data <- get_psi(x, solar)
 
       # actual plot
       res_plot <- data %>%
-        tidyr::gather(pl_code, psi, -timestamp) %>%
-        ggplot(aes(x = timestamp, y = psi, colour = pl_code)) +
+        # tidyr::gather(pl_code, psi, -TIMESTAMP) %>%
+        ggplot(aes(x = TIMESTAMP, y = psi, colour = pl_code)) +
         geom_point(alpha = 0.4) +
         labs(y = expression(Psi*"[MPa]")) +
         scale_x_datetime() +
@@ -246,12 +235,11 @@ setMethod(
     }
 
     # psiSE
-    if (type == 'psiSE') {
-      data <- get_psi(x, solar)
+    if (type == 'psi_SE') {
 
       # actual plot
       res_plot <- data %>%
-        tidyr::gather(pl_code, psiSE, -timestamp) %>%
+        # tidyr::gather(pl_code, psi_SE, -timestamp) %>%
         ggplot(aes(x = timestamp, y = psiSE, colour = pl_code)) +
         geom_point(alpha = 0.4) +
         labs(y = expression(Psi*"[MPa]")) +
@@ -260,12 +248,11 @@ setMethod(
     }
 
     # psiN
-    if (type == 'psiN') {
-      data <- get_psi(x, solar)
+    if (type == 'psi_N') {
 
       # actual plot
       res_plot <- data %>%
-        tidyr::gather(pl_code, psiN, -timestamp) %>%
+        # tidyr::gather(pl_code, psi_N, -timestamp) %>%
         ggplot(aes(x = timestamp, y = psiN, colour = pl_code)) +
         geom_point(alpha = 0.4) +
         labs(y = expression(Psi*"[MPa]")) +
@@ -434,7 +421,7 @@ setValidity(
       nrow(slot(object, "psi_data")) != length(slot(object, "si_code")),
       length(slot(object, "timestamp")) != length(slot(object, "si_code")),
       length(slot(object, "timestamp")) != length(slot(object, "solar_timestamp")),
-      nrow(slot(object, "psi_flags")) != nrow(slot(object, "psi_data")),,
+      nrow(slot(object, "psi_flags")) != nrow(slot(object, "psi_data")),
       nrow(slot(object, "psi_flags")) != length(slot(object, "timestamp")),
       nrow(slot(object, "psi_flags")) != length(slot(object, "si_code"))
     )) {
@@ -449,8 +436,7 @@ setValidity(
     }
 
     # check for metadata presence
-    if (any(nrow(slot(object, "site_md")) < 1, nrow(slot(object, "stand_md")) < 1,
-            nrow(slot(object, "plant_md")) < 1)) {
+    if (any(nrow(slot(object, "site_md")) < 1, nrow(slot(object, "plant_md")) < 1)) {
       valid <- FALSE
       info <- c(info, 'metadata slots can not be empty data frames')
     }
