@@ -4,14 +4,14 @@
 \alias{qc_species_names}
 \title{Wrapper for species names check}
 \usage{
-qc_species_names(species, conservatism = 0.9, parent_logger = "test")
+qc_species_names(species, max_distance = 1, parent_logger = "test")
 }
 \arguments{
 \item{species}{Character vector containing the species names to verify}
 
-\item{conservatism}{Numerical value between 0 and 1 indicating the
-conservatism level of the tpl spelling check algorithm. Default to
-0.9}
+\item{max_distance}{NA number indicating the maximum distance allowed for
+a match in agrep when performing corrections of spelling errors in
+specific epithets. Not used if corr = FALSE.}
 }
 \value{
 a vector with the fixed names of the species if fix is possible or
@@ -27,41 +27,29 @@ Other Quality Checks Functions:
 \code{\link{qc_coordinates}()},
 \code{\link{qc_data_results_table}()},
 \code{\link{qc_env_ranges}()},
-\code{\link{qc_env_vars_presence}()},
 \code{\link{qc_ext_radiation}()},
 \code{\link{qc_factor_values}()},
-\code{\link{qc_fix_timestamp}()},
 \code{\link{qc_get_biomes_spdf}()},
 \code{\link{qc_get_biome}()},
-\code{\link{qc_get_sapw_md}()},
-\code{\link{qc_get_timestep}()},
-\code{\link{qc_get_timezone}()},
+\code{\link{qc_get_timezone_coord}()},
 \code{\link{qc_is_timestamp}()},
 \code{\link{qc_md_cols}()},
 \code{\link{qc_md_results_table}()},
-\code{\link{qc_mind_the_gap_eff}()},
-\code{\link{qc_mind_the_gap}()},
 \code{\link{qc_out_hampel_filter}()},
 \code{\link{qc_out_of_range}()},
 \code{\link{qc_out_remove}()},
 \code{\link{qc_outliers_process}()},
 \code{\link{qc_outliers_subs}},
 \code{\link{qc_pl_treatments}()},
-\code{\link{qc_rad_conversion}()},
 \code{\link{qc_range_dic}()},
 \code{\link{qc_sapf_ranges}()},
-\code{\link{qc_sapw_area_calculator}()},
-\code{\link{qc_sapw_conversion}()},
 \code{\link{qc_set_timezone}()},
-\code{\link{qc_soil_texture}()},
+\code{\link{qc_simplify_questions}()},
 \code{\link{qc_species_names_info}()},
 \code{\link{qc_species_verification}()},
-\code{\link{qc_start_process}()},
+\code{\link{qc_start_process_psi}()},
 \code{\link{qc_swc_check}()},
 \code{\link{qc_swc_fix}()},
-\code{\link{qc_time_interval}()},
-\code{\link{qc_timestamp_concordance}()},
-\code{\link{qc_timestamp_errors}()},
 \code{\link{qc_timestamp_nas}()}
 }
 \concept{Quality Checks Functions}

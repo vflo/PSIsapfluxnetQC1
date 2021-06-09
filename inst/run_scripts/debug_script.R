@@ -1,6 +1,6 @@
 # Libraries
 library(psiQC)
-library(dplyr)
+library(tidyverse)
 library(DT)
 
 params <- list(

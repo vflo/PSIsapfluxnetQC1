@@ -27,8 +27,6 @@ to their values of MAT and MAP.
 \seealso{
 Other Visualization Functions: 
 \code{\link{vis_biome}()},
-\code{\link{vis_environmental_responses}()},
-\code{\link{vis_gap_lines}()},
-\code{\link{vis_plot_the_gap}()}
+\code{\link{vis_environmental_responses}()}
 }
 \concept{Visualization Functions}

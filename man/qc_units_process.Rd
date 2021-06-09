@@ -4,13 +4,13 @@
 \alias{qc_units_process}
 \title{Units process}
 \usage{
-qc_units_process(sfndata, parent_logger = "test")
+qc_units_process(psidata, parent_logger = "test")
 }
 \arguments{
-\item{sfndata}{SfnData object to perform the conversions}
+\item{psidata}{psiData object to perform the conversions}
 }
 \value{
-An SfnData object with the newly calculated variables included
+An psiData object with the newly calculated variables included
 }
 \description{
 This function checks for available transformations and perform them if needed
@@ -20,10 +20,7 @@ List of available transformations are obtained from \code{\link{qc_transf_list}}
 }
 \seealso{
 Other Unit conversion: 
-\code{\link{qc_cm_cm_h}()},
-\code{\link{qc_rh}()},
 \code{\link{qc_transf_list}()},
-\code{\link{qc_transformation_vars}()},
-\code{\link{qc_vpd}()}
+\code{\link{qc_transformation_vars}()}
 }
 \concept{Unit conversion}

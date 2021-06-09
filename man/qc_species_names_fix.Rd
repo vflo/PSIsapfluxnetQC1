@@ -13,22 +13,10 @@ qc_species_names_fix(data, parent_logger = "test")
 A character vector with species fixed in spelling and correctness.
 }
 \description{
-\code{qc_species_names} uses \code{tpl} package
-(\code{\link{https://github.com/gustavobio/tpl}}) to verify the species
-introduced by the contributors and fix spelling errors.
+\code{qc_species_names} uses \code{Taxonstand} package.
 }
 \details{
 This function takes a vector of species names and check if they are right
 spelled. Also, if a synonym is used, the function changes it automatically in
-order to have the same name for the same species.
+order to have the same name for the same species
 }
-\section{GitHub package}{
-
-\code{tpl} and \code{tpldata} are GitHub packages, and they are not available
-for install in the ususal way. In order to achieve that
-\code{qc_species_verification} works as expected, manual installation of
-those two packages must be done previously:
-\code{devtools::install_github("gustavobio/tpldata")}
-\code{devtools::install_github("gustavobio/tpl")}
-}
-

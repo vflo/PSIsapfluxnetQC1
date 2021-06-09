@@ -48,28 +48,6 @@ setMethod(
   }
 )
 
-#' @rdname psi_get_methods
-#' @export
-setMethod(
-  "get_env", "psiData",
-  function(object, solar = FALSE) {
-    # data
-    .env <- slot(object, "env_data")
-
-    # timestamp
-    if (solar) {
-      TIMESTAMP <- slot(object, "solar_timestamp")
-    } else {
-      TIMESTAMP <- slot(object, "timestamp")
-    }
-
-    # combining both
-    res <- cbind(TIMESTAMP, .env)
-
-    # return
-    return(res)
-  }
-)
 
 #' @rdname psi_get_methods
 #' @export
@@ -87,28 +65,6 @@ setMethod(
 
     # combining both
     res <- cbind(TIMESTAMP, .psi_flags)
-
-    # return
-    return(res)
-  }
-)
-
-#' @rdname psi_get_methods
-#' @export
-setMethod(
-  "get_env_flags", "psiData",
-  function(object, solar = FALSE) {
-    .env_flags <- slot(object, "env_flags")
-
-    # timestamp
-    if (solar) {
-      TIMESTAMP <- slot(object, "solar_timestamp")
-    } else {
-      TIMESTAMP <- slot(object, "timestamp")
-    }
-
-    # combining both
-    res <- cbind(TIMESTAMP, .env_flags)
 
     # return
     return(res)
@@ -154,20 +110,12 @@ setMethod(
 #' @rdname psi_get_methods
 #' @export
 setMethod(
-  "get_stand_md", "psiData",
+  "get_question_md", "psiData",
   function(object) {
-    slot(object, "stand_md")
+    slot(object, "questionnaire_md")
   }
 )
 
-#' @rdname psi_get_methods
-#' @export
-setMethod(
-  "get_species_md", "psiData",
-  function(object) {
-    slot(object, "species_md")
-  }
-)
 
 #' @rdname psi_get_methods
 #' @export
@@ -178,14 +126,6 @@ setMethod(
   }
 )
 
-#' @rdname psi_get_methods
-#' @export
-setMethod(
-  "get_env_md", "psiData",
-  function(object) {
-    slot(object, "env_md")
-  }
-)
 
 #' Show method for psiData
 #'
@@ -270,9 +210,8 @@ setMethod(
       solar_timestamp = .solar_timestamp,
       si_code = .si_code,
       site_md = slot(x, "site_md"),
-      species_md = slot(x, "species_md"),
       plant_md = slot(x, "plant_md"),
-      question_data = slot(x, "env_md")
+      question_data = slot(x, "question_md")
     )
   }
 )
@@ -287,9 +226,7 @@ setMethod(
 setMethod(
   'plot', c('psiData', 'missing'),
   function(x,
-           type = c('psi', 'env',
-                    'ta', 'rh', 'vpd', 'ppfd_in', 'netrad', 'sw_in', 'ext_rad',
-                    'ws', 'precip', 'swc_shallow', 'swc_deep'),
+           type = c('psi','psiSE','psiN'),
            solar = FALSE) {
     # get the type with match argument
     type <- match.arg(type)
@@ -297,206 +234,45 @@ setMethod(
     # psi
     if (type == 'psi') {
       data <- get_psi(x, solar)
-      units_char <- get_plant_md(x)[['pl_sap_units']][1]
 
       # actual plot
       res_plot <- data %>%
-        tidyr::gather(Tree, Sapflow, -TIMESTAMP) %>%
-        ggplot(aes(x = TIMESTAMP, y = Sapflow, colour = Tree)) +
+        tidyr::gather(pl_code, psi, -timestamp) %>%
+        ggplot(aes(x = timestamp, y = psi, colour = pl_code)) +
         geom_point(alpha = 0.4) +
-        labs(y = paste0('Sapflow [', units_char, ']')) +
+        labs(y = expression(Psi*"[MPa]")) +
         scale_x_datetime() +
-        facet_wrap('Tree', ncol = 3, scale = 'fixed')
+        facet_wrap('pl_code', ncol = 3, scale = 'fixed')
     }
 
-    # env
-    if (type == 'env') {
-      data <- get_env(x, solar)
+    # psiSE
+    if (type == 'psiSE') {
+      data <- get_psi(x, solar)
 
       # actual plot
       res_plot <- data %>%
-        tidyr::gather(Variable, Value, -TIMESTAMP) %>%
-        ggplot(aes(x = TIMESTAMP, y = Value, colour = Variable)) +
+        tidyr::gather(pl_code, psiSE, -timestamp) %>%
+        ggplot(aes(x = timestamp, y = psiSE, colour = pl_code)) +
         geom_point(alpha = 0.4) +
+        labs(y = expression(Psi*"[MPa]")) +
         scale_x_datetime() +
-        facet_wrap('Variable', ncol = 3, scale = 'free_y')
+        facet_wrap('pl_code', ncol = 3, scale = 'fixed')
     }
 
-    # ta
-    if (type == 'ta') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['ta']])) {
-        stop('Site has not ta data')
-      }
+    # psiN
+    if (type == 'psiN') {
+      data <- get_psi(x, solar)
 
       # actual plot
       res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = ta)) +
-        geom_point(alpha = 0.4, colour = '#C0392B') +
-        labs(y = 'Air Temperature [C]') +
-        scale_x_datetime()
+        tidyr::gather(pl_code, psiN, -timestamp) %>%
+        ggplot(aes(x = timestamp, y = psiN, colour = pl_code)) +
+        geom_point(alpha = 0.4) +
+        labs(y = expression(Psi*"[MPa]")) +
+        scale_x_datetime() +
+        facet_wrap('pl_code', ncol = 3, scale = 'fixed')
     }
 
-    # rh
-    if (type == 'rh') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['rh']])) {
-        stop('Site has not rh data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = rh)) +
-        geom_point(alpha = 0.4, colour = '#6BB9F0') +
-        labs(y = 'Relative Humidity [%]') +
-        scale_x_datetime()
-    }
-
-    # vpd
-    if (type == 'vpd') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['vpd']])) {
-        stop('Site has not vpd data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = vpd)) +
-        geom_point(alpha = 0.4, colour = '#6BB9F0') +
-        labs(y = 'VPD [kPa]') +
-        scale_x_datetime()
-    }
-
-    # ppfd_in
-    if (type == 'ppfd_in') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['ppfd_in']])) {
-        stop('Site has not ppfd_in data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = ppfd_in)) +
-        geom_point(alpha = 0.4, colour = '#D35400') +
-        labs(y = 'PPFD [?]') +
-        scale_x_datetime()
-    }
-
-    # sw_in
-    if (type == 'sw_in') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['sw_in']])) {
-        stop('Site has not sw_in data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = sw_in)) +
-        geom_point(alpha = 0.4, colour = '#E87E04') +
-        labs(y = 'sw [?]') +
-        scale_x_datetime()
-    }
-
-    # netrad
-    if (type == 'netrad') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['netrad']])) {
-        stop('Site has not netrad data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = netrad)) +
-        geom_point(alpha = 0.4, colour = '#EB9532') +
-        labs(y = 'Net Radiation [?]') +
-        scale_x_datetime()
-    }
-
-    # ext_rad
-    if (type == 'ext_rad') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['ext_rad']])) {
-        stop('Site has not ext_rad data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = ext_rad)) +
-        geom_point(alpha = 0.4, colour = '#F89406') +
-        labs(y = 'Extraterrestrial Radiation [?]') +
-        scale_x_datetime()
-    }
-
-    # ws
-    if (type == 'ws') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['ws']])) {
-        stop('Site has not ws data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = ws)) +
-        geom_col(alpha = 0.4, fill = '#674172') +
-        labs(y = 'Wind Speed [m/s]') +
-        scale_x_datetime()
-    }
-
-    # precip
-    if (type == 'precip') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['precip']])) {
-        stop('Site has not precip data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = precip)) +
-        geom_col(alpha = 0.4, fill = '#67809F') +
-        labs(y = 'Precipitation [?]') +
-        scale_x_datetime()
-    }
-
-    # swc_shallow
-    if (type == 'swc_shallow') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['swc_shallow']])) {
-        stop('Site has not swc_shallow data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = swc_shallow)) +
-        geom_point(alpha = 0.4, colour = '#26A65B') +
-        labs(y = 'SWC Shallow [cm3/cm3]') +
-        scale_x_datetime()
-    }
-
-    # swc_deep
-    if (type == 'swc_deep') {
-      data <- get_env(x, solar)
-
-      if (is.null(data[['swc_deep']])) {
-        stop('Site has not swc_deep data')
-      }
-
-      # actual plot
-      res_plot <- data %>%
-        ggplot(aes(x = TIMESTAMP, y = swc_deep)) +
-        geom_point(alpha = 0.4, colour = '#019875') +
-        labs(y = 'SWC Deep [cm3/cm3]') +
-        scale_x_datetime()
-    }
 
     return(res_plot)
   }
@@ -535,22 +311,6 @@ setReplaceMethod(
   }
 )
 
-#' @export
-#' @rdname psi_replacement
-setReplaceMethod(
-  "get_env", "psiData",
-  function(object, value) {
-    slot(object, "env_data") <- value
-
-    # check validity before return the object, we don't want a messy object
-    validity <- try(validObject(object))
-    if (is(validity, "try-error")) {
-      stop('new data is not valid: ', validity[1])
-    }
-
-    return(object)
-  }
-)
 
 #' @export
 #' @rdname psi_replacement
@@ -569,22 +329,6 @@ setReplaceMethod(
   }
 )
 
-#' @export
-#' @rdname psi_replacement
-setReplaceMethod(
-  "get_env_flags", "psiData",
-  function(object, value) {
-    slot(object, "env_flags") <- value
-
-    # check validity before return the object, we don't want a messy object
-    validity <- try(validObject(object))
-    if (is(validity, "try-error")) {
-      stop('new data is not valid: ', validity[1])
-    }
-
-    return(object)
-  }
-)
 
 #' @export
 #' @rdname psi_replacement
@@ -654,39 +398,6 @@ setReplaceMethod(
   }
 )
 
-#' @export
-#' @rdname psi_replacement
-setReplaceMethod(
-  "get_stand_md", "psiData",
-  function(object, value) {
-    slot(object, "stand_md") <- value
-
-    # check validity before return the object, we don't want a messy object
-    validity <- try(validObject(object))
-    if (is(validity, "try-error")) {
-      stop('new data is not valid: ', validity[1])
-    }
-
-    return(object)
-  }
-)
-
-#' @export
-#' @rdname psi_replacement
-setReplaceMethod(
-  "get_species_md", "psiData",
-  function(object, value) {
-    slot(object, "species_md") <- value
-
-    # check validity before return the object, we don't want a messy object
-    validity <- try(validObject(object))
-    if (is(validity, "try-error")) {
-      stop('new data is not valid: ', validity[1])
-    }
-
-    return(object)
-  }
-)
 
 #' @export
 #' @rdname psi_replacement
@@ -705,22 +416,6 @@ setReplaceMethod(
   }
 )
 
-#' @export
-#' @rdname psi_replacement
-setReplaceMethod(
-  "get_env_md", "psiData",
-  function(object, value) {
-    slot(object, "env_md") <- value
-
-    # check validity before return the object, we don't want a messy object
-    validity <- try(validObject(object))
-    if (is(validity, "try-error")) {
-      stop('new data is not valid: ', validity[1])
-    }
-
-    return(object)
-  }
-)
 
 #' Validity method for psiData class
 #'
@@ -732,11 +427,6 @@ setValidity(
     info <- NULL
     valid <- TRUE
 
-    # check timestamp variable
-    # if (is.null(get_psi(object)$TIMESTAMP) | is.null(get_env(object)$TIMESTAMP)) {
-    #   valid <- FALSE
-    #   info <- c(info, 'No TIMESTAMP variable in psi or env slots')
-    # }
 
     # check dimensions
     if (any(
@@ -760,8 +450,7 @@ setValidity(
 
     # check for metadata presence
     if (any(nrow(slot(object, "site_md")) < 1, nrow(slot(object, "stand_md")) < 1,
-            nrow(slot(object, "species_md")) < 1, nrow(slot(object, "plant_md")) < 1,
-            nrow(slot(object, "env_md")) < 1)) {
+            nrow(slot(object, "plant_md")) < 1)) {
       valid <- FALSE
       info <- c(info, 'metadata slots can not be empty data frames')
     }
@@ -778,7 +467,15 @@ setValidity(
       info <- c(info, 'si_code must be of length >= 1')
     }
 
+    # check for questionnaire presence
+    if (nrow(slot(object, "question_md")) < 1) {
+      valid <- FALSE
+      info <- c(info, 'questionnaire must be of length >= 1')
+    }
+
     # insert more checks here
+
+
 
     # return validity or info
     if (valid) {

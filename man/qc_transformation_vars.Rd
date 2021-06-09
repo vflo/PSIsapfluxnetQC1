@@ -4,10 +4,10 @@
 \alias{qc_transformation_vars}
 \title{Presence of variables needed for transformations summary}
 \usage{
-qc_transformation_vars(sfndata, parent_logger = "test")
+qc_transformation_vars(psidata, parent_logger = "test")
 }
 \arguments{
-\item{sfndata}{SfnData object for the site containing all the information}
+\item{psidata}{psiData object for the site containing all the information}
 }
 \value{
 A data frame with the following columns:
@@ -29,10 +29,7 @@ data transformations/conversions.
 }
 \seealso{
 Other Unit conversion: 
-\code{\link{qc_cm_cm_h}()},
-\code{\link{qc_rh}()},
 \code{\link{qc_transf_list}()},
-\code{\link{qc_units_process}()},
-\code{\link{qc_vpd}()}
+\code{\link{qc_units_process}()}
 }
 \concept{Unit conversion}

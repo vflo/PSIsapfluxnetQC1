@@ -8,7 +8,7 @@ qc_download_maps(data, folder = getwd(), parent_logger = "test")
 }
 \arguments{
 \item{data}{Data frame where the countries ISO codes are. Must contain a
-variable called \code{country} where the ISO code resides.}
+variable called \code{site_country} where the ISO code resides.}
 
 \item{folder}{Folder route where the maps are stored or where they will be
 stored, by default the working directory. It must be a character object and

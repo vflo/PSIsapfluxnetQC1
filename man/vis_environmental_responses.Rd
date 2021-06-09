@@ -28,8 +28,6 @@ Plot the desired environmental funcion \emph{vs.} spaflow values
 \seealso{
 Other Visualization Functions: 
 \code{\link{vis_biome}()},
-\code{\link{vis_gap_lines}()},
-\code{\link{vis_location_biome}()},
-\code{\link{vis_plot_the_gap}()}
+\code{\link{vis_location_biome}()}
 }
 \concept{Visualization Functions}

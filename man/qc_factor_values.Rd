@@ -4,23 +4,14 @@
 \alias{qc_factor_values}
 \title{Metadata factor variables check}
 \usage{
-qc_factor_values(
-  site = NULL,
-  stand = NULL,
-  species = NULL,
-  plant = NULL,
-  environmental = NULL,
-  parent_logger = "test"
-)
+qc_factor_values(site = NULL, plant = NULL, psi = NULL, parent_logger = "test")
 }
 \arguments{
-\item{site, stand, species, plant, environmental}{Data frames with the metadata
+\item{site, plant, psi}{Data frames with the metadata
 to check.}
 }
 \value{
-A data frame with variable names, check result and NA presence as
-  columns, as well as a column (Metadata) indicating the kind of metadata
-  variables checked.
+A data frame with variable names and check result.
 }
 \description{
 \code{qc_factor_values} function checks in the provided metadata if the
@@ -37,41 +28,29 @@ Other Quality Checks Functions:
 \code{\link{qc_coordinates}()},
 \code{\link{qc_data_results_table}()},
 \code{\link{qc_env_ranges}()},
-\code{\link{qc_env_vars_presence}()},
 \code{\link{qc_ext_radiation}()},
-\code{\link{qc_fix_timestamp}()},
 \code{\link{qc_get_biomes_spdf}()},
 \code{\link{qc_get_biome}()},
-\code{\link{qc_get_sapw_md}()},
-\code{\link{qc_get_timestep}()},
-\code{\link{qc_get_timezone}()},
+\code{\link{qc_get_timezone_coord}()},
 \code{\link{qc_is_timestamp}()},
 \code{\link{qc_md_cols}()},
 \code{\link{qc_md_results_table}()},
-\code{\link{qc_mind_the_gap_eff}()},
-\code{\link{qc_mind_the_gap}()},
 \code{\link{qc_out_hampel_filter}()},
 \code{\link{qc_out_of_range}()},
 \code{\link{qc_out_remove}()},
 \code{\link{qc_outliers_process}()},
 \code{\link{qc_outliers_subs}},
 \code{\link{qc_pl_treatments}()},
-\code{\link{qc_rad_conversion}()},
 \code{\link{qc_range_dic}()},
 \code{\link{qc_sapf_ranges}()},
-\code{\link{qc_sapw_area_calculator}()},
-\code{\link{qc_sapw_conversion}()},
 \code{\link{qc_set_timezone}()},
-\code{\link{qc_soil_texture}()},
+\code{\link{qc_simplify_questions}()},
 \code{\link{qc_species_names_info}()},
 \code{\link{qc_species_names}()},
 \code{\link{qc_species_verification}()},
-\code{\link{qc_start_process}()},
+\code{\link{qc_start_process_psi}()},
 \code{\link{qc_swc_check}()},
 \code{\link{qc_swc_fix}()},
-\code{\link{qc_time_interval}()},
-\code{\link{qc_timestamp_concordance}()},
-\code{\link{qc_timestamp_errors}()},
 \code{\link{qc_timestamp_nas}()}
 }
 \concept{Quality Checks Functions}

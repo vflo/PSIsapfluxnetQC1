@@ -8,7 +8,7 @@ qc_site_dics(variable, parent_logger = "test")
 }
 \arguments{
 \item{variable}{Variable name in which the dictionary is needed as character
-vector (e.g. \code{'si_igbp'}).}
+vector (e.g. \code{'site_country'}).}
 }
 \value{
 A character vector containing the valid values for the provided
@@ -26,15 +26,12 @@ use in the checks.
 }
 \section{Accepted variables}{
 
-The factor variables in site_md are \code{si_country}, \code{si_dist_mgmt}
-and \code{si_igbp}.
+The factor variables in site_md is \code{site_country}.
 }
 
 \seealso{
 Other Dictionaries: 
-\code{\link{qc_env_dics}()},
 \code{\link{qc_plant_dics}()},
-\code{\link{qc_species_dics}()},
-\code{\link{qc_stand_dics}()}
+\code{\link{qc_psi_dics}()}
 }
 \concept{Dictionaries}
