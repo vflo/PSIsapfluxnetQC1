@@ -250,8 +250,8 @@ df_start_status_psi <- function(si_code, parent_logger = 'test') {
       # 2.1 create the content
       content <- list(
         QC = list(DONE = FALSE, DATE = NULL),
-        LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE',
-                    TO_UNITS = 'FREEZE', AVAIL = NULL)
+        LVL1 = list(STORED = FALSE, DATE = NULL,
+                    TO_REM = 'FREEZE', AVAIL = NULL)
       )
 
       # 2.2 create the yaml object
@@ -651,7 +651,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, site_md = NULL,
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'question_md.csv', sep = '_')))
     )) {
-      df_set_status(si_code,
+      df_set_status_psi(si_code,
                     LVL1 = list(STORED = TRUE, DATE = as.character(Sys.Date())))
     } else {
       stop('One or more files has been not created in Lvl_1 folder, please revise manually')
