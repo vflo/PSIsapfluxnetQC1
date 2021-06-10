@@ -196,7 +196,7 @@ qc_md_results_table <- function(md_cols, factor_values,
 
 # START
 # Function declaration
-qc_data_results_table <- function(spsi_data_fixed, psi_timestamp_nas,
+qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
                                   parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -320,43 +320,43 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
     # STEP 1
     # Get the files names, code and status of the site
     code_and_files <- dl_get_si_code_psi(folder, parent_logger = parent_logger)
-    status <- df_get_status(code_and_files[['si_code']],
+    status <- df_get_status(code_and_files[['site_code']],
                             parent_logger = parent_logger)
 
     # 1.1 Info message
-    message('Starting process for ', code_and_files[['si_code']], ' site')
+    message('Starting process for ', code_and_files[['site_code']], ' site')
 
     # STEP 2
     # 2.1 if status exists and QC is DONE, don't do anything
     if (!is.logical(status)) {
       if(status$QC$DONE) {
-        message(code_and_files[['si_code']],
+        message(code_and_files[['site_code']],
                 ' already passed QC, not doing anything else')
         return(invisible(FALSE))
       } else {
 
         # 2.2 if status exists but QC is not DONE, lets do it
         # 2.2.1 report folder
-        df_report_folder_creation(code_and_files[['si_code']],
+        df_report_folder_creation(code_and_files[['site_code']],
                                   parent_logger = parent_logger)
 
         # 2.2.2 report
         rep_psi_render('QC_report.Rmd',
                        output_file = file.path(
                          paste(format(Sys.time(), '%Y%m%d%H%M'),
-                               code_and_files[['si_code']],
+                               code_and_files[['site_code']],
                                'QC_report.html', sep = '_')
                        ),
                        output_dir = file.path('Reports',
-                                              code_and_files[['si_code']]),
+                                              code_and_files[['site_code']]),
                        parent_logger = parent_logger,
                        md_file = code_and_files[['md_file']],
                        psi_data_file = code_and_files[['psi_file']],
-                       code = code_and_files[['si_code']],
+                       code = code_and_files[['site_code']],
                        rdata = rdata)
 
         # 2.2.3 set status
-        df_set_status(code_and_files[['si_code']],
+        df_set_status_psi(code_and_files[['site_code']],
                       QC = list(DONE = TRUE, DATE = as.character(Sys.Date())),
                       parent_logger = parent_logger)
 
@@ -368,35 +368,35 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
 
       # 2.3 If status does not exist, create it and perform the QC
       # 2.3.1 start status
-      df_start_status_psi(code_and_files[['si_code']], parent_logger = parent_logger)
+      df_start_status_psi(code_and_files[['site_code']], parent_logger = parent_logger)
 
       # 2.3.2 log setup
       log_psi_setup('Logs/psi.log',
-                           logger = code_and_files[['si_code']],
+                           logger = code_and_files[['site_code']],
                            level = "DEBUG")
 
       # 2.3.3 report folder
-      df_report_folder_creation(code_and_files[['si_code']],
+      df_report_folder_creation(code_and_files[['site_code']],
                                 parent_logger = parent_logger)
 
       # 2.3.4 report
       rep_psi_render('QC_report.Rmd',
                      output_file = file.path(
                        paste(format(Sys.time(), '%Y%m%d%H%M'),
-                             code_and_files[['si_code']],
+                             code_and_files[['site_code']],
                              'QC_report.html', sep = '_')
                      ),
                      output_dir = file.path('Reports',
-                                            code_and_files[['si_code']]),
+                                            code_and_files[['site_code']]),
                      parent_logger = parent_logger,
                      md_file = code_and_files[['md_file']],
                      sapf_data_file = code_and_files[['sapf_file']],
                      env_data_file = code_and_files[['env_file']],
-                     code = code_and_files[['si_code']],
+                     code = code_and_files[['site_code']],
                      rdata = rdata)
 
       # 2.3.5 set status
-      df_set_status(code_and_files[['si_code']],
+      df_set_status_psi(code_and_files[['site_code']],
                     QC = list(DONE = TRUE, DATE = as.character(Sys.Date())),
                     parent_logger = parent_logger)
 
