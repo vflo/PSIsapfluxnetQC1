@@ -512,7 +512,7 @@ dl_get_si_code_psi <- function(folder = '.', parent_logger = 'test') {
     # STEP 4
     # now, lets make the results object, a list
     res <- list(
-      si_code = code,
+      site_code = code,
       md_file = metadata,
       psi_file = psi
     )

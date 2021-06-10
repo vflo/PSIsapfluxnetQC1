@@ -5,15 +5,15 @@
 \title{Main function to resume Data QC in one data frame}
 \usage{
 qc_data_results_table(
-  spsi_data_fixed,
+  psi_data_fixed,
   psi_timestamp_nas,
   parent_logger = "test"
 )
 }
 \arguments{
-\item{psi_timestamp_nas}{}
-
 \item{psi_data_fixed}{}
+
+\item{psi_timestamp_nas}{}
 }
 \description{
 Data QC codified results in one data frame
