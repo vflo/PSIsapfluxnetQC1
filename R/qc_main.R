@@ -380,7 +380,7 @@ qc_start_process_psi <- function(folder = '.', rdata = TRUE,
                                 parent_logger = parent_logger)
 
       # 2.3.4 report
-      rep_sfn_render('QC_report.Rmd',
+      rep_psi_render('QC_report.Rmd',
                      output_file = file.path(
                        paste(format(Sys.time(), '%Y%m%d%H%M'),
                              code_and_files[['si_code']],
