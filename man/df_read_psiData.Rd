@@ -16,8 +16,7 @@ df_read_psiData(
 
 \item{level}{Level to read from as a character string}
 
-\item{units}{Only used if \code{level = "unit_trans"}. Indicates which sapflow
-units (plant, sapwood or leaf) must be read.}
+\item{units}{Only used if \code{level = "unit_trans"}.}
 }
 \value{
 A psiData object.

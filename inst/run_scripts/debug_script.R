@@ -32,6 +32,11 @@ questionnaire_md <- dl_metadata(params$md_file, 'Questionnaire',
 
 ################################################################################
 
+#Simplify questions of the questionnaire
+questionnaire_simplified <- qc_simplify_questions(questionnaire_md)
+
+################################################################################
+
 # md qc
 
 ## metadata columns
@@ -39,7 +44,7 @@ md_cols <- bind_rows(
   qc_md_cols(site_md, 'site_md', parent_logger = logger_name),
   qc_md_cols(plant_md, 'plant_md', parent_logger = logger_name),
   qc_md_cols(psi_data, 'psi_data', parent_logger = logger_name),
-  qc_md_cols(questionnaire_md, 'Questionnaire', parent_logger = logger_name)
+  qc_md_cols(questionnaire_simplified, 'Questionnaire', parent_logger = logger_name)
 )
 
 ## factor variables values
@@ -71,19 +76,16 @@ pl_treatments_check <- qc_pl_treatments(plant_md, parent_logger = logger_name)
 
 # data qc
 ## timestamp
-### psi
 psi_data_fixed <- qc_as_timestamp(psi_data, site_md, logger_name)
 
 
 ## timestamp NAs
-### psi
 psi_timestamp_nas <- qc_timestamp_nas(psi_data_fixed, logger_name)
 
+## extraterrestrial ratiation and timestamp
+psi_data_fixed <- qc_ext_radiation(psi_data_fixed, site_md,TRUE)
 
-################################################################################
 
-#Simplify questions of the questionnaire
-questionnaire_simplified <- qc_simplify_questions(questionnaire_md)
 
 
 ################################################################################
@@ -106,33 +108,21 @@ save(list = c(params$code),
 
 
 ################################################################################
-# trasnformations availabilty
-transformations_table <- qc_transformation_vars(
-  sfn_data_object, parent_logger = logger_name
-) %>%
-  qc_transf_list(parent_logger = logger_name)
-
-################################################################################
 # results md_qc table
 qc_md_results_table(md_cols, factor_values, email_check, site_md_coordfix,
-                    species_md, plant_md, species_md_spnames, plant_md_spnames,
-                    sp_verification, env_var_presence,
-                    parent_logger = logger_name)
+                    plant_md_spnames, parent_logger = logger_name)
 ################################################################################
 ################################################################################
 # table
-qc_data_results_table(sapf_data_fixed, env_data_fixed, timestamp_errors_sapf,
-                      timestamp_errors_env, sapw_md,
-                      timestamp_concordance, sapf_gaps_info,
-                      env_gaps_info, sapf_timestamp_nas, env_timestamp_nas,
+qc_data_results_table(psi_data_fixed, psi_timestamp_nas,
                       parent_logger = logger_name)
 ################################################################################
 
 # 2.2.6 saving the fixed datasets and the objects created in the level1 folder
-df_accepted_to_lvl1(
-  params$code, sapf_data_fixed, env_data_fixed,
-  site_md_coordfix, stand_md, plant_md, species_md,
-  env_md, parent_logger = 'DataFlow'
+df_accepted_to_lvl1_psi(
+  params$code, psi_data_fixed,
+  site_md_coordfix, plant_md, questionnaire_simplified,
+  parent_logger = 'DataFlow'
 )
 
 # saving Rdata file with all the objects (just in case)

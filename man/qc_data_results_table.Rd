@@ -5,45 +5,15 @@
 \title{Main function to resume Data QC in one data frame}
 \usage{
 qc_data_results_table(
-  sapf_data_fixed,
-  env_data_fixed,
-  timestamp_errors_sapf,
-  timestamp_errors_env,
-  sapw_md,
-  timestamp_concordance,
-  sapf_gaps_info,
-  env_gaps_info,
-  sapf_timestamp_nas,
-  env_timestamp_nas,
-  swc_check,
-  transformations_table,
+  spsi_data_fixed,
+  psi_timestamp_nas,
   parent_logger = "test"
 )
 }
 \arguments{
-\item{sapf_data_fixed}{}
+\item{psi_timestamp_nas}{}
 
-\item{env_data_fixed}{}
-
-\item{timestamp_errors_sapf}{}
-
-\item{timestamp_errors_env}{}
-
-\item{sapw_md}{}
-
-\item{timestamp_concordance}{}
-
-\item{sapf_gaps_info}{}
-
-\item{env_gaps_info}{}
-
-\item{sapf_timestamp_nas}{}
-
-\item{env_timestamp_nas}{}
-
-\item{swc_check}{}
-
-\item{transformations_table}{}
+\item{psi_data_fixed}{}
 }
 \description{
 Data QC codified results in one data frame

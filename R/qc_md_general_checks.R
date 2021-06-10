@@ -138,6 +138,8 @@ create_dic <- function(dic_name, parent_logger = 'test') {
 #'
 #' @return A character vector containing the valid values for the provided
 #'   variable
+#'
+#' @export
 
 # START
 # Function declaration
@@ -157,7 +159,7 @@ qc_site_dics <- function(variable, parent_logger = 'test') {
 
     # STEP 1
     # Get the variable and populate the dictionary
-    # 1.1 si_country
+    # 1.1 site_country
       res <- c('AFG', 'ALA', 'ALB', 'DZA', 'ASM', 'AND', 'AGO', 'AIA', 'ATA',
                'ATG', 'ARG', 'ARM', 'ABW', 'AUS', 'AUT', 'AZE', 'BHS', 'BHR',
                'BGD', 'BRB', 'BLR', 'BEL', 'BLZ', 'BEN', 'BMU', 'BTN', 'BOL',
@@ -230,6 +232,9 @@ qc_site_dics <- function(variable, parent_logger = 'test') {
 #'
 #' @return A character vector containing the valid values for the provided
 #'   variable
+#'
+#' @export
+
 
 # START
 # Function declaration
@@ -304,6 +309,8 @@ qc_plant_dics <- function(variable, parent_logger = 'test') {
 #'
 #' @return A character vector containing the valid values for the provided
 #'   variable
+#'
+#' @export
 
 # START
 # Function declaration
@@ -582,10 +589,9 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
     }
 
     # 2. Generate the results data frame and return it
-    res_data <- bind_cols(site_checks,
+    res_data <- data.frame(site_checks,
                           pl_checks,
-                          psi_checks,
-                          stringsAsFactors = FALSE)
+                          psi_checks)
 
     return(res_data)
 

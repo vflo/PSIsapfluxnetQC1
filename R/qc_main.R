@@ -13,17 +13,7 @@
 #'
 #' @param site_md_coordfix
 #'
-#' @param species_md
-#'
-#' @param plant_md
-#'
-#' @param species_md_spnames
-#'
 #' @param plant_md_spnames
-#'
-#' @param sp_verification
-#'
-#' @param env_var_presence
 #'
 #' @return A data frame with the highlights of the QC
 #'
@@ -32,10 +22,7 @@
 # START
 # Function declaration
 qc_md_results_table <- function(md_cols, factor_values,
-                                email_check, site_md_coordfix,
-                                species_md, plant_md,
-                                species_md_spnames, plant_md_spnames,
-                                sp_verification, env_var_presence,
+                                email_check, site_md_coordfix, plant_md_spnames,
                                 parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -60,12 +47,12 @@ qc_md_results_table <- function(md_cols, factor_values,
     }
 
     # 2.2 ClassOK
-    if (any(is.na(md_cols$IsNA)) | any(is.na(md_cols$ClassOK))) {
+    if (any(is.na(md_cols$anyNA)) | any(is.na(md_cols$ClassOK))) {
       step <- c(step, 'Metadata variables expected class')
       status <- c(status, 'WARNING')
       description <- c(description, 'One or more variables are missing from metadata and class check is unfeasible')
     } else {
-      if (any(!md_cols$ClassOK & !md_cols$IsNA)) {
+      if (any(!md_cols$ClassOK & !md_cols$anyNA)) {
         step <- c(step, 'Metadata variables expected class')
         status <- c(status, 'ERROR')
         description <- c(description, 'One or more variables have the wrong class')
@@ -77,12 +64,12 @@ qc_md_results_table <- function(md_cols, factor_values,
     }
 
     # 2.3 NAs
-    if (any(is.na(md_cols$IsNA))) {
+    if (any(is.na(md_cols$anyNA))) {
       step <- c(step, 'Metadata variables NA presence')
       status <- c(status, 'WARNING')
       description <- c(description, 'One or more variables are missing from metadata and NA check is unfeasible')
     } else {
-      if (any(md_cols$IsNA)) {
+      if (any(md_cols$anyNA)) {
         step <- c(step, 'Metadata variables NA presence')
         status <- c(status, 'INFO')
         description <- c(description, 'Some variables have no value')
@@ -96,7 +83,7 @@ qc_md_results_table <- function(md_cols, factor_values,
     # STEP 3
     # Metadata factor values
     # 3.1 Wrong value
-    if (any(!factor_values$Check_result & !factor_values$NA_presence)) {
+    if (any(!factor_values)) {
       step <- c(step, 'Metadata factor variable values')
       status <- c(status, 'ERROR')
       description <- c(description, 'One or more metadata factor variables have values not accepted')
@@ -130,30 +117,7 @@ qc_md_results_table <- function(md_cols, factor_values,
       description <- c(description, 'Site provided correct or fixable coordinates')
     }
 
-    # STEP 6
-    # Species names
-    # 6.1 species md
-    if (any(!species_md_spnames$Concordance)) {
-      step <- c(step, 'Species names spelling (species_md)')
-      status <- c(status, 'WARNING')
-      description <- c(description, 'Species names in Species metadata are mispelled')
-    } else {
-      step <- c(step, 'Species names spelling (species_md)')
-      status <- c(status, 'PASS')
-      description <- c(description, 'No mispelling in species names')
-    }
 
-
-    # if (isTRUE(tryCatch(sapfluxnetQC1::qc_species_names(species_md$sp_name),
-    #                     error = function(e) return(TRUE)))) {
-    #   step <- c(step, 'Species names spelling (species_md)')
-    #   status <- c(status, 'WARNING')
-    #   description <- c(description, 'Species names in Species metadata are mispelled')
-    # } else {
-    #   step <- c(step, 'Species names spelling (species_md)')
-    #   status <- c(status, 'PASS')
-    #   description <- c(description, 'No mispelling in species names')
-    # }
 
     # 6.2 plant md
     if (any(!plant_md_spnames$Concordance)) {
@@ -166,40 +130,6 @@ qc_md_results_table <- function(md_cols, factor_values,
       description <- c(description, 'No mispelling in species names')
     }
 
-    # if (isTRUE(tryCatch(sapfluxnetQC1::qc_species_names(plant_md$pl_species),
-    #                     error = function(e) return(TRUE)))) {
-    #   step <- c(step, 'Species names spelling (plant_md)')
-    #   status <- c(status, 'WARNING')
-    #   description <- c(description, 'Species names in Plant metadata are mispelled')
-    # } else {
-    #   step <- c(step, 'Species names spelling (plant_md)')
-    #   status <- c(status, 'PASS')
-    #   description <- c(description, 'No mispelling in species names')
-    # }
-
-    # STEP 7
-    # Species verification
-    if (any(!sp_verification$Concordance)) {
-      step <- c(step, 'Species names presence in Plant and Species metadata')
-      status <- c(status, 'ERROR')
-      description <- c(description, 'Species in Plant metadata not match species in Species metadata')
-    } else {
-      step <- c(step, 'Species names presence in Plant and Species metadata')
-      status <- c(status, 'PASS')
-      description <- c(description, 'Species are the same in Plant and Species metadata')
-    }
-
-    # STEP 8
-    # Environmental variables presence
-    if (any(!env_var_presence$Concordance)) {
-      step <- c(step, 'Environmental variables presence')
-      status <- c(status, 'ERROR')
-      description <- c(description, 'Data and Metadata environmental variables do not agree')
-    } else {
-      step <- c(step, 'Environmental variables presence')
-      status <- c(status, 'PASS')
-      description <- c(description, 'Data and Metadata environmental variables agree')
-    }
 
     # STEP 9
     # Create the results data frame
@@ -258,39 +188,15 @@ qc_md_results_table <- function(md_cols, factor_values,
 #'
 #' @family Quality Checks Functions
 #'
-#' @param sapf_data_fixed
+#' @param psi_data_fixed
 #'
-#' @param env_data_fixed
-#'
-#' @param timestamp_errors_sapf
-#'
-#' @param timestamp_errors_env
-#'
-#' @param sapw_md
-#'
-#' @param timestamp_concordance
-#'
-#' @param sapf_gaps_info
-#'
-#' @param env_gaps_info
-#'
-#' @param sapf_timestamp_nas
-#'
-#' @param env_timestamp_nas
-#'
-#' @param swc_check
-#'
-#' @param transformations_table
+#' @param psi_timestamp_nas
 #'
 #' @export
 
 # START
 # Function declaration
-qc_data_results_table <- function(sapf_data_fixed, env_data_fixed, timestamp_errors_sapf,
-                                  timestamp_errors_env, sapw_md,
-                                  timestamp_concordance, sapf_gaps_info,
-                                  env_gaps_info, sapf_timestamp_nas, env_timestamp_nas,
-                                  swc_check, transformations_table,
+qc_data_results_table <- function(spsi_data_fixed, psi_timestamp_nas,
                                   parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -304,176 +210,26 @@ qc_data_results_table <- function(sapf_data_fixed, env_data_fixed, timestamp_err
 
     # STEP 2
     # Timestamps
-    # 2.1 correct format sapf
-    if (!qc_is_timestamp(sapf_data_fixed, FALSE, parent_logger = parent_logger)) {
-      step <- c(step, 'TIMESTAMP Format Sapflow data')
+    # 2.1 correct format psi
+    if (!qc_is_timestamp(psi_data_fixed, FALSE, parent_logger = parent_logger)) {
+      step <- c(step, 'TIMESTAMP Format psi data')
       status <- c(status, 'ERROR')
       description <- c(description, 'TIMESTAMP format is incorrect and unfixable')
     } else {
-      step <- c(step, 'TIMESTAMP Format Sapflow data')
-      status <- c(status, 'PASS')
-      description <- c(description, 'TIMESTAMP format is correct or has been fixed')
-    }
-
-    # 2.2 correct format env
-    if (!qc_is_timestamp(env_data_fixed, FALSE, parent_logger = parent_logger)) {
-      step <- c(step, 'TIMESTAMP Format Environmental data')
-      status <- c(status, 'ERROR')
-      description <- c(description, 'TIMESTAMP format is incorrect and unfixable')
-    } else {
-      step <- c(step, 'TIMESTAMP Format Environmental data')
+      step <- c(step, 'TIMESTAMP Format psi data')
       status <- c(status, 'PASS')
       description <- c(description, 'TIMESTAMP format is correct or has been fixed')
     }
 
     # 2.3 TIMESTAMP NAs sapf
-    if (is.logical(sapf_timestamp_nas)) {
-      step <- c(step, 'Sapflow TIMESTAMP NAs presence')
+    if (is.logical(psi_timestamp_nas)) {
+      step <- c(step, 'psi TIMESTAMP NAs presence')
       status <- c(status, 'PASS')
       description <- c(description, 'No NAs detected in TIMESTAMP')
     } else {
-      step <- c(step, 'Sapflow TIMESTAMP NAs presence')
+      step <- c(step, 'psi TIMESTAMP NAs presence')
       status <- c(status, 'ERROR')
       description <- c(description, 'TIMESTAMP has NAs')
-    }
-
-    # 2.3b TIMESTAMP NAs env
-    if (is.logical(env_timestamp_nas)) {
-      step <- c(step, 'Environmental TIMESTAMP NAs presence')
-      status <- c(status, 'PASS')
-      description <- c(description, 'No NAs detected in TIMESTAMP')
-    } else {
-      step <- c(step, 'Environmental TIMESTAMP NAs presence')
-      status <- c(status, 'ERROR')
-      description <- c(description, 'TIMESTAMP has NAs')
-    }
-
-    # 2.4 TIMESTAMP errors sapf
-    if (length(timestamp_errors_sapf[[1]]) > 0) {
-      step <- c(step, 'TIMESTAMP continuity errors Sapflow data')
-      status <- c(status, 'WARNING')
-      description <- c(description, 'TIMESTAMP continuity presents errors')
-    } else {
-      step <- c(step, 'TIMESTAMP continuity errors Sapflow data')
-      status <- c(status, 'PASS')
-      description <- c(description, 'TIMESTAMP continuity is fine')
-    }
-
-    # 2.5 TIMESTAMP errors env
-    if (length(timestamp_errors_env[[1]]) > 0) {
-      step <- c(step, 'TIMESTAMP continuity errors Environmental data')
-      status <- c(status, 'WARNING')
-      description <- c(description, 'TIMESTAMP continuity presents errors')
-    } else {
-      step <- c(step, 'TIMESTAMP continuity errors Environmental data')
-      status <- c(status, 'PASS')
-      description <- c(description, 'TIMESTAMP continuity is fine')
-    }
-
-    # 2.6 TIMESTAMP concordance
-    if (all(timestamp_concordance$t0 %in% timestamp_concordance$t0[[1]]) &&
-        all(timestamp_concordance$tf %in% timestamp_concordance$tf[[1]])) {
-      step <- c(step, 'TIMESTAMP concordance between sapflow and environmental variables')
-      status <- c(status, 'PASS')
-      description <- c(description, 'Concordance OK')
-    } else {
-      step <- c(step, 'TIMESTAMP concordance between sapflow and environmental variables')
-      status <- c(status, 'WARNING')
-      description <- c(description, 'Concordance failed for one or more variables')
-    }
-
-    # 2.7 Gaps info, sapflow
-    if (all(is.na(sapf_gaps_info$gap_coverage)) | length(sapf_gaps_info$gap_coverage) == 0) {
-      step <- c(step, 'Sapflow gaps coverage')
-      status <- c(status, 'PASS')
-      description <- c(description, 'No gaps')
-    } else {
-      if (any(sapf_gaps_info$gap_coverage > 0.25)) {
-        step <- c(step, 'Sapflow gaps coverage')
-        status <- c(status, 'ERROR')
-        description <- c(description, 'Presence of gaps covering more than 25% of the TIMESTAMP')
-      } else {
-        if (any(sapf_gaps_info$gap_coverage > 0.05)) {
-          step <- c(step, 'Sapflow gaps coverage')
-          status <- c(status, 'WARNING')
-          description <- c(description, 'Presence of gaps covering 5-25% of the TIMESTAMP')
-        } else {
-          step <- c(step, 'Sapflow gaps coverage')
-          status <- c(status, 'INFO')
-          description <- c(description, 'Presence of gaps covering less than 5% of the TIMESTAMP')
-        }
-      }
-    }
-
-    # 2.8 Gaps info, environmental
-    if (all(is.na(env_gaps_info$gap_coverage)) | length(env_gaps_info$gap_coverage) == 0) {
-      step <- c(step, 'Environmental gaps coverage')
-      status <- c(status, 'PASS')
-      description <- c(description, 'No gaps')
-    } else {
-      if (any(env_gaps_info$gap_coverage > 0.25)) {
-        step <- c(step, 'Environmental gaps coverage')
-        status <- c(status, 'ERROR')
-        description <- c(description, 'Presence of gaps covering more than 25% of the TIMESTAMP')
-      } else {
-        if (any(env_gaps_info$gap_coverage > 0.05)) {
-          step <- c(step, 'Environmental gaps coverage')
-          status <- c(status, 'WARNING')
-          description <- c(description, 'Presence of gaps covering 5-25% of the TIMESTAMP')
-        } else {
-          step <- c(step, 'Environmental gaps coverage')
-          status <- c(status, 'INFO')
-          description <- c(description, 'Presence of gaps covering less than 5% of the TIMESTAMP')
-        }
-      }
-    }
-
-    # 2.9 swc_check
-    if (swc_check[1] == 'PASS') {
-      step <- c(step, "SWC shallow values check")
-      status <- c(status, 'PASS')
-      description <- c(description, 'Values do not need transformation')
-    } else {
-      if (swc_check[1] == 'WARNING') {
-        step <- c(step, "SWC shallow values check")
-        status <- c(status, 'WARNING')
-        description <- c(description, 'Values in %, transformed to 0-1')
-      } else {
-        if (swc_check[1] == 'ERROR') {
-          step <- c(step, "SWC shallow values check")
-          status <- c(status, 'ERROR')
-          description <- c(description, 'Strange SWC values, check manually')
-        }
-      }
-    }
-
-    if (swc_check[2] == 'PASS') {
-      step <- c(step, "SWC deep values check")
-      status <- c(status, 'PASS')
-      description <- c(description, 'Values do not need transformation')
-    } else {
-      if (swc_check[2] == 'WARNING') {
-        step <- c(step, "SWC deep values check")
-        status <- c(status, 'WARNING')
-        description <- c(description, 'Values in %, transformed to 0-1')
-      } else {
-        if (swc_check[2] == 'ERROR') {
-          step <- c(step, "SWC deep values check")
-          status <- c(status, 'ERROR')
-          description <- c(description, 'Strange SWC values, check manually')
-        }
-      }
-    }
-
-    # 2.10 transformation table
-    if (any(!transformations_table$Presence)) {
-      step <- c(step, 'Data conversion and transformations')
-      status <- c(status, 'WARNING')
-      description <- c(description, 'One or more conversions/transformations are not available')
-    } else {
-      step <- c(step, 'Data conversion and transformations')
-      status <- c(status, 'PASS')
-      description <- c(description, 'All conversions/transformations are available')
     }
 
     # FINAL STEP

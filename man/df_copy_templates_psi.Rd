@@ -18,7 +18,7 @@ the template for shiny web app to parent directory, and running scripts to paren
 directory.
 }
 \details{
-If it is the first time to set the SAPFLUXNET project, execute this function
+If it is the first time to set the PSI project, execute this function
 after the function \code{\link{df_folder_structure}} with the argument
 \code{first} set to \code{TRUE}
 }

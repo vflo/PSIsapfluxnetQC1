@@ -7,6 +7,8 @@
 df_accepted_to_lvl1_psi(
   si_code,
   psi_data = NULL,
+  site_md = NULL,
+  plant_md = NULL,
   question_md = NULL,
   parent_logger = "test"
 )
@@ -15,6 +17,10 @@ df_accepted_to_lvl1_psi(
 \item{si_code}{Character with the site code}
 
 \item{psi_data}{Data frame with the fixed psi data}
+
+\item{site_md}{Data frame with the fixed site metadata}
+
+\item{plant_md}{Data frame with the fixed plant metadata}
 
 \item{question_md}{Data frame with the fixed questionnaire data}
 }

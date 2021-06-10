@@ -42,6 +42,8 @@ log_psi_setup('Logs/psi.log',
 library(psiQC)
 library(dplyr)
 library(DT)
+
+
 # Data load
 ## site_md
 site_md <- dl_metadata(params$md_file, 'Data', data_type = "site_md",
@@ -62,6 +64,11 @@ questionnaire_md <- dl_metadata(params$md_file, 'Questionnaire',
 
 ################################################################################
 
+#Simplify questions of the questionnaire
+questionnaire_simplified <- qc_simplify_questions(questionnaire_md)
+
+################################################################################
+
 # md qc
 
 ## metadata columns
@@ -69,7 +76,7 @@ md_cols <- bind_rows(
   qc_md_cols(site_md, 'site_md', parent_logger = logger_name),
   qc_md_cols(plant_md, 'plant_md', parent_logger = logger_name),
   qc_md_cols(psi_data, 'psi_data', parent_logger = logger_name),
-  qc_md_cols(questionnaire_md, 'Questionnaire', parent_logger = logger_name)
+  qc_md_cols(questionnaire_simplified, 'Questionnaire', parent_logger = logger_name)
 )
 
 ## factor variables values
@@ -101,19 +108,16 @@ pl_treatments_check <- qc_pl_treatments(plant_md, parent_logger = logger_name)
 
 # data qc
 ## timestamp
-### psi
 psi_data_fixed <- qc_as_timestamp(psi_data, site_md, logger_name)
 
 
 ## timestamp NAs
-### psi
 psi_timestamp_nas <- qc_timestamp_nas(psi_data_fixed, logger_name)
 
+## extraterrestrial ratiation and timestamp
+psi_data_fixed <- qc_ext_radiation(psi_data_fixed, site_md,TRUE)
 
-################################################################################
 
-#Simplify questions of the questionnaire
-questionnaire_simplified <- qc_simplify_questions(questionnaire_md)
 
 
 ################################################################################
@@ -134,11 +138,7 @@ save(list = c(params$code),
                       paste(params$code, '.RData', sep = '')),
      envir = environment())
 
-################################################################################
-# trasnformations availabilty
-transformations_table <- qc_transformation_vars(
-  sfn_data_object, parent_logger = logger_name
-)
+
 ```
 
 
@@ -146,15 +146,13 @@ transformations_table <- qc_transformation_vars(
 ################################################################################
 # results md_qc table
 qc_md_results_table(md_cols, factor_values, email_check, site_md_coordfix,
-                    species_md, plant_md, species_md_spnames, plant_md_spnames,
-                    sp_verification, env_var_presence,
-                    parent_logger = logger_name)
+                    plant_md_spnames, parent_logger = logger_name)
 ################################################################################
 ```
 
 > **NOTE: Metadata Quality Checks are under continous development. Checks made and
 results presentation can change in the future to adapt to new insights in
-data digesting processes**
+data curation processes**
   ***
 
   ## Metadata columns
@@ -165,7 +163,8 @@ data digesting processes**
 md_cols %>%
   mutate(PresenceOK = as.character(PresenceOK),
          ClassOK = as.character(ClassOK),
-         IsNA = as.character(IsNA)) %>%
+         allNA = as.character(allNA),
+         anyNA = as.character(anyNA)) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'Metadata variables info',
@@ -177,7 +176,10 @@ md_cols %>%
                                                   targets = 0)),
                            scroller = TRUE,
                            scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatStyle('IsNA',
+  formatStyle('allNA',
+              backgroundColor = styleEqual(c('TRUE', 'FALSE'),
+                                           c('#89c4f4', 'transparent'))) %>%
+  formatStyle('anyNA',
               backgroundColor = styleEqual(c('TRUE', 'FALSE'),
                                            c('#89c4f4', 'transparent'))) %>%
   formatStyle('PresenceOK',
@@ -196,9 +198,7 @@ md_cols %>%
 
 ```{r factor_values, echo=FALSE}
 factor_values %>%
-  mutate(Check_result = as.character(Check_result),
-         NA_presence = as.character(NA_presence),
-         foo_var = paste(Check_result, NA_presence, sep = '')) %>%
+  mutate_all(as.character) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'Metadata factor variables info',
@@ -211,10 +211,28 @@ factor_values %>%
                                                   targets = 0)),
                            scroller = TRUE,
                            scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatStyle('NA_presence',
+  formatStyle('site_country',
               backgroundColor = styleEqual(c('FALSE', 'TRUE'),
-                                           c('transparent', '#89c4f4'))) %>%
-  formatStyle('Check_result',
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('pl_status',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('measured_sfn',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('time_psi',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('canopy_position',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('method',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('organ',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#d91e18', 'transparent'))) %>%
+  formatStyle('aggregation_level',
               backgroundColor = styleEqual(c('FALSE', 'TRUE'),
                                            c('#d91e18', 'transparent')))
 ```
@@ -253,7 +271,7 @@ email_check %>%
 
 ```{r coordinates, echo=FALSE}
 site_md_coordfix %>%
-  select(si_name, si_lat, si_long, is_inside_country) %>%
+  select(si_name, lat, lon, is_inside_country) %>%
   mutate(is_inside_country = as.character(is_inside_country)) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
@@ -303,29 +321,6 @@ species_md_spnames %>%
                                            c('#d91e18', 'transparent')))
 ```
 
-
-```{r species, echo=FALSE}
-sp_verification %>%
-  mutate(Concordance = as.character(Concordance)) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Species names info',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  targets = 1:3),
-                                             list(className = 'dt-right',
-                                                  targets = 0),
-                                             list(width = '50px',
-                                                  targets = 1:2),
-                                             list(width = '100px',
-                                                  targets = 3)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatStyle('Concordance',
-              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
-                                           c('#d91e18', 'transparent')))
-```
-
 ***
 
   ## Plant treatments check
@@ -346,33 +341,6 @@ datatable(pl_treatments_check, class = 'display compact', rownames = FALSE, filt
                          scrollY = 450, scrollCollapse = TRUE))
 ```
 
-***
-
-  ## Environmental variables
-
-  Information about environmental variables and their presence in metadata and data
-
-```{r env_vars, echo=FALSE}
-env_var_presence %>%
-  mutate(Concordance = as.character(Concordance),
-         Md_presence = as.character(Md_presence),
-         Data_presence = as.character(Data_presence)) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Environmental variables info',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '100px',
-                                                  targets = 1:3),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatStyle('Concordance',
-              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
-                                           c('#d91e18', 'transparent')))
-```
-
 
 ## Metadata Remarks
 
@@ -380,48 +348,19 @@ List of remarks provided by the contributor/s
 
 ***
 
-  **Site level remarks**
+  **psi measure remarks**
 
-  `r if (is.null(site_md_coordfix$si_remarks)) {'*No remarks*'} else {site_md_coordfix$si_remarks}`
+  `r if (is.null(psi_data_fixed$remarks)) {'*No remarks*'} else {psi_data_fixed$remarks}`
 
-***
-
-  **Stand level remarks**
-
-  `r if (is.null(stand_md$st_remarks)) {'*No remarks*'} else {stand_md$st_remarks}`
-
-***
-
-  **Species level remarks**
-
-  `r if (is.null(species_md$sp_remarks)) {'*No remarks*'} else {species_md$sp_remarks}`
-
-***
-
-  **Plant level remarks**
-
-  `r if (is.null(plant_md$pl_remarks)) {'*No remarks*'} else {plant_md$pl_remarks}`
-
-***
-
-  **Environmental remarks**
-
-  `r if (is.null(env_md$env_remarks)) {'*No remarks*'} else {env_md$env_remarks}`
-
-***
 
   # Data QC
 
   ## Quick Summary
 
-  ```{r qc_data_table, echo=FALSE, message=FALSE, warning=FALSE}
+```{r qc_data_table, echo=FALSE, message=FALSE, warning=FALSE}
 ################################################################################
 # table
-qc_data_results_table(sapf_data_fixed, env_data_fixed_swc, timestamp_errors_sapf,
-                      timestamp_errors_env, sapw_md,
-                      timestamp_concordance, sapf_gaps_info,
-                      env_gaps_info, sapf_timestamp_nas, env_timestamp_nas,
-                      swc_check, transformations_table,
+qc_data_results_table(psi_data_fixed, psi_timestamp_nas,
                       parent_logger = logger_name)
 ################################################################################
 ```
@@ -436,20 +375,15 @@ data digesting processes**
   Information about TIMESTAMPS
 
 ```{r sapf_timestamp_format}
-timestamp_sapf <- sapf_data_fixed %>%
-  select(TIMESTAMP) %>%
-  summarise(Sample = as.character(sample(TIMESTAMP, 1)),
-            Range = paste(range(TIMESTAMP), collapse = ' - ')) %>%
-  mutate(Data = 'Sapflow') %>%
-  select(Data, Sample, Range)
-timestamp_env <- env_data_fixed_swc %>%
-  select(TIMESTAMP) %>%
-  summarise(Sample = as.character(sample(TIMESTAMP, 1)),
-            Range = paste(range(TIMESTAMP), collapse = ' - ')) %>%
-  mutate(Data = 'Environmental') %>%
-  select(Data, Sample, Range)
-timestamp_sapf %>%
-  bind_rows(timestamp_env) %>%
+timestamp_psi <- psi_data_fixed %>%
+  select(timestamp,pl_code) %>%
+  group_by(pl_code) %>% 
+  summarise(Sample = as.character(sample(timestamp, 1)),
+            Range = paste(range(timestamp), collapse = ' - ')) %>%
+  mutate(Data = 'psi') %>%
+  select(Data, pl_code, Sample, Range)
+
+timestamp_psi %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'TIMESTAMP format info',
@@ -467,10 +401,10 @@ timestamp_sapf %>%
 ```
 
 ```{r sapf_timestamp_nas}
-if (is.logical(sapf_timestamp_nas)) {
+if (is.logical(psi_timestamp_nas)) {
   invisible(TRUE)
 } else {
-  sapf_timestamp_nas %>%
+  psi_timestamp_nas %>%
     datatable(class = 'display compact', rownames = FALSE, filter = 'none',
               extensions = c('Scroller'),
               caption = 'Sapflow TIMESTAMP NAs info',
@@ -485,190 +419,18 @@ if (is.logical(sapf_timestamp_nas)) {
 }
 ```
 
-```{r env_timestamp_nas}
-if (is.logical(env_timestamp_nas)) {
-  invisible(TRUE)
-} else {
-  env_timestamp_nas %>%
-    datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-              extensions = c('Scroller'),
-              caption = 'Environmental TIMESTAMP NAs info',
-              options = list(dom = 'ti',
-                             columnDefs = list(list(className = 'dt-center',
-                                                    width = '25%',
-                                                    targets = 1),
-                                               list(className = 'dt-right',
-                                                    targets = 0)),
-                             scroller = TRUE,
-                             scrollY = 450, scrollCollapse = TRUE))
-}
-```
-
-```{r timestamp_cont_errors_sapf}
-timestamp_errors_sapf %>%
-  mutate(Int_length_minutes = Int_length/60) %>%
-  select(Interval, Int_length_minutes) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Sapflow TIMESTAMP continuity info',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '25%',
-                                                  targets = 1),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE))
-```
-
-```{r timestamp_cont_errors_env}
-timestamp_errors_env %>%
-  mutate(Int_length_minutes = Int_length/60) %>%
-  select(Interval, Int_length_minutes) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Environmental TIMESTAMP continuity info',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '25%',
-                                                  targets = 1),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE))
-```
-
-TIMESTAMP concordance between sapflow and environmental data
-
-```{r timestamp_concordance, fig.width=12}
-# timestamp_concordance %>%
-#   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-#             caption = 'Table 4. TIMESTAMP concordance info',
-#             options = list(dom = 'ti',
-#                            # columnDefs = list(list(className = 'dt-center',
-#                            #                        width = '40%',
-#                            #                        targets = 1),
-#                            #                   list(className = 'dt-right',
-#                            #                        targets = 0)),
-#                            scroller = TRUE,
-#                            scrollY = 450, scrollCollapse = TRUE))
-# timestamp_concordance_plot
-gap_lines_plot
-```
-
-***
-
-  ## Time series gaps
-
-  ### Sap flow gaps info
-
-  ```{r gaps_info}
-sapf_gaps_info %>%
-  select(-timestamp_start, -timestamp_end) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Sap flow gaps info. gap_interval is expressed in minutes',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '20%',
-                                                  targets = c(1:2)),
-                                             list(className = 'dt-center',
-                                                  width = '15%',
-                                                  targets = c(3:4)),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatPercentage('gap_coverage', 2) %>%
-  formatStyle('gap_coverage',
-              backgroundColor = styleInterval(c(.10, .25),
-                                              c('#89c4f4', '#f39c12',
-                                                '#d91e18'))) %>%
-  formatRound('gap_interval', 3)
-```
-
-```{r gaps_info_cal, fig.width=12, fig.height=6, message=FALSE}
-suppressWarnings(cowplot::ggdraw() +
-                   cowplot::draw_plot(sapf_gaps_cal, 0, .5, 1, .5) +
-                   cowplot::draw_plot(sapf_gaps_plot, 0, 0, .5, .5) +
-                   cowplot::draw_plot(sapf_gaps_plot_int, .5, 0, .5, .5) +
-                   cowplot::draw_plot_label(c("A", "B", "C"), c(0, 0, 0.5), c(1, 0.5, 0.5), size = 12))
-```
-
-### Environmental gaps info
-
-```{r gaps_info_env}
-env_gaps_info %>%
-  select(-timestamp_start, -timestamp_end) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Environmental gaps info. gap_interval is expressed in minutes',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '20%',
-                                                  targets = c(1:2)),
-                                             list(className = 'dt-center',
-                                                  width = '15%',
-                                                  targets = c(3:4)),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE,
-                           scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatPercentage('gap_coverage', 2) %>%
-  formatStyle('gap_coverage',
-              backgroundColor = styleInterval(c(.10, .25),
-                                              c('#89c4f4', '#f39c12',
-                                                '#d91e18'))) %>%
-  formatRound('gap_interval', 3)
-```
-
-```{r env_gaps_info_cal, fig.width=12, fig.height=6, message=FALSE}
-suppressWarnings(cowplot::ggdraw() +
-                   cowplot::draw_plot(env_gaps_cal, 0, .5, 1, .5) +
-                   cowplot::draw_plot(env_gaps_plot, 0, 0, .5, .5) +
-                   cowplot::draw_plot(env_gaps_plot_int, .5, 0, .5, .5) +
-                   cowplot::draw_plot_label(c("A", "B", "C"), c(0, 0, 0.5), c(1, 0.5, 0.5), size = 12))
-```
-
-***
-
-  ## Unit Conversion, standarization and transformation
-
-  The following table shows the available transformations
-
-```{r unit conversion}
-transformations_table %>%
-  mutate(Presence = as.character(Presence)) %>%
-  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
-            extensions = c('Scroller'),
-            caption = 'Unit conversion, standarization and transformation',
-            options = list(dom = 'ti',
-                           columnDefs = list(list(className = 'dt-center',
-                                                  width = '10%',
-                                                  targets = 3),
-                                             list(className = 'dt-center',
-                                                  width = '15%',
-                                                  targets = c(1:2)),
-                                             list(className = 'dt-right',
-                                                  targets = 0)),
-                           scroller = TRUE, scrollY = 450,
-                           scrollCollapse = TRUE)) %>%
-  formatStyle('Presence',
-              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
-                                           c('#d91e18', 'transparent')))
-```
-
 ```{r}
 # 2.2.5 log setup
 log_sapfluxnet_setup('Logs/sapfluxnet.log',
                      logger = 'DataFlow',
                      level = 'WARNING')
 # 2.2.6 saving the fixed datasets and the objects created in the level1 folder
-df_accepted_to_lvl1(
-  params$code, sapf_data_fixed, env_data_fixed_swc,
-  site_md_coordfix, stand_md, plant_md, species_md,
-  env_md, parent_logger = 'DataFlow'
+df_accepted_to_lvl1_psi(
+  params$code, psi_data_fixed,
+  site_md_coordfix, plant_md, questionnaire_simplified,
+  parent_logger = 'DataFlow'
 )
+
 # saving Rdata file with all the objects (just in case)
 save(list = ls(all.names = TRUE),
      file = file.path('Data', params$code, 'Lvl_1',

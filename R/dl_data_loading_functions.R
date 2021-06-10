@@ -405,7 +405,7 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
         # rename psi columns
         dplyr::rename(psi = 25, psi_SE = 26, psi_N = 27) %>%
         # column selection
-        dplyr::select('timestamp', 'time_psi', 'canopy_position', 'method',
+        dplyr::select('timestamp','pl_code', 'time_psi', 'canopy_position', 'method',
                       'organ', 'psi','psi_SE', 'psi_N', 'aggregation_level',
                       'remarks')
 

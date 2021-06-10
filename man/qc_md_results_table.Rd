@@ -9,12 +9,7 @@ qc_md_results_table(
   factor_values,
   email_check,
   site_md_coordfix,
-  species_md,
-  plant_md,
-  species_md_spnames,
   plant_md_spnames,
-  sp_verification,
-  env_var_presence,
   parent_logger = "test"
 )
 }
@@ -27,17 +22,7 @@ qc_md_results_table(
 
 \item{site_md_coordfix}{}
 
-\item{species_md}{}
-
-\item{plant_md}{}
-
-\item{species_md_spnames}{}
-
 \item{plant_md_spnames}{}
-
-\item{sp_verification}{}
-
-\item{env_var_presence}{}
 }
 \value{
 A data frame with the highlights of the QC

@@ -16,8 +16,7 @@ df_write_psiData(
 
 \item{level}{Level to write to as a character string}
 
-\item{units}{Only used if \code{level = "unit_trans"}. Indicates which sapflow
-units (plant, sapwood or leaf) must be written.}
+\item{units}{Only used if \code{level = "unit_trans"}.}
 }
 \value{
 Nothing, the desired site data is saved.

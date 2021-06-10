@@ -569,6 +569,10 @@ df_get_data_folders <- function(parent_logger = 'test') {
 #'
 #' @param psi_data Data frame with the fixed psi data
 #'
+#' @param site_md Data frame with the fixed site metadata
+#'
+#' @param plant_md Data frame with the fixed plant metadata
+#'
 #' @param question_md Data frame with the fixed questionnaire data
 #'
 #' @return Nothing
@@ -577,21 +581,23 @@ df_get_data_folders <- function(parent_logger = 'test') {
 
 # START
 # Function declaration
-df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL,
-                                parent_logger = 'test') {
+df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, site_md = NULL,
+                                    plant_md = NULL, question_md = NULL,
+                                    parent_logger = 'test') {
 
   # Using calling handlers to manage errors
   withCallingHandlers({
 
     # STEP 0
     # Argument checks
-    # if any of the data is NULL (does not exists), stop and report, except
-    # for the different sapflow unit conversions, as they can be missing
-    if(any(is.null(psi_data), is.null(question_md))) {
+    # if any of the data is NULL (does not exists), stop and report
+    if(any(is.null(psi_data), is.null(site_md), is.null(plant_md),
+           is.null(question_md))) {
       stop('One or more datasets were not provided')
     }
     # are datasets dataframes?
-    if(any(!is.data.frame(psi_data), !is.data.frame(question_md))) {
+    if(any(!is.data.frame(psi_data), !is.data.frame(site_md),
+           !is.data.frame(plant_md), !is.data.frame(question_md))) {
       stop('One or more datasets provided are not data frames')
     }
     # is si_code a character string?
@@ -603,6 +609,10 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'psi_data.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
+                            paste(si_code, 'site_md.csv', sep = '_'))),
+      file.exists(file.path('Data', si_code, 'Lvl_1',
+                            paste(si_code, 'plant_md.csv', sep = '_'))),
+      file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'question_md.csv', sep = '_')))
     )) {
       stop('csv files already exist in Lvl_1 folder. Please revise manually')
@@ -610,9 +620,21 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL
 
     # STEP 1
     # Writing csv files
-    write.csv(sapf_data,
+    write.csv(psi_data,
               file.path('Data', si_code, 'Lvl_1',
                         paste(si_code, 'psi_data.csv', sep = '_')),
+              row.names = FALSE)
+    write.csv(site_md,
+              file.path('Data', si_code, 'Lvl_1',
+                        paste(si_code, 'site_md.csv', sep = '_')),
+              row.names = FALSE)
+    write.csv(plant_md,
+              file.path('Data', si_code, 'Lvl_1',
+                        paste(si_code, 'plant_md.csv', sep = '_')),
+              row.names = FALSE)
+    write.csv(species_md,
+              file.path('Data', si_code, 'Lvl_1',
+                        paste(si_code, 'question_md.csv', sep = '_')),
               row.names = FALSE)
 
 
@@ -622,6 +644,10 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL
     if (all(
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'psi_data.csv', sep = '_'))),
+      file.exists(file.path('Data', si_code, 'Lvl_1',
+                            paste(si_code, 'site_md.csv', sep = '_'))),
+      file.exists(file.path('Data', si_code, 'Lvl_1',
+                            paste(si_code, 'plant_md.csv', sep = '_'))),
       file.exists(file.path('Data', si_code, 'Lvl_1',
                             paste(si_code, 'question_md.csv', sep = '_')))
     )) {
@@ -656,7 +682,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, question_md = NULL
 #' the template for shiny web app to parent directory, and running scripts to parent
 #' directory.
 #'
-#' If it is the first time to set the SAPFLUXNET project, execute this function
+#' If it is the first time to set the PSI project, execute this function
 #' after the function \code{\link{df_folder_structure}} with the argument
 #' \code{first} set to \code{TRUE}
 #'
@@ -1198,8 +1224,7 @@ df_lvl2_folder_structure <- function(si_code, parent_logger = 'test') {
 #'
 #' @param level Level to read from as a character string
 #'
-#' @param units Only used if \code{level = "unit_trans"}. Indicates which sapflow
-#'   units (plant, sapwood or leaf) must be read.
+#' @param units Only used if \code{level = "unit_trans"}.
 #'
 #' @return A psiData object.
 #'
@@ -1284,8 +1309,7 @@ df_read_psiData <- function(
 #'
 #' @param level Level to write to as a character string
 #'
-#' @param units Only used if \code{level = "unit_trans"}. Indicates which sapflow
-#'   units (plant, sapwood or leaf) must be written.
+#' @param units Only used if \code{level = "unit_trans"}.
 #'
 #' @return Nothing, the desired site data is saved.
 #'

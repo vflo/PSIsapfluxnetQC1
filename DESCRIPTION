@@ -4,8 +4,8 @@ Title: Quality check for PSI project
 Version: 0.1.0
 Authors@R: c(person("Victor", "Flo", email = "v.flo@creaf.uab.cat", role = c("aut", "cre")),
           person("Victor", "Granda", email = "v.granda@creaf.uab.cat", role = c("aut")))
-Description: Utilities and functions to perform quality check in SAPFLUXNET PSI database
-License: 
+Description: Utilities and functions to perform quality check in PSI database
+License: MIT
 Encoding: UTF-8
 LazyDaa: true
 Imports:
@@ -34,7 +34,10 @@ Imports:
     GSODR,
     soiltexture,
     solaR,
-    zoo
+    zoo,
+    lutz,
+    methods,
+    shiny
 Suggests:
     knitr,
     testthat,
