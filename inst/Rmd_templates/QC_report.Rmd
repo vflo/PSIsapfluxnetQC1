@@ -410,7 +410,7 @@ if (is.logical(psi_timestamp_nas)) {
   psi_timestamp_nas %>%
     datatable(class = 'display compact', rownames = FALSE, filter = 'none',
               extensions = c('Scroller'),
-              caption = 'Sapflow TIMESTAMP NAs info',
+              caption = 'Psi TIMESTAMP NAs info',
               options = list(dom = 'ti',
                              columnDefs = list(list(className = 'dt-center',
                                                     width = '25%',
@@ -430,7 +430,8 @@ log_psi_setup('Logs/psi.log',
 # 2.2.6 saving the fixed datasets and the objects created in the level1 folder
 df_accepted_to_lvl1_psi(
   params$code, psi_data_fixed,
-  site_md_coordfix, plant_md, questionnaire_simplified,
+  site_md_coordfix, plant_md, 
+  questionnaire_simplified,
   parent_logger = 'DataFlow'
 )
 

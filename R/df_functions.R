@@ -663,15 +663,15 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, site_md = NULL,
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'df_accepted_to_lvl1',
+                                                        'df_accepted_to_lvl1_psi',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'df_accepted_to_lvl1',
+                                                       'df_accepted_to_lvl1_psi',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'df_accepted_to_lvl1',
+                                                        'df_accepted_to_lvl1_psi',
                                                         sep = '.'))})
 }
 
