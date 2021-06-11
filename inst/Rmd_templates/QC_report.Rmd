@@ -270,7 +270,7 @@ email_check %>%
 
 ```{r coordinates, echo=FALSE}
 site_md_coordfix %>%
-  select(si_name, lat, lon, is_inside_country) %>%
+  select(site_name, lat, lon, is_inside_country) %>%
   mutate(is_inside_country = as.character(is_inside_country)) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
@@ -295,8 +295,7 @@ site_md_coordfix %>%
   Information about species names
 
 ```{r species_metadata_names, echo=FALSE}
-species_md_spnames %>%
-  bind_rows(plant_md_spnames) %>%
+plant_md_spnames %>%
   mutate(Concordance = as.character(Concordance),
          IsNA = as.character(IsNA)) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
