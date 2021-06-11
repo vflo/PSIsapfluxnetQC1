@@ -80,6 +80,23 @@ qc_md_results_table <- function(md_cols, factor_values,
       }
     }
 
+    # 2.4 Unique values
+    if (any(is.na(md_cols$UniqueValue))) {
+      step <- c(step, 'Metadata variables unique value')
+      status <- c(status, 'PASS')
+      description <- c(description, 'All metadata variables have a unique value')
+    } else {
+      if (any(md_cols$UniqueValue)) {
+        step <- c(step, 'Metadata variables unique value')
+        status <- c(status, 'INFO')
+        description <- c(description, 'Some variables have no value')
+      } else {
+        step <- c(step, 'Metadata variables unique value')
+        status <- c(status, 'WARNING')
+        description <- c(description, 'There is some metadata variables with more than one unique value')
+      }
+    }
+
     # STEP 3
     # Metadata factor values
     # 3.1 Wrong value

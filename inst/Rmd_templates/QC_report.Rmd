@@ -186,6 +186,9 @@ md_cols %>%
                                            c('transparent', '#d91e18'))) %>%
   formatStyle('ClassOK',
               backgroundColor = styleEqual(c('FALSE', 'TRUE'),
+                                           c('#89c4f4', 'transparent')))%>%
+  formatStyle('UniqueValue',
+              backgroundColor = styleEqual(c('FALSE', 'TRUE'),
                                            c('#89c4f4', 'transparent')))
 ```
 
