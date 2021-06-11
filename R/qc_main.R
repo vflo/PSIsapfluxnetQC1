@@ -238,7 +238,7 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
       description <- c(description, 'TIMESTAMP format is correct or has been fixed')
     }
 
-    # 2.3 TIMESTAMP NAs sapf
+    # 2.2 TIMESTAMP NAs psi
     if (is.logical(psi_timestamp_nas)) {
       step <- c(step, 'psi TIMESTAMP NAs presence')
       status <- c(status, 'PASS')
@@ -247,6 +247,24 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
       step <- c(step, 'psi TIMESTAMP NAs presence')
       status <- c(status, 'ERROR')
       description <- c(description, 'TIMESTAMP has NAs')
+    }
+
+    # 2.3 psi out of range
+    is_out_range <- any(psi_data_fixed$psi <= (-10))
+    is_positive <- any(psi_data_fixed$psi > 0)
+
+    if (all(!is_out_range, !is_positive)) {
+      step <- c(step, 'psi values within range')
+      status <- c(status, 'PASS')
+      description <- c(description, 'No positive or extremely low psi values')
+    } if (is_out_range){
+      step <- c(step, 'psi values extremely low')
+      status <- c(status, 'WARNING')
+      description <- c(description, 'extremely low psi values')
+    } if (is_positive){
+      step <- c(step, 'psi positive values')
+      status <- c(status, 'ERROR')
+      description <- c(description, 'There is positive psi values')
     }
 
     # FINAL STEP
