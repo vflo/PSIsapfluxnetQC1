@@ -441,16 +441,17 @@ save(list = ls(all.names = TRUE),
      envir = environment())
 ```
 
+## PSI checks
 
-```{r outrange, echo=FALSE}
-psi_data_fixed %>%
+```{r outrange}
+psi_range <- psi_data_fixed %>%
   select(timestamp, pl_name, psi) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'out of range info',
             options = list(dom = 'ti',
                            columnDefs = list(list(className = 'dt-center',
-                                                  targets = 1:3,
+                                                  targets = 1:2,
                                                   width = '100px'),
                                              list(className = 'dt-right',
                                                   targets = 0)),
