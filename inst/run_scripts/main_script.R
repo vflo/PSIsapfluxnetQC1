@@ -43,9 +43,9 @@ data_folders <- df_get_data_folders(parent_logger = 'QC')
 ## Loop for every site
 lapply(data_folders, function(folder) {
   code <- stringr::str_sub(folder, 6, -1)
-  # log_psi_setup('Logs/psi.log',
-  #                      logger = paste('QC', code, sep = '.'),
-  #                      level = "DEBUG")
+  log_psi_setup('Logs/psi.log',
+                       logger = paste('QC', code, sep = '.'),
+                       level = "DEBUG")
   qc_start_process_psi(file.path(folder, 'Accepted'), rdata = FALSE,
                    parent_logger = paste('QC', code, sep = '.'))
 })

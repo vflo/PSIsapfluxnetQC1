@@ -445,7 +445,7 @@ save(list = ls(all.names = TRUE),
 
 ```{r outrange}
 psi_range <- psi_data_fixed %>%
-  select(timestamp, pl_name, psi) %>%
+  select(timestamp, pl_code, psi) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'out of range info',
