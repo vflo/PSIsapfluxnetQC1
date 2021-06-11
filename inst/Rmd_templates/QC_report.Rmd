@@ -1,5 +1,5 @@
 ---
-  title: "Quality Check for `r params$code`"
+title: "Quality Check for `r params$code`"
 author: "psi Project"
 date: "`r Sys.time()`"
 params:

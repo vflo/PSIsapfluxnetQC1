@@ -865,8 +865,7 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
 
     # 1.1 status lists
     QC = list(DONE = FALSE, DATE = NULL)
-    LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE',
-                TO_UNITS = 'FREEZE', AVAIL = NULL)
+    LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE', AVAIL = NULL)
 
     # 1.2 set status depending on the level argument
     if (level == 'all') {
@@ -1073,7 +1072,6 @@ df_whos_ready_to <- function(level = c('lvl2', 'rem', 'units', 'lvl3'),
     level <- switch(level,
                     lvl2 = c('LVL1', 'TO_LVL2'),
                     rem = c('LVL2', 'TO_REM'),
-                    units = c('LVL2', 'TO_UNITS'),
                     lvl3 = c('LVL2', 'TO_LVL3'))
 
     filter <- match.arg(filter)
