@@ -90,10 +90,10 @@ create_dic <- function(dic_name, parent_logger = 'test') {
 
     # 1.4 Questionnaire
     if (dic_name == 'Questionnaire') {
-      dic <- list(`Are the trees measured near a FLUXNET tower footprint?` = 'character',
-                  `Are the trees measured within the footprint of an eddy covariance tower?` = 'character',
-                  `Would you agree that your data are used to start a potential, global database of plant water potentials?` = 'character',
-                  `Does any species in this dataset have automatic dendrometer data (not necessarily co-located with water potential data)?` = 'character'
+      dic <- list(`CloseFluxnetTower` = 'character',
+                  `CloseEddyCovarianceTower` = 'character',
+                  `ContributorToGlobalDatabase` = 'character',
+                  `Dendrometers` = 'character'
                   )
 
       # 1.4.1 return dic
