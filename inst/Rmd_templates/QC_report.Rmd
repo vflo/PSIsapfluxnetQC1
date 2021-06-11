@@ -163,7 +163,8 @@ md_cols %>%
   mutate(PresenceOK = as.character(PresenceOK),
          ClassOK = as.character(ClassOK),
          allNA = as.character(allNA),
-         anyNA = as.character(anyNA)) %>%
+         anyNA = as.character(anyNA),
+         UniqueValue = as.character(UniqueValue)) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'Metadata variables info',
