@@ -298,11 +298,11 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
     is_positive <- any(psi_data_fixed$psi > 0)
 
     if (!is_positive) {
-      step <- c(step, 'psi values within range')
+      step <- c(step, 'positive psi values')
       status <- c(status, 'PASS')
       description <- c(description, 'No positive psi values')
     }else{
-      step <- c(step, 'psi positive values')
+      step <- c(step, 'positive psi values')
       status <- c(status, 'ERROR')
       description <- c(description, 'There is at least one positive psi value')
       }

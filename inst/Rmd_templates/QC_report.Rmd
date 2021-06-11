@@ -36,7 +36,7 @@ log_psi_setup('Logs/psi.log',
 
   ## Quick summary
 
-```{r qc, message=FALSE, warning=FALSE}
+```{r qc, message=FALSE, warning=FALSE, echo = FALSE}
 # Libraries
 library(psiQC)
 library(dplyr)
