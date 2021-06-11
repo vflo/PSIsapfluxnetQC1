@@ -121,7 +121,7 @@ psi_data_fixed <- qc_ext_radiation(psi_data_fixed, site_md,TRUE)
 
 ################################################################################
 # create the psiData object and save it as a RData file for later use
-## sfndata_object
+## psidata_object
 psi_data_object <- psi_data_constructor(
   psi_data = psi_data_fixed,
   site_md = site_md_coordfix,
@@ -377,7 +377,7 @@ data digesting processes**
 
   Information about TIMESTAMPS
 
-```{r sapf_timestamp_format}
+```{r sapf_timestamp_format,  echo=FALSE, message=FALSE, warning=FALSE}
 timestamp_psi <- psi_data_fixed %>%
   select(timestamp,pl_code) %>%
   group_by(pl_code) %>% 
@@ -403,7 +403,7 @@ timestamp_psi %>%
                            scrollY = 450, scrollCollapse = TRUE))
 ```
 
-```{r sapf_timestamp_nas}
+```{r sapf_timestamp_nas, echo=FALSE, message=FALSE, warning=FALSE}
 if (is.logical(psi_timestamp_nas)) {
   invisible(TRUE)
 } else {
@@ -422,7 +422,7 @@ if (is.logical(psi_timestamp_nas)) {
 }
 ```
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # 2.2.5 log setup
 log_psi_setup('Logs/psi.log',
                      logger = 'DataFlow',
@@ -444,7 +444,7 @@ save(list = ls(all.names = TRUE),
 
   ## PSI checks
 
-```{r outrange}
+```{r outrange, echo=FALSE, message=FALSE, warning=FALSE}
 psi_data_fixed %>%
   select(timestamp, pl_code, psi) %>%
   mutate(timestamp = as.character(timestamp)) %>% 
