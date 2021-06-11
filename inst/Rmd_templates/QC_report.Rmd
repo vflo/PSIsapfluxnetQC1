@@ -457,7 +457,7 @@ psi_range <- psi_data_fixed %>%
                                                   targets = 0)),
                            scroller = TRUE,
                            scrollY = 450, scrollCollapse = TRUE)) %>%
-  formatStyle('is_inside_country',
+  formatStyle('psi',
               backgroundColor = styleInterval(c(-10, 0),
                                            c('#d91e18', 'transparent','#d91e18')))
 ```
