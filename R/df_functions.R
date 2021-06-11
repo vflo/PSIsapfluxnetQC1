@@ -632,7 +632,7 @@ df_accepted_to_lvl1_psi <- function(si_code, psi_data = NULL, site_md = NULL,
               file.path('Data', si_code, 'Lvl_1',
                         paste(si_code, 'plant_md.csv', sep = '_')),
               row.names = FALSE)
-    write.csv(species_md,
+    write.csv(question_md,
               file.path('Data', si_code, 'Lvl_1',
                         paste(si_code, 'question_md.csv', sep = '_')),
               row.names = FALSE)

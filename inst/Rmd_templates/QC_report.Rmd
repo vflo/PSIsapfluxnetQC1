@@ -419,7 +419,7 @@ if (is.logical(psi_timestamp_nas)) {
 
 ```{r}
 # 2.2.5 log setup
-log_sapfluxnet_setup('Logs/sapfluxnet.log',
+log_psi_setup('Logs/psi.log',
                      logger = 'DataFlow',
                      level = 'WARNING')
 # 2.2.6 saving the fixed datasets and the objects created in the level1 folder
