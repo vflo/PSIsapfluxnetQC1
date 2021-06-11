@@ -446,15 +446,19 @@ save(list = ls(all.names = TRUE),
 ```{r outrange}
 psi_data_fixed %>%
   select(timestamp, pl_code, psi) %>%
+  mutate(timestamp = as.character(timestamp)) %>% 
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'out of range info',
             options = list(dom = 'ti',
                            columnDefs = list(list(className = 'dt-center',
-                                                  targets = c(1:2),
-                                                  width = '100px'),
+                                                  width = '40%',
+                                                  targets = 2),
+                                             list(className = 'dt-center',
+                                                  width = '20%',
+                                                  targets = 1),
                                              list(className = 'dt-right',
-                                                  targets = 3)),
+                                                  targets = 0)),
                            scroller = TRUE,
                            scrollY = 450, scrollCollapse = TRUE)) %>%
   formatStyle('psi',
