@@ -293,25 +293,33 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
       description <- c(description, 'psi N has NAs')
     }
 
-    # 2.6 psi out of range
-    is_out_range <- any(psi_data_fixed$psi <= (-10))
+    # 2.6 positive psi
+
     is_positive <- any(psi_data_fixed$psi > 0)
 
-    if (all(!is_out_range, !is_positive)) {
+    if (!is_positive) {
       step <- c(step, 'psi values within range')
       status <- c(status, 'PASS')
-      description <- c(description, 'No positive or extremely low psi values')
-    } else{
-        if (is_positive){
-          step <- c(step, 'psi positive values')
-          status <- c(status, 'ERROR')
-          description <- c(description, 'There is at least one positive psi value')
-        } else{
-          step <- c(step, 'psi values extremely low')
-          status <- c(status, 'WARNING')
-          description <- c(description, 'extremely low psi values')
-        }
-    }
+      description <- c(description, 'No positive psi values')
+    }else{
+      step <- c(step, 'psi positive values')
+      status <- c(status, 'ERROR')
+      description <- c(description, 'There is at least one positive psi value')
+      }
+
+    # 2.7 psi out of range
+    is_out_range <- any(psi_data_fixed$psi <= (-10))
+
+    if (!is_out_range) {
+      step <- c(step, 'low psi values')
+      status <- c(status, 'PASS')
+      description <- c(description, 'No low psi values')
+    }else{
+      step <- c(step, 'low psi values')
+      status <- c(status, 'WARNING')
+      description <- c(description, 'Low psi values, please, check manually')
+      }
+
 
     # FINAL STEP
     # create the results object

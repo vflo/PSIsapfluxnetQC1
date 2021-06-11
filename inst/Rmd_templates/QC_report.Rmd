@@ -474,5 +474,5 @@ psi_data_fixed %>%
                            scrollY = 450, scrollCollapse = TRUE)) %>%
   formatStyle('psi',
               backgroundColor = styleInterval(c(-10, 0),
-                                           c('#d91e18', 'transparent','#d91e18')))
+                                           c('#f39c12', 'transparent','#d91e18')))
 ```
