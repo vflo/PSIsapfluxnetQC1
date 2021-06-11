@@ -56,7 +56,6 @@ sm_status_updater <- function(si_code, parent_logger = 'test') {
       si_code,
       QC = old_status[['QC']],
       LVL1 = old_status[['LVL1']],
-      LVL2 = old_status[['LVL2']],
       parent_logger = parent_logger
     )
 
@@ -91,11 +90,11 @@ sm_status_updater <- function(si_code, parent_logger = 'test') {
 ################################################################################
 #' solarTIMESTAMP adder
 #'
-#' Add solarTIMESTAMP slot to SfnData objects
+#' Add solarTIMESTAMP slot to psiData objects
 #'
-#' solarTIMESTAMP was a latter addition to the SfnData class. Sites ran with the
+#' solarTIMESTAMP was a latter addition to the psiData class. Sites ran with the
 #' pre-solarTIMESTAMP version lacks this slot, which will cause problems in the
-#' data flow. This function looks for level 1 SfnData object and update it.
+#' data flow. This function looks for level 1 psiData object and update it.
 #'
 #' @family Server Management
 #'
@@ -120,28 +119,28 @@ sm_solarTIMESTAMP_adder <- function(si_code, parent_logger = 'test') {
     }
 
     # STEP 1
-    # 1.1 get the SfnData
-    sfndata <- try(
-      df_read_SfnData(si_code, 'Lvl_1', parent_logger = parent_logger)
+    # 1.1 get the psiData
+    psidata <- try(
+      df_read_psiData(si_code, 'Lvl_1', parent_logger = parent_logger)
     )
 
-    if (is(sfndata, 'try-error')) {
-      message('SfnData for level 1 does not exists for ', si_code)
+    if (is(psidata, 'try-error')) {
+      message('psiData for level 1 does not exists for ', si_code)
       return(invisible(FALSE))
     }
 
     # 1.2 add the solar timestamp
-    get_solar_timestamp(sfndata) <- rep(as.POSIXct(NA),
-                                        length(get_timestamp(sfndata)))
+    get_solar_timestamp(psidata) <- rep(as.POSIXct(NA),
+                                        length(get_timestamp(psidata)))
 
-    # 1.3 rename old SfnData
+    # 1.3 rename old psiData
     file.rename(
       from = file.path('Data', si_code, 'Lvl_1', paste0(si_code, '.RData')),
       to = file.path('Data', si_code, 'Lvl_1', paste0(si_code, '.bak'))
     )
 
-    # 1.4 write the updated SfnData
-    df_write_SfnData(sfndata, 'Lvl_1', parent_logger = parent_logger)
+    # 1.4 write the updated psiData
+    df_write_psiData(psidata, 'Lvl_1', parent_logger = parent_logger)
 
     # STEP 2
     # Check file creation
@@ -172,12 +171,12 @@ sm_solarTIMESTAMP_adder <- function(si_code, parent_logger = 'test') {
 }
 
 ################################################################################
-#' SfnData to sfn_data conversion
+#' psiData to psi_data conversion
 #'
-#' This function converts an SfnData to sfn_data object
+#' This function converts an psiData to psi_data object
 #'
 #' Things that this funcion do:
-#'   List of thing to do when passing from SfnData to sfn_data:
+#'   List of thing to do when passing from psiData to psi_data:
 #'   1. pl_name in plant metadata must be set to character in all sites.
 #'   2. si_biome convert ot character (is factor)
 #'   3. tz of solarTIMESTAMP to UTC fixed
@@ -189,12 +188,12 @@ sm_solarTIMESTAMP_adder <- function(si_code, parent_logger = 'test') {
 
 # START FUNCTION
 # Function declaration
-as_sfn_data <- function(SfnData, parent_logger = 'test') {
+as_psi_data <- function(psiData, parent_logger = 'test') {
 
   withCallingHandlers({
 
-    print(paste0('plant_md for ', get_si_code(SfnData)[1]))
-    plant_md <- slot(SfnData, 'plant_md') %>%
+    print(paste0('plant_md for ', get_si_code(psiData)[1]))
+    plant_md <- slot(psiData, 'plant_md') %>%
       dplyr::mutate(
         # 1. pl_name in plant metadata must be set to character in all sites.
         pl_name = as.character(pl_name),
@@ -218,32 +217,32 @@ as_sfn_data <- function(SfnData, parent_logger = 'test') {
       ) %>%
       dplyr::select(-old_sap_units)
 
-    print(paste0('site_md for ', get_si_code(SfnData)[1]))
-    site_md <- slot(SfnData, 'site_md') %>%
+    print(paste0('site_md for ', get_si_code(psiData)[1]))
+    site_md <- slot(psiData, 'site_md') %>%
       dplyr::mutate(
         # 2. si_biome convert ot character (is factor)
         si_biome = if (is.null(.[['si_biome']])) {NA} else {as.character(.[['si_biome']])}
       )
 
     # 3. tz of solarTIMESTAMP to UTC fixed
-    print(paste0('solar TIMESTAMP for ', get_si_code(SfnData)[1]))
-    solar_timestamp <- slot(SfnData, 'solar_timestamp') %>%
+    print(paste0('solar TIMESTAMP for ', get_si_code(psiData)[1]))
+    solar_timestamp <- slot(psiData, 'solar_timestamp') %>%
       lubridate::with_tz('UTC')
 
 
-    res <- sapfluxnetr::sfn_data(
-      sapf_data = slot(SfnData, 'sapf_data'),
-      sapf_flags = slot(SfnData, 'sapf_flags'),
-      env_data = slot(SfnData, 'env_data'),
-      env_flags = slot(SfnData, 'env_flags'),
-      si_code = slot(SfnData, 'si_code')[1],
-      timestamp = slot(SfnData, 'timestamp'),
+    res <- psiQC::psi_data(
+      sapf_data = slot(psiData, 'sapf_data'),
+      sapf_flags = slot(psiData, 'sapf_flags'),
+      env_data = slot(psiData, 'env_data'),
+      env_flags = slot(psiData, 'env_flags'),
+      si_code = slot(psiData, 'si_code')[1],
+      timestamp = slot(psiData, 'timestamp'),
       solar_timestamp = solar_timestamp,
       site_md = site_md,
-      stand_md = slot(SfnData, 'stand_md'),
-      species_md = slot(SfnData, 'species_md'),
+      stand_md = slot(psiData, 'stand_md'),
+      species_md = slot(psiData, 'species_md'),
       plant_md = plant_md,
-      env_md = slot(SfnData, 'env_md')
+      env_md = slot(psiData, 'env_md')
     )
 
     return(res)
@@ -253,38 +252,38 @@ as_sfn_data <- function(SfnData, parent_logger = 'test') {
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'as_sfn_data',
+                                                        'as_psi_data',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'as_sfn_data',
+                                                       'as_psi_data',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'as_sfn_data',
+                                                        'as_psi_data',
                                                         sep = '.'))})
 }
 
 ################################################################################
-#' Function to save the sfn_data created
+#' Function to save the psi_data created
 #'
-#' This function saves the RData files with the PSIsfn_data objects
+#' This function saves the RData files with the psi_data objects
 #'
 #' @export
 
 # START FUNCTION
 # Funtion declaration
-write_sfn_data <- function(sfn_data, folder, parent_logger = 'test') {
+write_psi_data <- function(psi_data, folder, parent_logger = 'test') {
 
   # using calling handlers to manage errors
   withCallingHandlers({
 
-    si_code <- sapfluxnetr::get_si_code(sfn_data)
+    si_code <- sapfluxnetr::get_si_code(psi_data)
     path <- file.path(folder, paste0(si_code, '.RData'))
 
     print(paste0('Writing ', si_code))
 
-    assign(si_code, sfn_data)
+    assign(si_code, psi_data)
     save(list = si_code, file = path)
 
   },
@@ -292,47 +291,47 @@ write_sfn_data <- function(sfn_data, folder, parent_logger = 'test') {
   # handlers
   warning = function(w){logging::logwarn(w$message,
                                          logger = paste(parent_logger,
-                                                        'write_sfn_data',
+                                                        'write_psi_data',
                                                         sep = '.'))},
   error = function(e){logging::logerror(e$message,
                                         logger = paste(parent_logger,
-                                                       'write_sfn_data',
+                                                       'write_psi_data',
                                                        sep = '.'))},
   message = function(m){logging::loginfo(m$message,
                                          logger = paste(parent_logger,
-                                                        'write_sfn_data',
+                                                        'write_psi_data',
                                                         sep = '.'))})
 }
 
 ################################################################################
-#' sfn_data2csv function
+#' psi_data2csv function
 #'
-#' This function is used in lvl3_process to write the csv files for each sfn_data objet
+#' This function is used in lvl3_process to write the csv files for each psi_data objet
 #' slots in the corresponding folder of the database tree
 #'
 #' @export
-sfn_data2csv <- function(sfn_data, csv_folder) {
+psi_data2csv <- function(psi_data, csv_folder) {
 
   # get the slots and store them. In the case of data and flags, add the solar timestamp
   # also
-  sapf_data <- sapfluxnetr::get_sapf_data(sfn_data) %>%
-    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(sfn_data)) %>%
+  sapf_data <- sapfluxnetr::get_sapf_data(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(psi_data)) %>%
     dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
-  sapf_flags <- sapfluxnetr::get_sapf_flags(sfn_data) %>%
-    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(sfn_data)) %>%
+  sapf_flags <- sapfluxnetr::get_sapf_flags(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(psi_data)) %>%
     dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
-  env_data <- sapfluxnetr::get_env_data(sfn_data) %>%
-    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(sfn_data)) %>%
+  env_data <- sapfluxnetr::get_env_data(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(psi_data)) %>%
     dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
-  env_flags <- sapfluxnetr::get_env_flags(sfn_data) %>%
-    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(sfn_data)) %>%
+  env_flags <- sapfluxnetr::get_env_flags(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = sapfluxnetr::get_solar_timestamp(psi_data)) %>%
     dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
-  site_md <- sapfluxnetr::get_site_md(sfn_data)
-  stand_md <- sapfluxnetr::get_stand_md(sfn_data)
-  species_md <- sapfluxnetr::get_species_md(sfn_data)
-  plant_md <- sapfluxnetr::get_plant_md(sfn_data)
-  env_md <- sapfluxnetr::get_env_md(sfn_data)
-  si_code <- sapfluxnetr::get_si_code(sfn_data)
+  site_md <- sapfluxnetr::get_site_md(psi_data)
+  stand_md <- sapfluxnetr::get_stand_md(psi_data)
+  species_md <- sapfluxnetr::get_species_md(psi_data)
+  plant_md <- sapfluxnetr::get_plant_md(psi_data)
+  env_md <- sapfluxnetr::get_env_md(psi_data)
+  si_code <- sapfluxnetr::get_si_code(psi_data)
 
   sapf_data_name <- file.path(csv_folder, paste0(si_code, '_sapf_data.csv'))
   env_data_name <- file.path(csv_folder, paste0(si_code, '_env_data.csv'))
@@ -358,11 +357,11 @@ sfn_data2csv <- function(sfn_data, csv_folder) {
 ################################################################################
 #' QC3 function, cleaning a little
 #'
-#' Function to final clean the data and generate the sapfluxnetr::sfn_data
+#' Function to final clean the data and generate the sapfluxnetr::psi_data
 #' objects
 #'
 #' This function looks for LVL2 completed data at the three levels and performs
-#' the last cleaning and the sfn_data construction. See as_sfn_data for more
+#' the last cleaning and the psi_data construction. See as_psi_data for more
 #' details
 #'
 #' @export
@@ -386,39 +385,39 @@ lvl3_process <- function(version = '0.0.1', parent_logger = 'test') {
     # plant level
     if ('plant' %in% df_get_status(site)[['LVL2']][['AVAIL']]) {
 
-      df_read_SfnData(
+      df_read_psiData(
         site, 'unit_trans', 'plant', parent_logger = parent_logger
       ) %>%
-        as_sfn_data(parent_logger = parent_logger) -> plant_sfn_data
+        as_psi_data(parent_logger = parent_logger) -> plant_psi_data
 
-      write_sfn_data(plant_sfn_data, folder = folder_plant)
-      sfn_data2csv(plant_sfn_data, csv_folder = csv_folder_plant)
+      write_psi_data(plant_psi_data, folder = folder_plant)
+      psi_data2csv(plant_psi_data, csv_folder = csv_folder_plant)
 
     }
 
     # sapwood level
     if ('sapwood' %in% df_get_status(site)[['LVL2']][['AVAIL']]) {
 
-      df_read_SfnData(
+      df_read_psiData(
         site, 'unit_trans', 'sapwood', parent_logger = parent_logger
       ) %>%
-        as_sfn_data(parent_logger = parent_logger) -> sapwood_sfn_data
+        as_psi_data(parent_logger = parent_logger) -> sapwood_psi_data
 
-      write_sfn_data(sapwood_sfn_data, folder = folder_sapwood)
-      sfn_data2csv(sapwood_sfn_data, csv_folder = csv_folder_sapwood)
+      write_psi_data(sapwood_psi_data, folder = folder_sapwood)
+      psi_data2csv(sapwood_psi_data, csv_folder = csv_folder_sapwood)
 
     }
 
     # leaf level
     if ('leaf' %in% df_get_status(site)[['LVL2']][['AVAIL']]) {
 
-      df_read_SfnData(
+      df_read_psiData(
         site, 'unit_trans', 'leaf', parent_logger = parent_logger
       ) %>%
-        as_sfn_data(parent_logger = parent_logger) -> leaf_sfn_data
+        as_psi_data(parent_logger = parent_logger) -> leaf_psi_data
 
-      write_sfn_data(leaf_sfn_data, folder = folder_leaf)
-      sfn_data2csv(leaf_sfn_data, csv_folder = csv_folder_leaf)
+      write_psi_data(leaf_psi_data, folder = folder_leaf)
+      psi_data2csv(leaf_psi_data, csv_folder = csv_folder_leaf)
 
     }
 

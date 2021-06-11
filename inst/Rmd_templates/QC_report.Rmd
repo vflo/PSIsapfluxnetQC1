@@ -343,17 +343,18 @@ datatable(pl_treatments_check, class = 'display compact', rownames = FALSE, filt
                          scrollY = 450, scrollCollapse = TRUE))
 ```
 
+***
 
-## Metadata Remarks
+  ## Metadata Remarks
 
 List of remarks provided by the contributor/s
 
-***
 
   **psi measure remarks**
 
   `r if (is.null(psi_data_fixed$remarks)) {'*No remarks*'} else {psi_data_fixed$remarks}`
 
+***
 
   # Data QC
 
@@ -438,3 +439,24 @@ save(list = ls(all.names = TRUE),
      file = file.path('Data', params$code, 'Lvl_1',
                       paste(params$code, 'objects.RData', sep = '_')),
      envir = environment())
+```
+
+
+```{r outrange, echo=FALSE}
+psi_data_fixed %>%
+  select(timestamp, pl_name, psi) %>%
+  datatable(class = 'display compact', rownames = FALSE, filter = 'none',
+            extensions = c('Scroller'),
+            caption = 'out of range info',
+            options = list(dom = 'ti',
+                           columnDefs = list(list(className = 'dt-center',
+                                                  targets = 1:3,
+                                                  width = '100px'),
+                                             list(className = 'dt-right',
+                                                  targets = 0)),
+                           scroller = TRUE,
+                           scrollY = 450, scrollCollapse = TRUE)) %>%
+  formatStyle('is_inside_country',
+              backgroundColor = styleInterval(c(-10, 0),
+                                           c('#d91e18', 'transparent','#d91e18')))
+```

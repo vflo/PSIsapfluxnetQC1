@@ -50,6 +50,8 @@ lapply(data_folders, function(folder) {
                    parent_logger = paste('QC', code, sep = '.'))
 })
 
+df_reset_data_status_psi()
+
 # ################################################################################
 # # LEVEL 2
 #
