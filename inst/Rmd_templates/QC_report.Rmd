@@ -5,14 +5,13 @@ date: "`r Sys.time()`"
 params:
   wd: ../
   md_file: ''
-sapf_data_file: ''
-env_data_file: ''
-code: ''
-rdata: yes
+  psi_data_file: ''
+  code: ''
+  rdata: yes
 output:
   html_document:
-  number_sections: yes
-toc: yes
+    number_sections: yes
+    toc: yes
 ---
 
 ```{r, include=FALSE}
