@@ -388,8 +388,7 @@ qc_as_timestamp <- function(data, site_data, parent_logger = 'test') {
 #'
 #' @family Quality Checks Functions
 #'
-#' @param data Data frame containing the timestamp variable (sapflow or
-#'   environmental data)
+#' @param data Data frame containing the timestamp variable
 #'
 #' @return A data frame with the NAs info
 #'
@@ -445,6 +444,203 @@ qc_timestamp_nas <- function(data, parent_logger = 'test') {
 
 
 
+
+################################################################################
+#' Checking for NAs in the psi
+#'
+#' Simple function to check for NAs in psi
+#'
+#' checking for NAs and info about the location is needed in order to be
+#' able to fix it
+#'
+#' @family Quality Checks Functions
+#'
+#' @param data Data frame containing the psi variable
+#'
+#' @return A data frame with the NAs info
+#'
+#' @export
+
+# START
+# Function declaration
+qc_psi_nas <- function(data, parent_logger = 'test') {
+
+  # Using calling handlers to manage errors
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    if (!is.data.frame(data)) {
+      stop('Data provided is not a data frame')
+    }
+    if (is.null(data$psi)) {
+      stop('Data provided has not psi variable')
+    }
+
+    # STEP 1
+    # Retrieving info about NAs in psi
+    if (!any(is.na(data$psi))) {
+
+      # 1.1 If no NAs, return TRUE
+      return(invisible(TRUE))
+      message("Nice!! no NA's found in psi.")
+    } else {
+
+      # 1.2 If NAs, return the NAs
+      res_df <- data %>%
+        dplyr::mutate(row_number = row.names(data)) %>%
+        dplyr::filter(is.na(psi))
+
+      # STEP 2
+      # Return the res_df
+      return(res_df)
+    }
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_nas', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'qc_psi_nas', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_nas', sep = '.'))})
+}
+
+
+
+
+################################################################################
+#' Checking for NAs in the psi SE
+#'
+#' Simple function to check for NAs in psi SE
+#'
+#' checking for NAs and info about the location is needed in order to be
+#' able to fix it
+#'
+#' @family Quality Checks Functions
+#'
+#' @param data Data frame containing the psi SE variable
+#'
+#' @return A data frame with the NAs info
+#'
+#' @export
+
+# START
+# Function declaration
+qc_psi_SE_nas <- function(data, parent_logger = 'test') {
+
+  # Using calling handlers to manage errors
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    if (!is.data.frame(data)) {
+      stop('Data provided is not a data frame')
+    }
+    if (is.null(data$psi_SE)) {
+      stop('Data provided has not psi SE variable')
+    }
+
+    # STEP 1
+    # Retrieving info about NAs in psi
+    if (!any(is.na(data$psi_SE))) {
+
+      # 1.1 If no NAs, return TRUE
+      return(invisible(TRUE))
+      message("Nice!! no NA's found in psi SE.")
+    } else {
+
+      # 1.2 If NAs, return the NAs
+      res_df <- data %>%
+        dplyr::mutate(row_number = row.names(data)) %>%
+        dplyr::filter(is.na(psi_SE))
+
+      # STEP 2
+      # Return the res_df
+      return(res_df)
+    }
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_SE_nas', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'qc_psi_SE_nas', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_SE_nas', sep = '.'))})
+}
+
+
+
+################################################################################
+#' Checking for NAs in the psi N
+#'
+#' Simple function to check for NAs in psi N
+#'
+#' checking for NAs and info about the location is needed in order to be
+#' able to fix it
+#'
+#' @family Quality Checks Functions
+#'
+#' @param data Data frame containing the psi N variable
+#'
+#' @return A data frame with the NAs info
+#'
+#' @export
+
+# START
+# Function declaration
+qc_psi_N_nas <- function(data, parent_logger = 'test') {
+
+  # Using calling handlers to manage errors
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    if (!is.data.frame(data)) {
+      stop('Data provided is not a data frame')
+    }
+    if (is.null(data$psi_N)) {
+      stop('Data provided has not psi N variable')
+    }
+
+    # STEP 1
+    # Retrieving info about NAs in psi
+    if (!any(is.na(data$psi_N))) {
+
+      # 1.1 If no NAs, return TRUE
+      return(invisible(TRUE))
+      message("Nice!! no NA's found in psi N.")
+    } else {
+
+      # 1.2 If NAs, return the NAs
+      res_df <- data %>%
+        dplyr::mutate(row_number = row.names(data)) %>%
+        dplyr::filter(is.na(psi_N))
+
+      # STEP 2
+      # Return the res_df
+      return(res_df)
+    }
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_N_nas', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'qc_psi_N_nas', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'qc_psi_N_nas', sep = '.'))})
+}
 
 ################################################################################
 #' Function to simplify questionnaire section

@@ -7,8 +7,7 @@
 qc_timestamp_nas(data, parent_logger = "test")
 }
 \arguments{
-\item{data}{Data frame containing the timestamp variable (sapflow or
-environmental data)}
+\item{data}{Data frame containing the timestamp variable}
 }
 \value{
 A data frame with the NAs info
@@ -41,6 +40,9 @@ Other Quality Checks Functions:
 \code{\link{qc_outliers_process}()},
 \code{\link{qc_outliers_subs}},
 \code{\link{qc_pl_treatments}()},
+\code{\link{qc_psi_N_nas}()},
+\code{\link{qc_psi_SE_nas}()},
+\code{\link{qc_psi_nas}()},
 \code{\link{qc_range_dic}()},
 \code{\link{qc_sapf_ranges}()},
 \code{\link{qc_set_timezone}()},

@@ -422,7 +422,7 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
         remove_dupcols() %>%
         # select only 4 rows
         dplyr::slice(c(1:4)) %>%
-        pivot_wider(values_from = "Answer", names_from = "Question")
+        tidyr::pivot_wider(values_from = "Answer", names_from = "Question")
 
       # 1.4.2 return the plant metadata
       return(res)

@@ -7,13 +7,26 @@
 qc_data_results_table(
   psi_data_fixed,
   psi_timestamp_nas,
+  psi_nas,
+  psi_SE_nas,
+  psi_N_nas,
   parent_logger = "test"
 )
 }
 \arguments{
-\item{psi_data_fixed}{}
+\item{psi_data_fixed}{Data frame containing psi data}
 
-\item{psi_timestamp_nas}{}
+\item{psi_timestamp_nas}{Data frame containing timestamp NAs as obtained by
+\code{\link{qc_timestamp_nas}}}
+
+\item{psi_nas}{Data frame containing psi NAs as obtained by
+\code{\link{qc_psi_nas}}}
+
+\item{psi_SE_nas}{Data frame containing psi SE NAs as obtained by
+\code{\link{qc_psi_SE_nas}}}
+
+\item{psi_N_nas}{Data frame containing psi N NAs as obtained by
+\code{\link{qc_psi_N_nas}}}
 }
 \description{
 Data QC codified results in one data frame
@@ -37,6 +50,9 @@ Other Quality Checks Functions:
 \code{\link{qc_outliers_process}()},
 \code{\link{qc_outliers_subs}},
 \code{\link{qc_pl_treatments}()},
+\code{\link{qc_psi_N_nas}()},
+\code{\link{qc_psi_SE_nas}()},
+\code{\link{qc_psi_nas}()},
 \code{\link{qc_range_dic}()},
 \code{\link{qc_sapf_ranges}()},
 \code{\link{qc_set_timezone}()},

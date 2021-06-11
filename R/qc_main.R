@@ -205,15 +205,26 @@ qc_md_results_table <- function(md_cols, factor_values,
 #'
 #' @family Quality Checks Functions
 #'
-#' @param psi_data_fixed
+#' @param psi_data_fixed Data frame containing psi data
 #'
-#' @param psi_timestamp_nas
+#' @param psi_timestamp_nas Data frame containing timestamp NAs as obtained by
+#' \code{\link{qc_timestamp_nas}}
+#'
+#' @param psi_nas Data frame containing psi NAs as obtained by
+#' \code{\link{qc_psi_nas}}
+#'
+#' @param psi_SE_nas Data frame containing psi SE NAs as obtained by
+#' \code{\link{qc_psi_SE_nas}}
+#'
+#' @param psi_N_nas Data frame containing psi N NAs as obtained by
+#' \code{\link{qc_psi_N_nas}}
 #'
 #' @export
 
 # START
 # Function declaration
 qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
+                                  psi_nas, psi_SE_nas, psi_N_nas,
                                   parent_logger = 'test') {
 
   # Using calling handlers to manage errors
@@ -226,7 +237,7 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
     description <- vector()
 
     # STEP 2
-    # Timestamps
+    # Timestamps and psi
     # 2.1 correct format psi
     if (!qc_is_timestamp(psi_data_fixed, FALSE, parent_logger = parent_logger)) {
       step <- c(step, 'TIMESTAMP Format psi data')
@@ -249,7 +260,40 @@ qc_data_results_table <- function(psi_data_fixed, psi_timestamp_nas,
       description <- c(description, 'TIMESTAMP has NAs')
     }
 
-    # 2.3 psi out of range
+    # 2.3 psi NAs
+    if (is.logical(psi_nas)) {
+      step <- c(step, 'psi NAs presence')
+      status <- c(status, 'PASS')
+      description <- c(description, 'No NAs detected in psi')
+    } else {
+      step <- c(step, 'psi NAs presence')
+      status <- c(status, 'ERROR')
+      description <- c(description, 'psi has NAs')
+    }
+
+    # 2.4 psi SE NAs
+    if (is.logical(psi_SE_nas)) {
+      step <- c(step, 'psi SE NAs presence')
+      status <- c(status, 'PASS')
+      description <- c(description, 'No NAs detected in TIMESTAMP')
+    } else {
+      step <- c(step, 'psi SE NAs presence')
+      status <- c(status, 'WARNING')
+      description <- c(description, 'PSI SE has NAs')
+    }
+
+    # 2.5 PSI N NAs
+    if (is.logical(psi_N_nas)) {
+      step <- c(step, 'psi N NAs presence')
+      status <- c(status, 'PASS')
+      description <- c(description, 'No NAs detected in psi N')
+    } else {
+      step <- c(step, 'psi N NAs presence')
+      status <- c(status, 'WARNING')
+      description <- c(description, 'psi N has NAs')
+    }
+
+    # 2.6 psi out of range
     is_out_range <- any(psi_data_fixed$psi <= (-10))
     is_positive <- any(psi_data_fixed$psi > 0)
 
