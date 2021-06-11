@@ -441,20 +441,20 @@ save(list = ls(all.names = TRUE),
      envir = environment())
 ```
 
-## PSI checks
+  ## PSI checks
 
 ```{r outrange}
-psi_range <- psi_data_fixed %>%
+psi_data_fixed %>%
   select(timestamp, pl_code, psi) %>%
   datatable(class = 'display compact', rownames = FALSE, filter = 'none',
             extensions = c('Scroller'),
             caption = 'out of range info',
             options = list(dom = 'ti',
                            columnDefs = list(list(className = 'dt-center',
-                                                  targets = 1:2,
+                                                  targets = c(1:2),
                                                   width = '100px'),
                                              list(className = 'dt-right',
-                                                  targets = 0)),
+                                                  targets = 3)),
                            scroller = TRUE,
                            scrollY = 450, scrollCollapse = TRUE)) %>%
   formatStyle('psi',
