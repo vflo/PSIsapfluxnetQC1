@@ -14,12 +14,12 @@ Invisible TRUE if solarTIMESTAMP was succesfully added to all levels
   in si_code site
 }
 \description{
-Add solarTIMESTAMP slot to SfnData objects
+Add solarTIMESTAMP slot to psiData objects
 }
 \details{
-solarTIMESTAMP was a latter addition to the SfnData class. Sites ran with the
+solarTIMESTAMP was a latter addition to the psiData class. Sites ran with the
 pre-solarTIMESTAMP version lacks this slot, which will cause problems in the
-data flow. This function looks for level 1 SfnData object and update it.
+data flow. This function looks for level 1 psiData object and update it.
 }
 \seealso{
 Other Server Management: 

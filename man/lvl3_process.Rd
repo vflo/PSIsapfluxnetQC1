@@ -7,11 +7,11 @@
 lvl3_process(version = "0.0.1", parent_logger = "test")
 }
 \description{
-Function to final clean the data and generate the sapfluxnetr::sfn_data
+Function to final clean the data and generate the sapfluxnetr::psi_data
 objects
 }
 \details{
 This function looks for LVL2 completed data at the three levels and performs
-the last cleaning and the sfn_data construction. See as_sfn_data for more
+the last cleaning and the psi_data construction. See as_psi_data for more
 details
 }
