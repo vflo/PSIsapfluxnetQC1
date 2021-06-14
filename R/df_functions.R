@@ -975,7 +975,7 @@ psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
       stop('Data and/or metadata objects provided are not data.frames')
     }
 
-    if (site_md$site_name %>% unique() %>% lenght > 1)) {
+    if (site_md$site_name %>% unique() %>% lenght > 1) {
       stop('There is more than one different site name')
     }
 
