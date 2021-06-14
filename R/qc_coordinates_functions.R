@@ -837,7 +837,7 @@ qc_coordinates <- function(data, maps_folder = getwd(), plot = FALSE,
       message('Coordinates are correct')
       return(check_coord_data)
 
-      # 1.2 if not, try to fixit
+      # 1.2 if not, try to fix it
     } else {
       fixed_coord_data <- qc_fix_latlong_errors(check_coord_data, maps_folder,
                                                 sign_errors, special_countries,

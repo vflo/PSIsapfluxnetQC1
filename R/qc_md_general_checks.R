@@ -585,13 +585,15 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
     if(!is.null(psi)) {
       psi_names <- c('time_psi', 'canopy_position', 'method', 'organ',
                      'aggregation_level')
-      psi_checks <- sapply(psi_names, function(x) { psi[[x]] %in% qc_psi_dics(x) })
+      psi_checks <- sapply(psi_names, function(x) {
+        psi[[x]] %in% qc_psi_dics(x)
+        })
     }
 
     # 2. Generate the results data frame and return it
-    res_data <- data.frame(site_checks,
-                          pl_checks,
-                          psi_checks)
+    res_data <- bind_cols(site_checks %>% bind_rows() ,
+                          pl_checks %>% bind_rows(),
+                          psi_checks %>% bind_rows())
 
     return(res_data)
 
