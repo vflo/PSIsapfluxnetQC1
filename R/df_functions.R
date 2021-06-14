@@ -975,6 +975,10 @@ psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
       stop('Data and/or metadata objects provided are not data.frames')
     }
 
+    if (site_md$site_name %>% unique() %>% lenght > 1)) {
+      stop('There is more than one different site name')
+    }
+
     # STEP 1
     # 1.1 Get timestamp from psi_data
     psi_timestamp <- psi_data %>% dplyr::select(timestamp)
@@ -1002,7 +1006,7 @@ psi_data_constructor <- function(psi_data = NULL, site_md = NULL,
       psi_flags = .psi_flags,
       timestamp = psi_timestamp[[1]],
       solar_timestamp = .solar_timestamp,
-      si_code = rep(site_md$site_name, length(psi_timestamp[[1]])),
+      si_code = rep(site_md$site_name %>% unique(), length(psi_timestamp[[1]])),
       site_md = site_md,
       plant_md = plant_md,
       question_md = question_md
