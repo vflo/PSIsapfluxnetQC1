@@ -202,7 +202,7 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
     }
 
     #   more than 1 lat or lon provided
-    if (any(unique(data$lat)>1, unique(data$lon)>1)) {
+    if (any(unique(data$lat) %>% length()>1, unique(data$lon)%>% length()>1)) {
       stop('Provided data contains more than one different lat or lon',
            ' Please verify the original data')
     }
