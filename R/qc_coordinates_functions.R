@@ -191,6 +191,11 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
       stop('There is no country variable in this dataset.',
            ' Please verify if it is the correct data\n')
     }
+    #   if data contains a NA country variable
+    if (is.na(data$site_country)) {
+      stop('There is no country variable in this dataset.',
+           ' Please verify if it is the correct data\n')
+    }
     #   if data contains a site_name variable
     if (is.null(data$site_name)) {
       stop('There is no site_name variable in this dataset. ',
