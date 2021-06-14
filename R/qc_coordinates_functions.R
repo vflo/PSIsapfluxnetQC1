@@ -147,10 +147,6 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
 #' @param plot Logical indicating if plots for coordinate are created and saved
 #'   in the working directory. By default, plot are not saved.
 #'
-#' @param text_report Logical indicating if a text report is showed in the
-#'   console after checking coordinates. By default, a report is showed in the
-#'   console.
-#'
 #' @return The data frame used as input with a new variable, is_inside_country,
 #'   a logical variable indicating if the site has wrong coordinates
 #'
@@ -163,8 +159,7 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
 # Function declaration
 
 qc_check_coordinates <- function(data, maps_folder = getwd(),
-                                 plot = FALSE, text_report = TRUE,
-                                 parent_logger = 'test'){
+                                 plot = FALSE, parent_logger = 'test'){
 
   # Using calling handlers to logging
   withCallingHandlers({
@@ -206,6 +201,12 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
       stop('Maps folder does not exist, please verify the folder provided')
     }
 
+    #   more than 1 lat or lon provided
+    if (any(unique(data$lat)>1, unique(data$lon)>1)) {
+      stop('Provided data contains more than one different lat or lon',
+           ' Please verify the original data')
+    }
+
     # STEP 1
     # Downlaod maps, if already not downloaded
     qc_download_maps(data = data, folder = maps_folder,
@@ -216,29 +217,26 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
     results <- vector()
 
     # STEP 3
-    # Begin the for loop and read the map file
-    for (i in 1:length(data[,1])) {
 
-      file_name <- paste(data$site_country[i], '_adm0.rds', sep = '')
+      file_name <- paste(data$site_country %>% unique(), '_adm0.rds', sep = '')
       map_data <- readRDS(file.path(maps_folder, file_name))
 
       # 2.1 message to indicate status of loop, to avoid confussion if it takes
       #     a long time
-      message('Checking ', data$site_country[i], '-', data$site_name[i])
+      message('Checking ', data$site_country %>% unique(), '-', data$site_name %>% unique())
 
 
       # STEP 3
       # Get coordinates and transform them in SpatialPoints object
       sp_points <- sp::SpatialPoints(
-        data[i, c('lon', 'lat')],
+        data[, c('lon', 'lat')] %>% unique(),
         proj4string = sp::CRS(sp::proj4string(map_data))
       )
 
       # STEP 4
       # Update results object, including the output of rgeos::gContains
-      res_tmp <- rgeos::gContains(map_data, sp_points)
+      results <- rgeos::gContains(map_data, sp_points)
 
-      results <- c(results, res_tmp)
 
       # STEP 5
       # Create and saving the plot if plot = TRUE and is_inside_country = FALSE
@@ -261,23 +259,7 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
                                 data[i, c('site_name')], '.pdf', sep = ''),
                plot = plot_map, width = 6, height = 4, units = 'cm')
       }
-    }
 
-    # STEP 6
-    # Create a console report with message if text_report is TRUE
-
-    if (text_report) {
-
-      # 6.1 Sum of wrong, correct and total coordinates checked
-      wrong_coordinates <- sum(!results, na.rm = TRUE)
-      correct_coordinates <- sum(results, na.rm = TRUE)
-      total_coordinates <- wrong_coordinates + correct_coordinates
-
-      # 6.2 messages
-      message(wrong_coordinates, ' wrong coordinates in data')
-      message(correct_coordinates, ' correct coordinates in data')
-      message(total_coordinates, ' coordinates checked')
-    }
 
     # STEP 7
     # Create a new variable in data with the results of the checks
@@ -514,8 +496,7 @@ qc_coord_sign_test <- function(data, maps_folder = getwd(),
           # 7.2.2 check
           res_data$lat_changed[j] <- qc_check_coordinates(
             check_data_lat, maps_folder,
-            plot = FALSE,
-            text_report = FALSE)$is_inside_country[1]
+            plot = FALSE)$is_inside_country[1]
         }
 
         if (!lat_na && long_na) {
@@ -542,8 +523,7 @@ qc_coord_sign_test <- function(data, maps_folder = getwd(),
           # 7.2.4 check
           res_data$long_changed[j] <- qc_check_coordinates(
             check_data_long, maps_folder,
-            plot = FALSE,
-            text_report = FALSE)$is_inside_country[1]
+            plot = FALSE)$is_inside_country[1]
         }
 
         # 7.3 CASE 2 Both border coordinates with positive and negative values
@@ -578,18 +558,15 @@ qc_coord_sign_test <- function(data, maps_folder = getwd(),
           # 7.3.2 checks
           lat_check <- qc_check_coordinates(
             check_data_lat, maps_folder,
-            plot = FALSE,
-            text_report = FALSE)$is_inside_country[1]
+            plot = FALSE)$is_inside_country[1]
 
           long_check <- qc_check_coordinates(
             check_data_long, maps_folder,
-            plot = FALSE,
-            text_report = FALSE)$is_inside_country[1]
+            plot = FALSE)$is_inside_country[1]
 
           both_check <- qc_check_coordinates(
             check_data_both, maps_folder,
-            plot = FALSE,
-            text_report = FALSE)$is_inside_country[1]
+            plot = FALSE)$is_inside_country[1]
 
           # 7.3.3 Changing both fix the problem
           if (both_check && (!lat_check && !long_check)) {
@@ -770,7 +747,7 @@ qc_fix_latlong_errors <- function(data, maps_folder = getwd(),
     # Returning the results
     return(suppressMessages(
       qc_check_coordinates(results, maps_folder,
-                           plot = FALSE, text_report = FALSE))
+                           plot = FALSE))
     )
 
     # END FUNCTION
@@ -803,10 +780,6 @@ qc_fix_latlong_errors <- function(data, maps_folder = getwd(),
 #' @param plot Logical indicating if plots for coordinate are created and saved
 #'   in the working directory. By default, plot are not saved.
 #'
-#' @param text_report Logical indicating if a text report is showed in the
-#'   console after checking coordinates. By default, a report is showed in the
-#'   console.
-#'
 #' @param sign_errors Logical indicating if sign errors must be checked and
 #'   fixed. If TRUE (default), \code{\link{qc_coord_sign_test}} is internally
 #'   called.
@@ -819,8 +792,7 @@ qc_fix_latlong_errors <- function(data, maps_folder = getwd(),
 
 # START
 # Function declaration
-qc_coordinates <- function(data, maps_folder = getwd(), plot = FALSE,
-                           text_report = TRUE, sign_errors = TRUE,
+qc_coordinates <- function(data, maps_folder = getwd(), plot = FALSE, sign_errors = TRUE,
                            special_countries = TRUE,
                            parent_logger = 'test') {
 

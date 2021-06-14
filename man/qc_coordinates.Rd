@@ -8,7 +8,6 @@ qc_coordinates(
   data,
   maps_folder = getwd(),
   plot = FALSE,
-  text_report = TRUE,
   sign_errors = TRUE,
   special_countries = TRUE,
   parent_logger = "test"
@@ -24,10 +23,6 @@ working directory. It must be a character object and it must end
 
 \item{plot}{Logical indicating if plots for coordinate are created and saved
 in the working directory. By default, plot are not saved.}
-
-\item{text_report}{Logical indicating if a text report is showed in the
-console after checking coordinates. By default, a report is showed in the
-console.}
 
 \item{sign_errors}{Logical indicating if sign errors must be checked and
 fixed. If TRUE (default), \code{\link{qc_coord_sign_test}} is internally

@@ -8,7 +8,6 @@ qc_check_coordinates(
   data,
   maps_folder = getwd(),
   plot = FALSE,
-  text_report = TRUE,
   parent_logger = "test"
 )
 }
@@ -22,10 +21,6 @@ working directory. It must be a character object and it must end
 
 \item{plot}{Logical indicating if plots for coordinate are created and saved
 in the working directory. By default, plot are not saved.}
-
-\item{text_report}{Logical indicating if a text report is showed in the
-console after checking coordinates. By default, a report is showed in the
-console.}
 }
 \value{
 The data frame used as input with a new variable, is_inside_country,
