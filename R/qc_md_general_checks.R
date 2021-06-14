@@ -591,7 +591,7 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
     }
 
     # 2. Generate the results data frame and return it
-    if(nrow(as_tibble(site_checks))>1){
+    if(nrow(data.frame(site_checks))>1){
       res_data <- data.frame(site_checks, pl_checks, psi_checks)
     }else{
       res_data <- bind_cols(site_checks %>% bind_rows(),

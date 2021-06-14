@@ -54,8 +54,6 @@ Other Quality Checks Functions:
 \code{\link{qc_species_names_info}()},
 \code{\link{qc_species_names}()},
 \code{\link{qc_species_verification}()},
-\code{\link{qc_swc_check}()},
-\code{\link{qc_swc_fix}()},
 \code{\link{qc_timestamp_nas}()}
 }
 \concept{Quality Checks Functions}
