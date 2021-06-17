@@ -3,23 +3,6 @@
 library(psiQC)
 library(tidyverse)
 
-################################################################################
-# server management run when necessary
-################################################################################
-#
-# psiQC::log_psi_setup('Logs/psi.log',
-#                      logger = 'Server_Management',
-#                      level = "WARNING")
-#
-# df_get_data_folders() %>%
-#   stringr::str_sub(6, -1) %>%
-#   purrr::walk(sm_status_updater, parent_logger = 'Server_Management') %>%
-#   purrr::walk(sm_solarTIMESTAMP_adder, parent_logger = 'Server_Management')
-
-################################################################################
-# END server management
-################################################################################
-
 
 # setup logs
 log_psi_setup('Logs/psi.log',
@@ -43,14 +26,14 @@ data_folders <- df_get_data_folders(parent_logger = 'QC')
 ## Loop for every site
 lapply(data_folders, function(folder) {
   code <- stringr::str_sub(folder, 6, -1)
-  log_psi_setup('Logs/psi.log',
-                       logger = paste('QC', code, sep = '.'),
-                       level = "DEBUG")
+  # log_psi_setup('Logs/psi.log',
+  #                      logger = paste('QC', code, sep = '.'),
+  #                      level = "DEBUG")
   qc_start_process_psi(file.path(folder, 'Accepted'), rdata = FALSE,
                    parent_logger = paste('QC', code, sep = '.'))
 })
 
-df_reset_data_status_psi()
+df_reset_data_status_psi("FOO_FAA")
 
 # ################################################################################
 # # LEVEL 2

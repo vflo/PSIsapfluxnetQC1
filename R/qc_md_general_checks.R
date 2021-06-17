@@ -265,7 +265,7 @@ qc_plant_dics <- function(variable, parent_logger = 'test') {
 
     # 1.2 measured_sfn
     if (variable == 'measured_sfn') {
-      res <- c('yes', 'no')
+      res <- c('yes', 'no', 'YES', 'NO')
 
       # 1.2.1 return the dic
       return(res)
@@ -615,4 +615,152 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
                                          logger = paste(parent_logger,
                                                         'qc_factor_values', sep = '.'))})
 
+
 }
+
+
+
+################################################################################
+#' Check plant treatments for misspelling and concordance errors
+#'
+#' \code{qc_pl_treatments} function looks for spelling errors in treatments
+#' provided in the plant metadata.
+#'
+#' This function summarizes the treatments declared in the plant metadata to
+#' look for mispelling and concordance errors. At the moment, function only
+#' returns an informative data frame, but the search for spelling errors and
+#' fixes must be done at hand, as there is no automatized way of doing it.
+#'
+#' @family Quality Checks Functions
+#'
+#' @param plant_md Data frame containing the plant metadata
+#'
+#' @return A data frame with the information about the different treatments if
+#'   any.
+#'
+#' @export
+
+# START
+# Function declaration
+
+qc_pl_treatments <- function(plant_md, parent_logger = 'test') {
+
+  # Using calling handlers to logging
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    # Is plant_md a data frame and have a pl_treatment variable?
+    if (!is.data.frame(plant_md) | is.null(plant_md$pl_treatment)) {
+      stop('Data object is not a data frame or it not contains any variable called pl_treatment')
+    }
+
+    # STEP 1
+    # Check if pl_treatment is a NA vector (there are no treatments), so the
+    # treatment comprobation is not necessary
+    if (all(is.na(plant_md$pl_treatment))) {
+      warning("No treatments found, all values for pl_treatment are NA's")
+    }
+
+    # STEP 2
+    # Extract the unique treatments and summarise the results
+    res <- plant_md %>%
+      dplyr::select(pl_treatment) %>%
+      dplyr::group_by(pl_treatment) %>%
+      dplyr::arrange(pl_treatment) %>%
+      dplyr::summarize(n = n())
+
+    # STEP 3
+    # Return the results data frame
+    return(res)
+
+    # END FUNCTION
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))})
+
+}
+
+
+
+################################################################################
+#' Check if provided email directions are correct
+#'
+#' \code{qc_email_check} function checks for correctness in the email fields
+#'
+#' Provided email direction/s (contact and additional contributor, if any) are
+#' checked to ensure that are valid email directions. This function uses
+#' stringr package utilities for character string tinkering and regex to match
+#' the characteristics of email directions
+#'
+#' @section Regex:
+#'   Email directions can be divided in three components, \code{username},
+#'   \code{@} and \code{domain}. \code{username} component can contain
+#'   any letter, number, underscores, dots and hyphens. \code{domain} component
+#'   can be also any letter, number, underscores dots and hyphens, followed by
+#'   a dot and from two to six letters and/or dots. So, the regex expression
+#'   to match a email direction is as follows:
+#'   \code{"^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$"}
+#'
+#' @family Quality Checks functions
+#'
+#' @param data Data frame containing the site metadata where email variables are
+#'   located.
+#'
+#' @return A data frame with the directions and the result of the check
+#'
+#' @export
+
+# START
+# Function declaration
+qc_email_check <- function(data, parent_logger = 'test') {
+
+  # Using calling handlers to logging
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    # Has data valid email variables
+    if (is.null(data$contact_email)) {
+      stop('Data provided has not valid email variables')
+    }
+
+    # STEP 1
+    # Initialize pattern
+    email_pattern <- "^([a-zA-Z0-9_\\.-]+)@([\\da-zA-Z\\.-]+)\\.([a-zA-Z\\.]{2,6})$"
+
+    # Initialize email direction object
+    email_vec <- c(data$contact_email)
+
+    # STEP 2
+    # Check the email
+    email_res <- stringr::str_detect(string = email_vec, pattern = email_pattern)
+
+    # STEP 3
+    # Results object
+    email_df <- data.frame(email = email_vec, Is_correct = email_res,
+                           stringsAsFactors = FALSE)
+
+    # 3.1 return de results
+    return(email_df)
+
+    # END FUNCTION
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger, 'qc_email_check', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger, 'qc_email_check', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger, 'qc_email_check', sep = '.'))})
+
+}
+
+
