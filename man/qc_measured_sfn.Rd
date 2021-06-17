@@ -2,7 +2,7 @@
 % Please edit documentation in R/qc_md_general_checks.R
 \name{qc_measured_sfn}
 \alias{qc_measured_sfn}
-\title{Correct measured sfn values}
+\title{Correct measured_sfn values}
 \usage{
 qc_measured_sfn(plant_md, parent_logger = "test")
 }
@@ -18,7 +18,8 @@ A data frame with the information about the different treatments if
 }
 \details{
 This function standardizes the values provided by the authors which could be
-\code{yes}, \code{YES}, \code{no}, \code{NO}, \code{TRUE}, \code{FALSE}.
+\code{yes}, \code{YES}, \code{no}, \code{NO}, \code{TRUE}, \code{FALSE}
+\code{Yes} or \code{No}.
 }
 \seealso{
 Other Quality Checks Functions: 
