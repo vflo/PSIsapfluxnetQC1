@@ -813,7 +813,7 @@ qc_coordinates <- function(data, maps_folder = getwd(), plot = FALSE, sign_error
                                              parent_logger = parent_logger)
 
     # 1.1, check if it is correct
-    if (check_coord_data$is_inside_country) {
+    if (all(check_coord_data$is_inside_country)) {
 
       # if it is, return data with the is_inside_variable added
       message('Coordinates are correct')
