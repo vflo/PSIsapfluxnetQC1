@@ -51,7 +51,7 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
     downloaded_maps <- 0
 
 
-    if(data$site_country %>% unique() == 1){
+    if(data$site_country %>% unique() %>% length() == 1){
 
     # STEP 1
     # Begin for loop, and check if country code is NA, and if it is, don't do
