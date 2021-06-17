@@ -96,7 +96,7 @@ qc_species_names_info <- function(species, max_distance = 1,
               ' and this can be cause of species name changes.',
               ' Maybe manual fix of some species should be done')
     }
-
+    print("Checking species names")
     # STEP 1
     # Trimming blank spaces in both sides
     species <- stringr::str_trim(species, 'both')
