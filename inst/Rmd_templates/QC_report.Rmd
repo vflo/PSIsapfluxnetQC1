@@ -98,6 +98,8 @@ plant_md_spnames <- qc_species_names_info(
 plant_md$pl_species <- qc_species_names(plant_md$pl_species,
                                         parent_logger = logger_name)
 
+plant_md <- qc_measured_sfn(plant_md, parent_logger = logger_name)
+
 
 ## plant treatment check
 pl_treatments_check <- qc_pl_treatments(plant_md, parent_logger = logger_name)

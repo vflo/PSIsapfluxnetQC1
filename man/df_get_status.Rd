@@ -24,18 +24,11 @@ Other Data Flow:
 \code{\link{df_copy_templates_psi}()},
 \code{\link{df_folder_structure}()},
 \code{\link{df_get_data_folders}()},
-\code{\link{df_lvl1_to_lvl2}()},
-\code{\link{df_lvl2_folder_structure}()},
-\code{\link{df_read_psiData}()},
 \code{\link{df_received_to_accepted_psi}()},
-\code{\link{df_rem_to_units}()},
 \code{\link{df_report_folder_creation}()},
 \code{\link{df_reset_data_status_psi}()},
 \code{\link{df_set_status_psi}()},
 \code{\link{df_start_status_psi}()},
-\code{\link{df_warn_to_rem}()},
-\code{\link{df_whos_ready_to}()},
-\code{\link{df_write_psiData}()},
 \code{\link{psi_data_constructor}()}
 }
 \concept{Data Flow}

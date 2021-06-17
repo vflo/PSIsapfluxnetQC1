@@ -265,7 +265,7 @@ qc_plant_dics <- function(variable, parent_logger = 'test') {
 
     # 1.2 measured_sfn
     if (variable == 'measured_sfn') {
-      res <- c('yes', 'no', 'YES', 'NO')
+      res <- c('yes', 'no', 'YES', 'NO', "TRUE", "FALSE", "Yes", "No")
 
       # 1.2.1 return the dic
       return(res)
@@ -762,5 +762,76 @@ qc_email_check <- function(data, parent_logger = 'test') {
                                          logger = paste(parent_logger, 'qc_email_check', sep = '.'))})
 
 }
+
+
+
+################################################################################
+#' Correct measured sfn values
+#'
+#' \code{qc_measured_sfn} function standardizes the values provided by the authors.
+#'
+#' This function standardizes the values provided by the authors which could be
+#' \code{yes}, \code{YES}, \code{no}, \code{NO}, \code{TRUE}, \code{FALSE}.
+#'
+#' @family Quality Checks Functions
+#'
+#' @param plant_md Data frame containing the plant metadata
+#'
+#' @return A data frame with the information about the different treatments if
+#'   any.
+#'
+#' @export
+
+# START
+# Function declaration
+
+qc_measured_sfn <- function(plant_md, parent_logger = 'test') {
+
+  # Using calling handlers to logging
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checks
+    # Is plant_md a data frame and have a measured_sfn variable?
+    if (!is.data.frame(plant_md) | is.null(plant_md$measured_sfn)) {
+      stop('Data object is not a data frame or it not contains any variable called measured_sfn')
+    }
+
+    # STEP 1
+    # Check if pl_treatment is a NA vector (there are no treatments), so the
+    # treatment comprobation is not necessary
+    if (all(is.na(plant_md$measured_sfn))) {
+      warning("No treatments found, all values for pl_treatment are NA's")
+    }
+
+    # STEP 2
+    # Extract the unique treatments and summarise the results
+    res <- plant_md %>%
+      dplyr::mutate(measured_sfn = case_when(measuded_sfn == "yes" ~ "yes",
+                                             measuded_sfn == "no" ~ "no",
+                                             measuded_sfn == "YES" ~ "yes",
+                                             measuded_sfn == "NO" ~ "no",
+                                             measuded_sfn == "TRUE" ~ "yes",
+                                             measuded_sfn == "FALSE" ~ "no",
+                                             measuded_sfn == "Yes" ~ "yes",
+                                             measuded_sfn == "No" ~ "no"))
+
+    # STEP 3
+    # Return the results data frame
+    return(res)
+
+    # END FUNCTION
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger, 'qc_pl_treatments', sep = '.'))})
+
+}
+
 
 
