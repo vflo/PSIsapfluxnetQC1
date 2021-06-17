@@ -766,12 +766,13 @@ qc_email_check <- function(data, parent_logger = 'test') {
 
 
 ################################################################################
-#' Correct measured sfn values
+#' Correct measured_sfn values
 #'
 #' \code{qc_measured_sfn} function standardizes the values provided by the authors.
 #'
 #' This function standardizes the values provided by the authors which could be
-#' \code{yes}, \code{YES}, \code{no}, \code{NO}, \code{TRUE}, \code{FALSE}.
+#' \code{yes}, \code{YES}, \code{no}, \code{NO}, \code{TRUE}, \code{FALSE}
+#' \code{Yes} or \code{No}.
 #'
 #' @family Quality Checks Functions
 #'
@@ -807,14 +808,14 @@ qc_measured_sfn <- function(plant_md, parent_logger = 'test') {
     # STEP 2
     # Extract the unique treatments and summarise the results
     res <- plant_md %>%
-      dplyr::mutate(measured_sfn = case_when(measuded_sfn == "yes" ~ "yes",
-                                             measuded_sfn == "no" ~ "no",
-                                             measuded_sfn == "YES" ~ "yes",
-                                             measuded_sfn == "NO" ~ "no",
-                                             measuded_sfn == "TRUE" ~ "yes",
-                                             measuded_sfn == "FALSE" ~ "no",
-                                             measuded_sfn == "Yes" ~ "yes",
-                                             measuded_sfn == "No" ~ "no"))
+      dplyr::mutate(measured_sfn = case_when(measured_sfn == "yes" ~ "yes",
+                                             measured_sfn == "no" ~ "no",
+                                             measured_sfn == "YES" ~ "yes",
+                                             measured_sfn == "NO" ~ "no",
+                                             measured_sfn == "TRUE" ~ "yes",
+                                             measured_sfn == "FALSE" ~ "no",
+                                             measured_sfn == "Yes" ~ "yes",
+                                             measured_sfn == "No" ~ "no"))
 
     # STEP 3
     # Return the results data frame
