@@ -50,10 +50,13 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
     existent_maps <- length(list.files(folder, pattern = '.rds'))
     downloaded_maps <- 0
 
+
+    if(data$site_country %>% unique() == 1){
+
     # STEP 1
     # Begin for loop, and check if country code is NA, and if it is, don't do
     # anything with that value
-    for (code in data$site_country) {
+    for (code in data$site_country %>% unique()) {
       if (!is.na(code)) {
 
         # STEP 2
@@ -99,8 +102,10 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
             next
           }
         }
+      }
     }
-    }
+    }else{stop('More than one site_country. ',
+              'Please check it manually')}
 
     # STEP 6
     # Return a summary of downloaded maps and existent maps
