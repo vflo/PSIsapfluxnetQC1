@@ -251,7 +251,7 @@ df_start_status_psi <- function(si_code, parent_logger = 'test') {
       content <- list(
         QC = list(DONE = FALSE, DATE = NULL),
         LVL1 = list(STORED = FALSE, DATE = NULL,
-                    TO_REM = 'FREEZE', AVAIL = NULL)
+                    TO_LVL2 = 'FREEZE')
       )
 
       # 2.2 create the yaml object
@@ -447,6 +447,9 @@ df_set_status_psi <- function(si_code,
                                                         'df_set_status_psi', sep = '.'))})
 }
 
+
+
+
 ################################################################################
 #' Reports folders creation
 #'
@@ -506,6 +509,83 @@ df_report_folder_creation <- function(si_code, parent_logger = 'test') {
                                                         'df_report_folder_creation',
                                                         sep = '.'))})
 }
+
+
+################################################################################
+#' Function to save the psi_data created
+#'
+#' This function saves the RData files with the psi_data objects
+#'
+#' @export
+
+# START FUNCTION
+# Funtion declaration
+write_psi_data <- function(psi_data, folder, parent_logger = 'test') {
+
+  # using calling handlers to manage errors
+  withCallingHandlers({
+
+    si_code <- psiQC::get_si_code(psi_data)
+    path <- file.path(folder, paste0(si_code, '.RData'))
+
+    print(paste0('Writing ', si_code))
+
+    assign(si_code, psi_data)
+    save(list = si_code, file = path)
+
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'write_psi_data',
+                                                        sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'write_psi_data',
+                                                       sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'write_psi_data',
+                                                        sep = '.'))})
+}
+
+################################################################################
+#' psi_data2csv function
+#'
+#' This function is used in lvl2_process to write the csv files for each psi_data object
+#' slots in the corresponding folder of the database
+#'
+#' @export
+psi_data2csv <- function(psi_data, csv_folder) {
+
+  # get the slots and store them. In the case of data and flags, add the solar timestamp
+  # also
+  psi_data <- psiQC::get_psi_data(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = psiQC::get_solar_timestamp(psi_data)) %>%
+    dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
+  psi_flags <- psiQC::get_psi_flags(psi_data) %>%
+    dplyr::mutate(solar_TIMESTAMP = psiQC::get_solar_timestamp(psi_data)) %>%
+    dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
+  site_md <- psiQC::get_site_md(psi_data)
+  plant_md <- psiQC::get_plant_md(psi_data)
+  question_md <- psiQC::get_question_md(psi_data)
+  si_code <- psiQC::get_si_code(psi_data)
+
+  psi_data_name <- file.path(csv_folder, paste0(si_code, '_psi_data.csv'))
+  psi_flags_name <- file.path(csv_folder, paste0(si_code, '_psi_flags.csv'))
+  site_md_name <- file.path(csv_folder, paste0(si_code, '_site_md.csv'))
+  plant_md_name <- file.path(csv_folder, paste0(si_code, '_plant_md.csv'))
+  question_md_name <- file.path(csv_folder, paste0(si_code, '_question_md.csv'))
+
+  readr::write_csv(psi_data, psi_data_name)
+  readr::write_csv(psi_flags, psi_flags_name)
+  readr::write_csv(site_md, site_md_name)
+  readr::write_csv(plant_md, plant_md_name)
+  readr::write_csv(question_md, question_md_name)
+}
+
+
 
 ################################################################################
 #' Get the folders to feed \code{\link{qc_start_process}}
@@ -865,7 +945,7 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
 
     # 1.1 status lists
     QC = list(DONE = FALSE, DATE = NULL)
-    LVL1 = list(STORED = FALSE, DATE = NULL, TO_REM = 'FREEZE', AVAIL = NULL)
+    LVL1 = list(STORED = FALSE, DATE = NULL, TO_LVL2 = 'FREEZE')
 
     # 1.2 set status depending on the level argument
     if (level == 'all') {
@@ -927,6 +1007,170 @@ df_reset_data_status_psi <- function(si_code, level = 'all', parent_logger = 'te
                                                         'df_reset_data_status_psi',
                                                         sep = '.'))})
 }
+
+
+
+################################################################################
+#' Load psiData
+#'
+#' Accesory function to load an specified psiData object
+#'
+#' Given a site code and a level description, \code{df_read_psiData} will return
+#' the selected psiData object from the selected location
+#'
+#' @family Data Flow
+#'
+#' @param si_code Site code as a character string
+#'
+#' @param level Level to read from as a character string
+#'
+#' @return A psiData object.
+#'
+#' @export
+
+# START
+# Function declaration
+df_read_psiData <- function(
+  si_code,
+  level = c("Lvl_1", "Accepted"),
+  parent_logger = 'test'
+) {
+
+  # Using calling handlers to manage errors
+  withCallingHandlers({
+
+    # STEP 0
+    # Argument checking (done by match.arg)
+    level <- match.arg(level)
+
+
+    # STEP 1
+    # load the file
+    file_name <- file.path('Data', si_code, level,
+                           paste0(si_code, '.RData'))
+
+    if (!file.exists(file_name)) {
+      stop('psiData for ', si_code, ' and ', level, ' does not exist.')
+    } else {
+      load(file = file_name)
+
+      # 1.1 Return the psiData object
+      return(eval(as.name(si_code)))
+    }
+
+    # END FUNCTION
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'df_load_psiData',
+                                                        sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'df_load_psiData',
+                                                       sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'df_load_psiData',
+                                                        sep = '.'))})
+}
+
+
+################################################################################
+#' Who is ready the desired level?
+#'
+#' Check the site status files to list who is ready to move to target
+#'
+#' This function check the status files of all sites and list the status
+#' for the desired level.
+#' \code{filter} parameter can be used to filter the results by any status:
+#'
+#'   \itemize{
+#'     \item{\code{all} retrieves all the statuses}
+#'     \item{\code{ready} retrieves only those sites marked to pass to level 2}
+#'     \item{\code{freeze} retrieves only those sites freezed in level 1 yet}
+#'   }
+#'
+#' @family Data Flow
+#'
+#' @param level string indicating the level to check. Accepted values are
+#'   "lvl2".
+#'
+#' @param filter character vector indicating by which status results must
+#'   been filtered. Accepted values are "all" (default), "ready" or "freeze"
+#'   (see details)
+#'
+#' @return A list with length equal to the number of sites containing the
+#'   \code{TO_[level]} flag of the status files.
+#'
+#' @export
+
+# START
+# Function declaration
+df_whos_ready_to <- function(level = c('lvl2'),
+                             filter = c('all', 'ready', 'freeze'),
+                             parent_logger = 'test') {
+
+  # Using calling handlers to manage errors
+  withCallingHandlers({
+
+    # STEP 0
+    # Checking arguments (match.arg throws an error if not matching)
+    level <- match.arg(level)
+    level <- switch(level,
+                    lvl2 = c('LVL1', 'TO_LVL2'))
+
+    filter <- match.arg(filter)
+    filter <- switch(filter,
+                     all = 'all',
+                     ready = 'READY',
+                     freeze = 'FREEZE')
+
+    # STEP 1
+    # Getting the site codes to pass to df_get_status
+    site_folders <- df_get_data_folders(parent_logger = parent_logger) %>%
+      stringr::str_sub(6, -1)
+
+    # STEP 2
+    # Get the statuses
+    whos_ready <- site_folders %>%
+      purrr::map(df_get_status, parent_logger = parent_logger) %>%
+      # STEP 3
+      # Get the TO_LVL2 flag
+      purrr::modify_depth(1, level, .null = NA)
+
+    # STEP 3
+    # Prepare the results
+    # 3.1 Name the list elements
+    names(whos_ready) <- site_folders
+    # 3.2 filter the results
+    if (filter != 'all') {
+      whos_ready <- whos_ready[whos_ready == filter]
+    }
+
+    # STEP 4
+    # Return the list
+    return(whos_ready)
+
+    # END FUNCTION
+  },
+
+  # handlers
+  warning = function(w){logging::logwarn(w$message,
+                                         logger = paste(parent_logger,
+                                                        'df_whos_ready_to',
+                                                        sep = '.'))},
+  error = function(e){logging::logerror(e$message,
+                                        logger = paste(parent_logger,
+                                                       'df_whos_ready_to',
+                                                       sep = '.'))},
+  message = function(m){logging::loginfo(m$message,
+                                         logger = paste(parent_logger,
+                                                        'df_whos_ready_to',
+                                                        sep = '.'))})
+}
+
 
 ################################################################################
 #' Create a PsiData object from results of Quality Checks

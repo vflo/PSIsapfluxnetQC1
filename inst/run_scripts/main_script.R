@@ -33,6 +33,9 @@ lapply(data_folders, function(folder) {
                    parent_logger = paste('QC', code, sep = '.'))
 })
 
+df_set_status_psi(si_code,
+                  LVL1 = list(TO_LVL2 = "READY"))
+
 df_reset_data_status_psi("FOO_FAA")
 
 # ################################################################################
