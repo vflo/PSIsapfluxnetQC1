@@ -561,7 +561,7 @@ psi_data2csv <- function(psi_data, csv_folder) {
 
   # get the slots and store them. In the case of data and flags, add the solar timestamp
   # also
-  psi_data <- psiQC::get_psi_data(psi_data) %>%
+  psi_data <- psiQC::get_psi(psi_data) %>%
     dplyr::mutate(solar_TIMESTAMP = psiQC::get_solar_timestamp(psi_data)) %>%
     dplyr::select(TIMESTAMP, solar_TIMESTAMP, dplyr::everything())
   psi_flags <- psiQC::get_psi_flags(psi_data) %>%
