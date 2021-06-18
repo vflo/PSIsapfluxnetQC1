@@ -24,7 +24,7 @@ log_psi_setup('Logs/psi.log', logger = 'QC', level = "DEBUG")
 data_folders <- df_get_data_folders(parent_logger = 'QC')
 
 ## Loop for every site
-lapply(data_folders, function(folder) {
+lapply(data_folders[[1]], function(folder) {
   code <- stringr::str_sub(folder, 6, -1)
   # log_psi_setup('Logs/psi.log',
   #                      logger = paste('QC', code, sep = '.'),
@@ -33,10 +33,12 @@ lapply(data_folders, function(folder) {
                    parent_logger = paste('QC', code, sep = '.'))
 })
 
-df_set_status_psi(si_code,
+## Site prepared for level 2
+df_set_status_psi(data_folders[[1]] %>% stringr::str_sub( 6, -1),
                   LVL1 = list(TO_LVL2 = "READY"))
 
-df_reset_data_status_psi("FOO_FAA")
+## Reset status of a site (RUN ONLY when changes are applied to received data)
+# df_reset_data_status_psi(data_folders[[9]] %>% stringr::str_sub( 6, -1))
 
 # ################################################################################
 # # LEVEL 2

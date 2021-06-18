@@ -64,7 +64,7 @@ read_psi_data <- function(site_code, folder = '.') {
 
 lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
 
-  # get the sites ready to lvl3
+  # get the sites ready to lvl2
   sites <- names(psiQC::df_whos_ready_to('lvl2', 'ready'))
 
   # folders
@@ -77,7 +77,7 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
 
 
     df_read_psiData(
-        site, 'lvl1', parent_logger = parent_logger
+        site, 'Lvl_1', parent_logger = parent_logger
       ) -> psi_data
 
       write_psi_data(psi_data, folder = folder_plant)
