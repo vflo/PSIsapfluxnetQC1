@@ -38,10 +38,8 @@ POSIXt attribute.
 \seealso{
 Other Data Loading Functions: 
 \code{\link{dl_data_col_classes}()},
-\code{\link{dl_dec_char_detect}()},
 \code{\link{dl_get_si_code_psi}()},
 \code{\link{dl_metadata}()},
-\code{\link{dl_na_char_generator}()},
 \code{\link{remove_dupcols}()}
 }
 \concept{Data Loading Functions}
