@@ -28,7 +28,7 @@
 read_psi_data <- function(site_code, folder = '.') {
 
   # if more than one site we need to map the call
-  if (length(site_codes) > 1) {
+  if (length(site_code) > 1) {
     stop("site_code must be unique")
   }
 
