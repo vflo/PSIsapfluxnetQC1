@@ -135,7 +135,7 @@ psi_tidyfier <- function(psi_data, include_flags = FALSE,
     }else{question <- NULL}
 
 
-  res <- cbind(psi, site, plant)
+  res <- left_join(psi, plant, by = pl_code) %>% cbind(site)
 
   if(length(flags) > 0) {
     cbind(res, flags)
