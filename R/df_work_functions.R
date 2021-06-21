@@ -135,14 +135,14 @@ psi_tidyfier <- function(psi_data, include_flags = FALSE,
     }else{question <- NULL}
 
 
-  res <- left_join(psi, plant, by = pl_code) %>% cbind(site)
+  res <- cbind(psi, plant %>% dplyr::select(-pl_code), site, row.names = NULL)
 
   if(length(flags) > 0) {
-    cbind(res, flags)
+    cbind(res, flags, row.names = NULL)
   }
 
   if(length(question) > 0) {
-    cbind(res, question)
+    cbind(res, question, row.names = NULL)
   }
 
   return(res)
