@@ -526,6 +526,7 @@ write_psi_data <- function(psi_data, folder, parent_logger = 'test') {
   withCallingHandlers({
 
     si_code <- psiQC::get_si_code(psi_data)
+    si_code <- unique(si_code)
     path <- file.path(folder, paste0(si_code, '.RData'))
 
     print(paste0('Writing ', si_code))
