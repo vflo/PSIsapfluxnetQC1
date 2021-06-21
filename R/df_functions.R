@@ -571,7 +571,7 @@ psi_data2csv <- function(psi_data, csv_folder) {
   site_md <- psiQC::get_site_md(psi_data)
   plant_md <- psiQC::get_plant_md(psi_data)
   question_md <- psiQC::get_question_md(psi_data)
-  si_code <- psiQC::get_si_code(psi_data)
+  si_code <- psiQC::get_si_code(psi_data) %>% unique()
 
   psi_data_name <- file.path(csv_folder, paste0(si_code, '_psi_data.csv'))
   psi_flags_name <- file.path(csv_folder, paste0(si_code, '_psi_flags.csv'))
