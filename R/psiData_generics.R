@@ -1,6 +1,6 @@
-#' SfnData custom get generics
+#' psiData custom get generics
 #'
-#' Generics for getting the info in the slots of SfnData
+#' Generics for getting the info in the slots of psiData
 #'
 #' @name psi_get_generics
 #' @include psiData_class.R

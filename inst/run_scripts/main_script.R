@@ -53,7 +53,6 @@ lvl2_process()
 
 
 ################################################################################
-
 folder <- "~/psi_db/0.0.1/RData/"
 
 psi_files <- list.files(folder) %>% gsub(".RData","",x=.)
@@ -61,7 +60,7 @@ psi_files <- list.files(folder) %>% gsub(".RData","",x=.)
 purrr::map(
   as.list(psi_files),
   function(.x){
-    read_psi_data(.x, folder = folder)
+    read_psi_data(.x, folder = folder) %>%
+      psi_tidyfier()
   }
 ) %>% bind_rows() -> PSI_DF
-

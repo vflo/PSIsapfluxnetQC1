@@ -10,7 +10,7 @@
 \alias{get_site_md}
 \alias{get_plant_md}
 \alias{get_question_md}
-\title{SfnData custom get generics}
+\title{psiData custom get generics}
 \usage{
 get_psi(object, ...)
 
@@ -29,5 +29,5 @@ get_plant_md(object, ...)
 get_question_md(object, ...)
 }
 \description{
-Generics for getting the info in the slots of SfnData
+Generics for getting the info in the slots of psiData
 }

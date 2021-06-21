@@ -90,3 +90,62 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
 
 }
 
+
+
+
+
+
+################################################################################
+#' PSI tidyfier
+#'
+#' Function to transform psiData objects to tidy format
+#'
+#' @param psi_data A psiData object
+#'
+#' @param include_flags A logical object. Set to TRUE if data flags should be
+#' included in the returned object
+#'
+#' @param include_question A logical object. Set to TRUE if data sets questionnaire
+#' data should be included in the returned object
+#'
+#' @return tibble object
+#'
+#' @export
+
+psi_tidyfier <- function(psi_data, include_flags = FALSE,
+                         include_question = FALSE, parent_logger = 'test') {
+
+  # get psi data
+  psi <- get_psi(psi_data)
+
+  # get site data
+  site <- get_site_md(psi_data)
+
+  # get plant data
+  plant <- get_plant_md(psi_data)
+
+  # get flags?
+  if(include_flags){
+    flags <- get_psi_flags(psi_data)
+  }else{flags <- NULL}
+
+  # get question?
+  if(include_question){
+    question <- get_question_md(psi_data)
+    }else{question <- NULL}
+
+
+  res <- cbind(psi, site, plant)
+
+  if(length(flags) > 0) {
+    cbind(res, flags)
+  }
+
+  if(length(question) > 0) {
+    cbind(res, question)
+  }
+
+  return(res)
+
+  }
+
