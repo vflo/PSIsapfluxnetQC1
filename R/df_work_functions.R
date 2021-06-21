@@ -68,7 +68,7 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
   sites <- names(psiQC::df_whos_ready_to('lvl2', 'ready'))
 
   # folders
-  folder_plant <- file.path('..', 'psi_db', version, 'RData')
+  folder <- file.path('..', 'psi_db', version, 'RData')
   csv_folder <- file.path('..', 'psi_db', version, 'csv')
 
 
@@ -80,8 +80,8 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
         site, 'Lvl_1', parent_logger = parent_logger
       ) -> psi_data_obj
 
-      write_psi_data(psi_data_obj, folder = folder_plant)
-      psi_data2csv(psi_data_obj, csv_folder = csv_folder_plant)
+      write_psi_data(psi_data_obj, folder = folder)
+      psi_data2csv(psi_data_obj, csv_folder = csv_folder)
 
     # set status
     df_set_status(site, LVL1 = list(TO_LVL2 = 'DONE'))
