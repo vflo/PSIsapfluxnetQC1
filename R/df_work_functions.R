@@ -84,7 +84,7 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
       psi_data2csv(psi_data_obj, csv_folder = csv_folder)
 
     # set status
-    df_set_status(site, LVL1 = list(TO_LVL2 = 'DONE'))
+    df_set_status_psi(site, LVL1 = list(TO_LVL2 = 'DONE'))
 
   }
 
