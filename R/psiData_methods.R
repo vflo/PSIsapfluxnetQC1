@@ -112,7 +112,7 @@ setMethod(
 setMethod(
   "get_question_md", "psiData",
   function(object) {
-    slot(object, "questionnaire_md")
+    slot(object, "question_md")
   }
 )
 
