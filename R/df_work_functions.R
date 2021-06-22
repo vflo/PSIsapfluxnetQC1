@@ -49,6 +49,91 @@ read_psi_data <- function(site_code, folder = '.') {
 
 
 
+################################################################################
+#' QC1 function
+#'
+#' Function to perform level 1 data and generate reports
+#'
+#' This function looks for sites without LVL1 process done and performs
+#' level 1 QC process
+#'
+#' @export
+
+
+lvl1_process <- function(){
+
+  # setup logs
+  log_psi_setup('Logs/psi.log',
+                logger = 'DataFlow',
+                level = 'DEBUG')
+
+  # reports for data in the system
+  rep_psi_render('received_to_accepted.Rmd',
+                 output_file = file.path(
+                   'Reports', paste(format(Sys.time(), '%Y%m%d%H%M'),
+                                    'received_to_accepted.html', sep = '_')
+                 ),
+                 output_dir = 'Reports',
+                 parent_logger = 'DataFlow')
+
+  # QC
+  log_psi_setup('Logs/psi.log', logger = 'QC', level = "DEBUG")
+
+  data_folders <- df_get_data_folders(parent_logger = 'QC')
+
+  status <- purrr::map(data_folders, function(y){
+    name <- gsub("Data/", "", y)
+    status <- df_get_status(name)
+
+    df <- tibble(site_code = name,
+                 status = status$QC$DONE)
+  }) %>% bind_rows()
+
+  if(status[!status$status,] %>% pull(site_code) %>% length() == 0){
+    stop('There is no site to perform level 1 process. All sites have level 1 process done.')
+  }
+
+  message("Available datasets to perform lvl 1 process:\n",
+          paste0(capture.output(status[!status$status,] %>% pull(site_code)),
+                 collapse = "\n"))
+
+  ## data set selection by user
+  fun <- function() {
+    ANSWER <- readline(
+      prompt="Please write the site code to start process or write ALL to start process on all available data sets:")
+    while(all(!ANSWER %in% (status[!status$status,] %>% pull(site_code)), !grepl("ALL", ANSWER, ignore.case=TRUE))){
+      cat("The provided site code is not valid")
+      ANSWER <- readline(
+        prompt="Please write the site code to start process or write ALL to start process on all available data sets:")
+    }
+    return(ANSWER)
+
+  }
+
+  fun() -> answer
+
+  ## Data set filter
+  if(grepl("ALL", answer, ignore.case=TRUE)){
+    folders <- data_folders
+  }else{
+    folders <- data_folders[grepl(answer, status %>% pull(site_code))]
+  }
+
+  ## Loop for every site
+  lapply(folders, function(folder) {
+    code <- stringr::str_sub(folder, 6, -1)
+    # log_psi_setup('Logs/psi.log',
+    #                      logger = paste('QC', code, sep = '.'),
+    #                      level = "DEBUG")
+    qc_start_process_psi(file.path(folder, 'Accepted'), rdata = FALSE,
+                         parent_logger = paste('QC', code, sep = '.'))
+  })
+
+
+
+}
+
+
 
 ################################################################################
 #' QC2 function, cleaning a little
