@@ -318,11 +318,10 @@ df_get_status <- function(si_code, parent_logger = 'test') {
     # Check if status file exists
     filename <- file.path('Data', si_code, paste(si_code, '_status.yaml', sep = ''))
     if (!file.exists(filename)) {
-
-      # 1.1 if don't exist, raise a warning and return false
-      warning('Status file for ', si_code, 'does not exist, unable to retrieve info')
-      return(invisible(FALSE))
-    } else {
+      # 1.1 if don't exist, create it and raise a warning
+      df_start_status_psi(si_code = si_code)
+      warning('Status file for ', si_code, 'was created.')
+    }
 
       # STEP 2
       # Get the yaml object
@@ -330,7 +329,6 @@ df_get_status <- function(si_code, parent_logger = 'test') {
 
       # 2.1 and return it
       return(res)
-    }
 
     # END FUNCTION
   },
