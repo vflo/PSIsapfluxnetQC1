@@ -156,6 +156,15 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
   folder <- file.path('..', 'psi_db', version, 'RData')
   csv_folder <- file.path('..', 'psi_db', version, 'csv')
 
+  #check if folders exist and if not, create them
+  if(!exists(folder)){
+    dir.create(folder)
+  }
+
+  if(!exists(csv_folder)){
+    dir.create(csv_folder)
+  }
+
 
   # big loop
   for (site in sites) {
