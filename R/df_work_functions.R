@@ -153,17 +153,14 @@ lvl2_process <- function(version = '0.0.1', parent_logger = 'test') {
   sites <- names(psiQC::df_whos_ready_to('lvl2', 'ready'))
 
   # folders
-  folder <- file.path('..', 'psi_db', version, 'RData')
-  csv_folder <- file.path('..', 'psi_db', version, 'csv')
+  folder <- file.path('.', 'psi_db', version, 'RData')
+  csv_folder <- file.path('.', 'psi_db', version, 'csv')
 
   #check if folders exist and if not, create them
-  if(!exists(folder)){
-    dir.create(folder)
-  }
-
-  if(!exists(csv_folder)){
-    dir.create(csv_folder)
-  }
+  dir.create(file.path('.', 'psi_db'))
+  dir.create(file.path('.', 'psi_db', version))
+  dir.create(folder)
+  dir.create(csv_folder)
 
 
   # big loop
