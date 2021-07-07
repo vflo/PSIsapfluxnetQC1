@@ -240,7 +240,11 @@ dl_metadata <- function(file_name, sheet_name, data_type = NA,
         remove_dupcols() %>%
         # column selection
         dplyr::select('pl_name','pl_code', 'pl_species', 'pl_height', 'pl_dbh',
-        'pl_treatment', 'pl_status','measured_sfn')
+        'pl_treatment', 'pl_status','measured_sfn') %>%
+        dplyr::mutate(pl_name = as.character(pl_name),
+                     pl_code = as.character(pl_code),
+                     pl_height = suppressWarnings(as.numeric(pl_height)),
+                     pl_dbh = suppressWarnings(as.numeric(pl_dbh)))
 
       # 1.2.2 return the Data sheet
       return(res)

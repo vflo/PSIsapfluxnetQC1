@@ -257,7 +257,7 @@ qc_plant_dics <- function(variable, parent_logger = 'test') {
     # Get the variable and populate the dictionary
     # 1.1 pl_status
     if (variable == 'pl_status') {
-      res <- c('healthy', 'incipient_stress', 'moderate_stress','intense_stress')
+      res <- c('healthy', 'incipient_stress', 'moderate_stress','intense_stress','NA')
 
       # 1.1.1 return the dic
       return(res)
@@ -577,9 +577,14 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
     if(!is.null(plant)) {
       pl_names <- c('pl_status', 'measured_sfn')
       pl_checks <- sapply(pl_names, function(x) {
-        plant[[x]] %in% qc_plant_dics(x)
+        tibble(One = is.na(plant[[x]]),
+               Two = plant[[x]] %in% qc_plant_dics(x)) %>%
+          mutate(
+          resume = as.logical(One + Two)) %>%
+          dplyr::select(resume) %>% as.matrix()
       })
     }
+
 
     # 1.3 psi
     if(!is.null(psi)) {
