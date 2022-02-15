@@ -3,20 +3,25 @@ library(psiQC)
 library(tidyverse)
 library(DT)
 
-params <- list(
-  wd = '../',
-  md_file = 'Data/ESP_GUA_VAL/Accepted/ESP_GUA_VAL.xlsx',
-  psi_data_file = 'Data/ESP_GUA_VAL/Accepted/ESP_GUA_VAL.xlsx',
-  code = 'ESP_GUA_VAL'
-)
-# 
+# params <- list(
+#   wd = '../',
+#   md_file = 'Data/ESP_GUA_VAL/Accepted/ESP_GUA_VAL.xlsx',
+#   psi_data_file = 'Data/ESP_GUA_VAL/Accepted/ESP_GUA_VAL.xlsx',
+#   code = 'ESP_GUA_VAL'
+# )
+#
 # params <- list(
 #   wd = '../',
 #   md_file = 'Data/ARG_TRE/Accepted/ARG_TRE.xlsx',
 #   psi_data_file = 'Data/ARG_TRE/Accepted/ARG_TRE.xlsx',
 #   code = 'ARG_TRE'
 # )
-
+params <- list(
+  wd = '../',
+  md_file = 'FOO.xlsx',
+  psi_data_file = 'FOO.xlsx',
+  code = 'FOO'
+)
 
 
 logger_name <- 'test'

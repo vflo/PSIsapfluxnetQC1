@@ -226,7 +226,9 @@ psi_tidyfier <- function(psi_data, include_flags = FALSE,
     }else{question <- NULL}
 
 
-  res <- cbind(psi, plant %>% dplyr::select(-pl_code), site, row.names = NULL)
+  res <- cbind(psi, plant %>% dplyr::select(-c(pl_code, pl_name)), site, row.names = NULL)
+
+  # res <- cbind(psi, plant %>% dplyr::select(-pl_code), site, row.names = NULL)
 
   if(length(flags) > 0) {
     cbind(res, flags, row.names = NULL)

@@ -575,8 +575,8 @@ qc_factor_values <- function(site = NULL, plant = NULL, psi = NULL,
 
     # 1.2 plant
     if(!is.null(plant)) {
-      pl_names <- c('pl_status', 'measured_sfn')
-      pl_checks <- sapply(pl_names, function(x) {
+      pl_md_names <- c('pl_status', 'measured_sfn')
+      pl_checks <- sapply(pl_md_names, function(x) {
         tibble(One = is.na(plant[[x]]),
                Two = plant[[x]] %in% qc_plant_dics(x)) %>%
           mutate(
