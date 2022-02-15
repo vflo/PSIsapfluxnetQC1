@@ -389,7 +389,7 @@ data digesting processes**
 ```{r sapf_timestamp_format,  echo=FALSE, message=FALSE, warning=FALSE}
 timestamp_psi <- psi_data_fixed %>%
   select(timestamp,pl_code,pl_name) %>%
-  group_by(pl_name) %>% 
+  group_by(pl_name,pl_code) %>% 
   summarise(Sample = as.character(sample(timestamp, 1)),
             Range = paste(range(timestamp), collapse = ' - ')) %>%
   mutate(Data = 'psi') %>%
