@@ -26,15 +26,8 @@ To utilize `psiQC`, follow these steps:
 
 3. Server Preparation will create the folders structure. Data should be stored in your project root within a folder called `received_data`. It should be something such as `./received_data/ARG_MAZ.xlsx`.
 
-4. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability.
+4. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability. Follow the instructions in the `main_script.R` file.
 
-```r
-# Example to run scripts
-source("path/to/inst/run_scripts/server_preparation_script.R")
-source("path/to/inst/run_scripts/main_script.R")
-```
-
-Replace `path/to` with the actual path where the `psiQC` package scripts are located.
 
 ## License
 
