@@ -28,6 +28,8 @@ To utilize `psiQC`, follow these steps:
 
 4. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability. Follow the instructions in the `main_script.R` file.
 
+5. For each one of the sites, the quality control will create a report specifying any potential issue.
+
 
 ## License
 
