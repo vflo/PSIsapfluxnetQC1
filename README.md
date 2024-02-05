@@ -20,11 +20,13 @@ devtools::install_github("vflo/psiQC")
 
 To utilize `psiQC`, follow these steps:
 
-1. **Server Preparation**: First, execute the `server_preparation_script.R` located in the `inst/run_scripts` folder. This script prepares your environment and data for analysis.
+1. Create an R project.
 
-2. Server Preparation will create the folders structure. Data should be stored within the Data folder, using a folder for each dataset using the site code name. Please, see `inst/Data/ARG_MAZ.xlsx`for an example of data.
+2.  **Server Preparation**: First, execute the `server_preparation_script.R` located in the `inst/run_scripts` folder. This script prepares your environment and data for analysis.
 
-3. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability.
+3. Server Preparation will create the folders structure. Data should be stored in your project root within a folder called `received_data`. It should be something such as `./received_data/ARG_MAZ.xlsx`.
+
+4. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability.
 
 ```r
 # Example to run scripts
