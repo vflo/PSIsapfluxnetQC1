@@ -1,6 +1,6 @@
 # psiQC
 
-`psiQC` is an R package designed to facilitate quality control in leaf water potential measurements, integrated with the SAPFLUXNET database. This package provides tools and scripts to ensure data integrity and reliability for researchers working with plant physiological data.
+`psiQC` is an R package designed to facilitate quality control in leaf water potential measurements, integrated with the SAPFLUXNET database. This package provides tools and scripts to ensure data integrity and reliability.
 
 ## Installation
 
