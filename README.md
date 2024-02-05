@@ -35,5 +35,3 @@ Replace `path/to` with the actual path where the `psiQC` package scripts are loc
 ## License
 
 `psiQC` is licensed under the MIT License, further details of which can be found in the LICENSE file included with the package. Additionally, this package adheres to Creative Commons Attribution 4.0 International (CC BY 4.0) licensing guidelines.
-
-```
