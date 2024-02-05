@@ -1,7 +1,7 @@
 Package: psiQC
 Type: Package
 Title: Quality check for PSI project
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Victor", "Flo", email = "v.flo@creaf.uab.cat", role = c("aut", "cre")),
           person("Victor", "Granda", email = "v.granda@creaf.uab.cat", role = c("aut")))
 Description: Utilities and functions to perform quality check in PSI database
@@ -10,7 +10,7 @@ Encoding: UTF-8
 LazyDaa: true
 Imports:
     sp,
-    rgeos,
+    sf,
     ggiraph,
     ggplot2,
     broom,
@@ -58,4 +58,4 @@ Collate:
     'qc_md_general_checks.R'
     'qc_species_functions.R'
     'rep_functions.R'
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3

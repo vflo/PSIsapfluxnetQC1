@@ -20,6 +20,8 @@
 #'   an invisible logical object is returned, indicating success (TRUE) or
 #'   failure (FALSE).
 #'
+#' @import lubridate
+#'
 #' @export
 
 # START
@@ -176,6 +178,8 @@ qc_get_timezone_coord <- function(coord_lat, coord_lon, parent_logger = 'test') 
 #' @return A data frame as the \code{data} provided, with the timestamp variable
 #'   associated to the timezone specified
 #'
+#' @import lubridate
+#'
 #' @export
 
 # START
@@ -262,6 +266,8 @@ qc_set_timezone <- function(data, tz, parent_logger = 'test') {
 #'   fixed values of timestamp. If timestamp is already in format, a message
 #'   appears and none fix is made, returning data as entered.
 #'   If timestamp can not be fixed, an error is raised.
+#'
+#' @import lubridate
 #'
 #' @export
 
@@ -392,6 +398,8 @@ qc_as_timestamp <- function(data, site_data, parent_logger = 'test') {
 #'
 #' @return A data frame with the NAs info
 #'
+#' @import dplyr
+#'
 #' @export
 
 # START
@@ -458,6 +466,8 @@ qc_timestamp_nas <- function(data, parent_logger = 'test') {
 #' @param data Data frame containing the psi variable
 #'
 #' @return A data frame with the NAs info
+#'
+#' @import dplyr
 #'
 #' @export
 
@@ -526,6 +536,8 @@ qc_psi_nas <- function(data, parent_logger = 'test') {
 #'
 #' @return A data frame with the NAs info
 #'
+#' @import dplyr
+#'
 #' @export
 
 # START
@@ -591,6 +603,8 @@ qc_psi_SE_nas <- function(data, parent_logger = 'test') {
 #' @param data Data frame containing the psi N variable
 #'
 #' @return A data frame with the NAs info
+#'
+#' @import dplyr
 #'
 #' @export
 

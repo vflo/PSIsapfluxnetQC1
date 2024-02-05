@@ -156,6 +156,9 @@ qc_download_maps <- function(data, folder = getwd(), parent_logger = 'test') {
 #'   a logical variable indicating if the site has wrong coordinates
 #'
 #' @import ggplot2
+#' @importFrom sf st_contains
+#' @importFrom sp CRS proj4string
+#' @importFrom broom tidy
 #'
 #' @export
 
@@ -240,8 +243,9 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
 
       # STEP 4
       # Update results object, including the output of rgeos::gContains
-      results <- rgeos::gContains(map_data, sp_points)
-
+      # results <- rgeos::gContains(map_data, sp_points)
+      # Update results object, including the output of sf::st_contains
+      results <- sf::st_contains(map_data, sp_points)
 
       # STEP 5
       # Create and saving the plot if plot = TRUE and is_inside_country = FALSE
@@ -324,6 +328,8 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
 #' @return Same data frame provided, with a two new columns, \code{lat_changed}
 #'   and \code{long_changed}, two logicals indicating if the coordinates are
 #'   sign exchanged
+#'
+#' @importFrom broom tidy
 #'
 #' @export
 
@@ -856,6 +862,8 @@ qc_coordinates <- function(data, maps_folder = getwd(), plot = FALSE, sign_error
 #'
 #' @return An object of class SpatialPolygonsDataFrame
 #'
+#' @importFrom sp SpatialPolygons Polygon SpatialPolygonsDataFrame
+#'
 #' @export
 
 # START
@@ -966,6 +974,10 @@ qc_get_biomes_spdf <- function(merge_deserts = FALSE, parent_logger = 'test') {
 #'
 #' @return The same data frame with extra columns of mean annual temperature
 #'    (si_mat), mean annual precipitation (si_map) and biome (si_biome)
+#'
+#' @importFrom purrr map2 map_dbl
+#' @importFrom GSODR nearest_stations
+#' @importFrom sp over SpatialPoints
 #'
 #' @export
 

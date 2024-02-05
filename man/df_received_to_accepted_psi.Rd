@@ -10,9 +10,6 @@ df_received_to_accepted_psi(remove = FALSE, parent_logger = "test")
 \item{remove}{Logical indicating if files in received folder are dropped after
 the file transfer. Default to FALSE.}
 }
-\value{
-
-}
 \description{
 Check if data file/s already exists and create the folder structure needed to
 store them.

@@ -81,6 +81,9 @@ df_folder_structure <- function(parent_dir = '.', parent_logger = 'test') {
 #'
 #' @return
 #'
+#' @importFrom stringr str_replace
+#' @importFrom tools md5sum
+#'
 #' @export
 
 # START
@@ -215,6 +218,8 @@ df_received_to_accepted_psi <- function(remove = FALSE, parent_logger = 'test') 
 #' @return Invisible TRUE if no errors were encountered, invisible FALSE if
 #'   there was errors. Also, status file is created in the corresponding folder.
 #'
+#' @importFrom yaml as.yaml
+#'
 #' @export
 
 # START
@@ -297,6 +302,8 @@ df_start_status_psi <- function(si_code, parent_logger = 'test') {
 #'
 #' @return a list object with the info contained in the status file
 #'
+#' @importFrom yaml yaml.load_file
+#'
 #' @export
 
 # START
@@ -370,6 +377,9 @@ df_get_status <- function(si_code, parent_logger = 'test') {
 #' @return Invisible TRUE if changes to status file were correctly made,
 #'   invisible FALSE if changes were not made. Also, the status file for the site
 #'   will be replaced with the new one.
+#'
+#' @importFrom purrr walk
+#' @importFrom yaml as.yaml
 #'
 #' @export
 
@@ -554,6 +564,9 @@ write_psi_data <- function(psi_data, folder, parent_logger = 'test') {
 #'
 #' This function is used in lvl2_process to write the csv files for each psi_data object
 #' slots in the corresponding folder of the database
+#'
+#' @import dplyr
+#' @import readr
 #'
 #' @export
 psi_data2csv <- function(psi_data, csv_folder) {
@@ -924,6 +937,8 @@ df_copy_templates_psi <- function(first = FALSE, parent_logger = 'test') {
 #'
 #' @return Nothing
 #'
+#' @importFrom stringr str_replace_all
+#'
 #' @export
 
 # START
@@ -1103,6 +1118,9 @@ df_read_psiData <- function(
 #' @return A list with length equal to the number of sites containing the
 #'   \code{TO_[level]} flag of the status files.
 #'
+#' @importFrom stringr str_sub
+#' @import purrr
+#'
 #' @export
 
 # START
@@ -1198,6 +1216,9 @@ df_whos_ready_to <- function(level = c('lvl2'),
 #' @param solar_timestamp Vector with solar timestamp
 #'
 #' @return A PsiData object with all the data and metadata of the site
+#'
+#' @import dplyr
+#' @import tibble
 #'
 #' @export
 
