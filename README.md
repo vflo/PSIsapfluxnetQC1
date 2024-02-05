@@ -15,20 +15,29 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 # Install psiQC from GitHub
 devtools::install_github("vflo/psiQC")
 ```
-
 ## Usage
 
-To utilize `psiQC`, follow these steps:
+To effectively use `psiQC` follow these steps:
 
-1. Create an R project.
+### 1. **Set Up Your R Project**
 
-2.  **Server Preparation**: First, execute the `server_preparation_script.R` located in the `inst/run_scripts` folder. This script prepares your environment and data for analysis.
+Start by creating a new R project. This will be your working environment where all scripts and data will be organized.
 
-3. Server Preparation will create the folders structure. Data should be stored in your project root within a folder called `received_data`. It should be something such as `./received_data/ARG_MAZ.xlsx`.
+### 2. **Prepare Your Server and Environment**
 
-4. **Quality Control**: Next, run the `main_script.R` to perform the quality control (QC) checks on your data. This script applies a series of QC measures to ensure data reliability. Follow the instructions in the `main_script.R` file.
+- **Server Preparation Script**: Begin by running the `server_preparation_script.R` script found in the `inst/run_scripts` directory of the `psiQC` package. This initial step sets up your working environment and prepares it for the quality control of your data.
 
-5. For each one of the sites, the quality control will create a report specifying any potential issue.
+### 3. **Organize Your Data**
+
+- **Data Storage**: Place your raw data files in the `received_data` directory located at the root of your project. The path will typically look like `./received_data/ARG_MAZ.xlsx`. Ensure your data files, such as Excel spreadsheets, are correctly named and placed in this directory for processing.
+
+### 4. **Execute Quality Control**
+
+- **Running QC Script**: With your environment and data prepared, proceed to run the `main_script.R` found in your R project root. This script conducts a comprehensive series of quality control checks on your data. Make sure to follow any additional instructions specified within the `main_script.R`.
+
+### 5. **Review QC Reports**
+
+- **QC Report Generation**: For each site data processed, `psiQC` generates a detailed QC report. These reports highlight any identified issues with the data.
 
 
 ## License
