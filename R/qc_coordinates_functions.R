@@ -246,6 +246,7 @@ qc_check_coordinates <- function(data, maps_folder = getwd(),
       # results <- rgeos::gContains(map_data, sp_points)
       # Update results object, including the output of sf::st_contains
       results <- as.logical(sf::st_contains(sf::st_as_sf(map_data), sf::st_as_sf(sp_points)))
+      if(is.na(results)){results <- FALSE}
 
       # STEP 5
       # Create and saving the plot if plot = TRUE and is_inside_country = FALSE
