@@ -105,8 +105,29 @@ qc_species_names_info <- function(species, max_distance = 1,
 
     # STEP 2
     # Obtaining tpl info
-    tpl_df <- Taxonstand::TPL(species, max.distance = max_distance)
-    species_tpl <- tpl_df$Taxon
+    # tpl_df <- Taxonstand::TPL(species, max.distance = max_distance)
+    # species_tpl <- tpl_df$Taxon
+    # Obtaining WFO info
+    save.dir = getwd()
+    if(!file.exists("WFO_Backbone.zip")){
+      message('Downloading World Flora Online database for the first time.',
+              ' It will only be downloaded once.')
+      save.file <- normalizePath(file.path(paste0(save.dir, "/WFO_Backbone.zip")))
+      download.file(paste0("https://files.worldfloraonline.org/files/WFO_Backbone/",
+                           "_WFOCompleteBackbone/WFO_Backbone.zip"),
+                    destfile = save.file,
+                    method = "wget", extra = "--no-check-certificate")
+      utils::unzip(save.file, exdir = save.dir)
+    }
+    WFO.file1 <- paste0(save.dir, "/classification.txt",
+                        sep = "")
+    if (file.exists(WFO.file1) == FALSE) {
+      WFO.file1 <- paste0(save.dir, "/classification.csv")
+    }
+    tpl_df <- WorldFlora::WFO.match(spec.data = species, WFO.file = WFO.file1)
+    species_tpl <- tpl_df$spec.name
+    rm(WFO.data)
+    gc()
 
     # 2.1 Checking for concordance taking into account that species_tpl maybe
     #     is NA
