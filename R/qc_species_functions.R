@@ -127,7 +127,6 @@ qc_species_names_info <- function(species, max_distance = 1,
       WFO.file1 <- paste0(save.dir, "/classification.csv")
     }
     tpl_df <- WorldFlora::WFO.match(spec.data = species, WFO.file = WFO.file1)
-    tpl
     species_tpl <- tpl_df[which(tpl_df$New.accepted == TRUE),'spec.name']
     rm(WFO.data)
     gc()
