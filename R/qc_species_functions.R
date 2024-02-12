@@ -128,7 +128,6 @@ qc_species_names_info <- function(species, max_distance = 1,
     }
     tpl_df <- WorldFlora::WFO.match(spec.data = species, WFO.file = WFO.file1)
     species_tpl <- tpl_df[which(tpl_df$New.accepted == TRUE),'spec.name']
-    rm(WFO.data)
     gc()
 
     # 2.1 Checking for concordance taking into account that species_tpl maybe
