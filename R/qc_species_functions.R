@@ -75,6 +75,8 @@ qc_species_names_fix <- function(data, parent_logger = 'test') {
 #' @return A data frame summarizing the species names declared, the species
 #'   names obtained after tpl and the concordance and NAs info
 #'
+#' @import WorldFlora
+#'
 #' @export
 
 # START

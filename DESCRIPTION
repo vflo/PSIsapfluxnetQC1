@@ -24,6 +24,7 @@ Imports:
     data.table,
     tools,
     Taxonstand,
+    WorldFlora,
     logging,
     rmarkdown,
     DT,
